@@ -1,0 +1,9 @@
+# UTF8 support
+AddDefaultCharset utf8
+
+# Disable directories listing in browser
+Options -Indexes
+
+# Rewrite Engine
+RewriteEngine On
+RewriteRule		(.*) webroot/$1 [L]
