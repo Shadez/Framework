@@ -44,6 +44,7 @@ class Log_Component extends Component
 	public function initialize()
 	{
 		$this->m_isEnabled = $this->c('Config')->getValue('site.log.enabled');
+
 		if (!$this->m_isEnabled)
 			return $this;
 
@@ -82,8 +83,24 @@ class Log_Component extends Component
 	{
 		if (!$this->m_isEnabled)
 			return;
-		
-		$this->addLines(func_get_args(), 'error');
+
+		$args = func_get_args();	
+		$this->addLines($args, 'error');
+	}
+
+	/**
+	 * Writes component log message to log file (if allowed)
+	 * @access public
+	 * @param  string $message,...
+	 * @return void
+	 **/
+	public function writeComponent($message)
+	{
+		if (!$this->m_isEnabled || $this->m_logLevel < 4)
+			return;
+
+		$args = func_get_args();	
+		$this->addLines($args, 'component');
 	}
 
 	/**
@@ -96,8 +113,9 @@ class Log_Component extends Component
 	{
 		if (!$this->m_isEnabled || $this->m_logLevel < 2)
 			return;
-		
-		$this->addLines(func_get_args(), 'debug');
+
+		$args = func_get_args();	
+		$this->addLines($args, 'debug');
 	}
 
 	/**
@@ -110,8 +128,9 @@ class Log_Component extends Component
 	{
 		if (!$this->m_isEnabled || $this->m_logLevel < 3)
 			return;
-		
-		$this->addLines(func_get_args(), 'sql');
+
+		$args = func_get_args();	
+		$this->addLines($args, 'sql');
 	}
 
 	/**
@@ -125,14 +144,14 @@ class Log_Component extends Component
 		if (!$this->m_isEnabled)
 			return;
 
+		$date = date('d-m-Y H:i:s');
 		switch ($type)
 		{
 			case 'error':
-				return '<strong>ERROR</strong> [' . date('d-m-Y H:i:s') . ']: ';
 			case 'debug':
-				return '<strong>DEBUG</strong> [' . date('d-m-Y H:i:s') . ']: ';
 			case 'sql':
-				return '<strong>SQL</strong> [' . date('d-m-Y H:i:s') . ']: ';
+			case 'component':
+				return '<strong>' . strtoupper(strtolower($type)) . '</strong> [' . $date . ']: ';
 			default:
 				return '';
 		}

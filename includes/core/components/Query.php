@@ -62,7 +62,7 @@ class Query_Component extends Component
 
 	public function setModel($model_name)
 	{
-		$this->m_model = $this->c($model_name, 'Model');
+		$this->m_model = $this->i($model_name, 'Model');
 		if (!$this->m_model)
 			throw new ModelCrash_Exception_Component('Model ' . $model_name . ' was not found!');
 
@@ -155,7 +155,8 @@ class Query_Component extends Component
 		$this->m_fields = array();
 		foreach ($fields as $model => $_fields)
 		{
-			if (!$this->getModelByName($model)) continue;
+			if (!$this->getModelByName($model))
+				continue;
 
 			$this->m_fields[$this->getModelByName($model)->m_table] = $_fields;
 			
@@ -167,51 +168,7 @@ class Query_Component extends Component
 
 	private function getFields(&$fields, &$model)
 	{
-		/*
-		if (!$fields || !$model)
-			return false;
-
-		$data = array();
-		$new_fields = array();
-		$locale = $this->c('Locale')->getLocale();
-		$localeId = $this->c('Locale')->getLocaleId();
-
-		foreach ($fields as $key => $field)
-		{
-			if (!is_scalar($field))
-				continue;
-
-			if (isset($model->m_fields[$field]))
-			{
-				if ($model->m_fields[$field] == 'Locale')
-				{
-					$new = $field . '_' . $locale;
-					$model->m_aliases[$new] = $field;
-					$data[] = array($field, $new);
-					$field = $new;
-				}
-				elseif ($model->m_fields[$field] == 'DbLocale')
-				{
-					$new = $field . '_loc' . $localeId;
-					$model->m_aliases[$new] = $field;
-					$data[] = array($field, $new);
-					$field = $new;
-				}
-			}
-			$new_fields[$key] = $field;
-		}
-
-		if ($data)
-		{
-			foreach ($data as $info)
-			{
-				$tmp = $model->m_fields[$info[0]];
-				$model->m_fields[$info[1]] = $tmp;
-				unset($model->m_fields[$info[0]]);
-			}
-		}
-
-		$fields = $new_fields;*/
+		
 	}
 
 	public function fieldsConditions($conditions)
@@ -264,7 +221,7 @@ class Query_Component extends Component
 		if (isset($this->m_childModels[$model_name]))
 			return $this;
 
-		$this->m_childModels[$model_name] = $this->c($model_name, 'Model');
+		$this->m_childModels[$model_name] = $this->i($model_name, 'Model');
 
 		if (!$this->m_childModels[$model_name])
 			throw new ModelCrash_Exception_Component('Model ' . $model_name . ' was not found!');
@@ -308,11 +265,6 @@ class Query_Component extends Component
 		return $this->appendSql('limit', array($limit, $offset));
 	}
 
-	/*public function group($fields)
-	{
-		return $this->appendSql('group', $fields);
-	}*/
-
 	public function keyIndex($field)
 	{
 		return $this->appendSql('key_index', $field);
@@ -322,6 +274,7 @@ class Query_Component extends Component
 	{
 		$this->parseSqlData()
 			->query();
+
 		return $this;
 	}
 

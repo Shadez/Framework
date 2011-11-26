@@ -94,7 +94,7 @@ class Document_Component extends Component
 			// Multiply css files
 			foreach ($js as $key => $file)
 			{
-				if (!isset($file['file']))
+				if (!isset($file['file']) && !isset($file['text']))
 					continue;
 
 				$this->m_clientJs[$type][$key] = $file;
@@ -135,7 +135,12 @@ class Document_Component extends Component
 		$files_string = '';
 
 		foreach ($this->m_clientJs[$type] as &$js)
-			$files_string .= '<script language="javascript" type="text/javascript" src="' . (!isset($js['external']) ? $js['file'] : $this->getPath($js['file'])) . (isset($js['version']) ? '?v=' . $js['version'] : '') . '"></script>' . NL;
+		{
+			if (isset($js['file']))
+				$files_string .= '<script language="javascript" type="text/javascript" src="' . (!isset($js['external']) ? $js['file'] : $this->getPath($js['file'])) . (isset($js['version']) ? '?v=' . $js['version'] : '') . '"></script>' . NL;
+			elseif (isset($js['text']))
+				$files_string .= '<script language="javascript" type="text/javascript">' . NL . '    ' . $js['text'] . NL . '</script>' . NL;
+		}
 
 		return $files_string;
 	}

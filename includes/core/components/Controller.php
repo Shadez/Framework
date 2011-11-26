@@ -31,6 +31,7 @@ class Controller_Component extends Component
 	protected $m_menuIndex = null;
 	protected $m_errorPage = false;
 	protected $m_pageTitle = '';
+	protected $m_menuTitle = '';
 	protected $m_clientFilesController = '';
 	protected $m_installerController = false;
 
@@ -93,6 +94,7 @@ class Controller_Component extends Component
 	protected function pageTitle()
 	{
 		$this->c('Layout')->setPageTitle($this->m_pageTitle);
+
 		return $this;
 	}
 
@@ -263,9 +265,12 @@ class Controller_Component extends Component
 		return $this;
 	}
 
-	protected function ajaxPage()
+	protected function ajaxPage($define = false)
 	{
 		$this->m_isAjax = true;
+
+		if ($define)
+			define('AJAX_PAGE', true);
 
 		return $this;
 	}

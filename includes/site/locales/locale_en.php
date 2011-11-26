@@ -19,6 +19,6 @@
  **/
 
 $Site_Locale = array(
-    'locale_name' => 'English (EU)'
+    'locale_name' => 'English'
 );
 ?>

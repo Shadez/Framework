@@ -41,7 +41,7 @@ class QueryResult_Db_Component extends Component
 	{
 		$this->clear();
 
-		$this->m_model = $this->c($name, 'Model');
+		$this->m_model = $this->i($name, 'Model');
 
 		if (!$this->m_model)
 			throw new ModelCrash_Exception_Component('Model ' . $name . ' was not found!');

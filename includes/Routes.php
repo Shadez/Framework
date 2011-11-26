@@ -48,10 +48,5 @@ if (!defined('BOOT_FILE'))
  */
 
 $Router = array(
-	/*'/' => array(
-		'destination' => '',
-		'redirectType' => 'wow',
-		'access' => 'everyone'
-	),*/
 );
 ?>

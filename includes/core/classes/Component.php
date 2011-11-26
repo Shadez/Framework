@@ -147,7 +147,43 @@ abstract class Component
 	 **/
 	public function c($name, $type = '')
 	{
+		if (!$name)
+			throw new CoreCrash_Exception_Component('You must provide component name!');
+
 		return $this->getComponent($name, $type);
+	}
+
+	/**
+	 * Creates and returns component instance.
+	 * Please, note that component instance will be created at every Component::i() call!
+	 * @access public
+	 * @param  string $name
+	 * @param  string $type = ''
+	 * @return Component
+	 **/
+	public function i($name, $type = '')
+	{
+		if (!$name)
+			throw new CoreCrash_Exception_Component('You must provide component name!');
+
+		$singletons = array(
+			'Core', 'Db'
+		); // Component names that must have only one instance during app work
+
+		if (in_array($name, $singletons))
+			throw new CoreCrash_Exception_Component('You are not allowed to create more that 1 instance of ' . $name . ' Component (use Component::c() method instead)!');
+
+		$c_name = ucfirst(strtolower($name)) . ($type ? '_' . $type : '') . '_Component';
+
+		$c_name = str_replace('-', '', $c_name);
+
+		//$this->c('Log')->writeComponent('%s : creating component %s', __METHOD__, $c_name);
+
+		$component = new $c_name($c_name, $this->core);
+
+		// Since we are about use new at every i() call, we must skip addComponent() method.
+
+		return $component->initialize()->setInitialized(true); // Init component and return it.
 	}
 	
 	/**
@@ -159,7 +195,7 @@ abstract class Component
 	 **/
 	private function getComponent($name, $type = '')
 	{
-		$c_name = ucfirst($name) . ($type ? '_' . $type : '') . '_Component';
+		$c_name = ucfirst(strtolower($name)) . ($type ? '_' . $type : '') . '_Component';
 
 		if ($type == '')
 			$c_type = 'default';
@@ -176,6 +212,9 @@ abstract class Component
 		//If this will be implemented, we'll can safely handle controller errors (404).
 
 		$c_name = str_replace('-', '', $c_name);
+
+		//$this->c('Log')->writeComponent('%s : creating component %s', __METHOD__, $c_name);
+
 		$component = new $c_name($c_name, $this->core); // 
 
 		$this->addComponent($name, $c_type, $component);
@@ -259,21 +298,6 @@ abstract class Component
 			if ($type != 'default')
 				unset(self::$m_components[$type]);
 		}
-	}
-
-	public function localeWowUrl($url = '')
-	{
-		if (!$this->m_locale)
-			$this->m_locale = $this->c('Locale')->GetLocale();
-
-		if ($this->m_coreUrl != null)
-			return $this->m_coreUrl . $url;
-
-		if (!defined('CLIENT_FILES_PATH'))
-			define('CLIENT_FILES_PATH', $this->c('Config')->getValue('site.path'));
-
-		$this->m_coreUrl = CLIENT_FILES_PATH . '/wow/' . $this->m_locale;
-		return $this->m_coreUrl . $url;
 	}
 
 	public function getUrl($url = '')

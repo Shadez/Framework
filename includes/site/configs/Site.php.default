@@ -23,15 +23,16 @@ $SiteConfig = array(
 		'path' => '',
 		'log' => array(
 			'enabled' => true,
-			'level' => 2
+			'level' => 4
 		),
 		'title' => 'Framework Demo',
 		'locale' => array(
-			'default' => 'en'
+			'default' => 'ru'
 		),
 		'locale_indexes' => array(
-			0, 1
-		)
+			0
+		),
+		'url_string_index' => 'mOUjX93',
 	),
 	'misc' => array(
 		'admin_email' => 'admin@' . $_SERVER['SERVER_NAME']

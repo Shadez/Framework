@@ -437,6 +437,7 @@ class Model_Db_Component extends Component
 		return $this->getLoadItems()->getData();
 	}
 
+	//!
 	public function getFields()
 	{
 		$data = array();
@@ -512,6 +513,7 @@ class Model_Db_Component extends Component
 		return $this;
 	}
 
+	//!
 	public function restoreFields()
 	{
 		$this->m_fields = $this->m_defaultFields;
@@ -519,6 +521,7 @@ class Model_Db_Component extends Component
 		return $this;
 	}
 
+	//!
 	public function restoreAliases()
 	{
 		$this->m_aliases = $this->m_defaultAliases;

@@ -43,19 +43,18 @@ class Layout_Component extends Component
 	{
 		$title = array();
 
+		if (!$this->m_pageTitle && !$this->m_menuTitle)
+			return $this->c('Config')->getValue('site.title');
+
 		if ($this->m_pageTitle)
 			$title[] = $this->m_pageTitle;
 
 		if ($this->m_menuTitle)
 			$title[] = $this->m_menuTitle;
 
-		if (!$title)
-			return $this->c('Config')->getValue('site.title');
-		else
-		{
-			$title[] = $this->c('Config')->getValue('site.title');
-			return implode(' - ', $title);
-		}
+		$title[] = $this->c('Config')->getValue('site.title');
+
+		return implode(' :: ', $title);
 	}
 
 	public function initialize()

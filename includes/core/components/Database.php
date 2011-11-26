@@ -336,32 +336,44 @@ class Database_Component extends Component
 
 	public function selectCell($query)
 	{
-		return $this->_prepareQuery(func_get_args(), func_num_args(), SINGLE_CELL);
+		$argv = func_get_args();
+		$argc = func_num_args();
+		return $this->_prepareQuery($argv, $argc, SINGLE_CELL);
 	}
 
 	public function selectRow($query)
 	{
-		return $this->_prepareQuery(func_get_args(), func_num_args(), SINGLE_ROW);
+		$argv = func_get_args();
+		$argc = func_num_args();
+		return $this->_prepareQuery($argv, $argc, SINGLE_ROW);
 	}
 
 	public function select($query)
 	{
-		return $this->_prepareQuery(func_get_args(), func_num_args(), MULTIPLY_ROW);
+		$argv = func_get_args();
+		$argc = func_num_args();
+		return $this->_prepareQuery($argv, $argc, MULTIPLY_ROW);
 	}
 
 	public function query($query)
 	{
-		return $this->_prepareQuery(func_get_args(), func_num_args(), SQL_QUERY);
+		$argv = func_get_args();
+		$argc = func_num_args();
+		return $this->_prepareQuery($argv, $argc, SQL_QUERY);
 	}
 
 	public function RawQuery($query)
 	{
-		return $this->_prepareQuery(func_get_args(), func_num_args(), SQL_RAW_QUERY);
+		$argv = func_get_args();
+		$argc = func_num_args();
+		return $this->_prepareQuery($argv, $argc, SQL_RAW_QUERY);
 	}
 
 	public function selectObject($query)
 	{
-		return $this->_prepareQuery(func_get_args(), func_num_args(), OBJECT_QUERY);
+		$argv = func_get_args();
+		$argc = func_num_args();
+		return $this->_prepareQuery($argv, $argc, OBJECT_QUERY);
 	}
 
 	/**

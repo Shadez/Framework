@@ -44,6 +44,15 @@ class Editing_Component extends Component
 			case 'integer':
 				$value = (int) $value;
 				break;
+			case 'float':
+				$value = (float) $value;
+				break;
+			case 'double':
+				$value = (double) $value;
+				break;
+			case 'bool':
+				$value = (bool) $value;
+				break;
 			default:
 				break;
 		}
@@ -81,6 +90,15 @@ class Editing_Component extends Component
 		{
 			case 'integer':
 				$value = (int) $value;
+				break;
+			case 'float':
+				$value = (float) $value;
+				break;
+			case 'double':
+				$value = (double) $value;
+				break;
+			case 'bool':
+				$value = (bool) $value;
 				break;
 		}
 
@@ -177,7 +195,7 @@ class Editing_Component extends Component
 	public function setModel($modelName)
 	{
 		$this->clearValues()
-			->m_model = $this->c($modelName, 'Model');
+			->m_model = $this->i($modelName, 'Model');
 
 		if (!$this->m_model)
 			throw new ModelCrash_Exception_Component('Model ' . $modelName . ' was not found!');
@@ -274,7 +292,7 @@ class Editing_Component extends Component
 
 	public function load()
 	{
-		$this->m_data = $this->c('QueryResult', 'Db')
+		$this->m_data = $this->i('QueryResult', 'Db')
 			->model($this->m_model->m_model)
 			->setItemId($this->m_id)
 			->loadItem();
