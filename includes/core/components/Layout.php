@@ -41,20 +41,7 @@ class Layout_Component extends Component
 
 	public function getPageTitle()
 	{
-		$title = array();
-
-		if (!$this->m_pageTitle && !$this->m_menuTitle)
-			return $this->c('Config')->getValue('site.title');
-
-		if ($this->m_pageTitle)
-			$title[] = $this->m_pageTitle;
-
-		if ($this->m_menuTitle)
-			$title[] = $this->m_menuTitle;
-
-		$title[] = $this->c('Config')->getValue('site.title');
-
-		return implode(' :: ', $title);
+		return $this->m_pageTitle;
 	}
 
 	public function initialize()
@@ -87,8 +74,7 @@ class Layout_Component extends Component
 
 			foreach ($holder as $file)
 			{
-				//if (!isset($file['condition'])) //TODO: add conditions support
-					$aHolder[$region][] = $file;
+				$aHolder[$region][] = $file;
 			}
 		}
 

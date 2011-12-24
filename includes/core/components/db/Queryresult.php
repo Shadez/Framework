@@ -126,12 +126,24 @@ class QueryResult_Db_Component extends Component
 			return false;
 
 		if (!$fields)
-			return $item; // Nothing to do
+		{
+			$holder = $this->i('ResultHolder', 'Db')
+				->setResult(array($item), $this->m_sqlBuilder->getSql());
+
+			unset($item);
+
+			return $holder; // Nothing to do
+		}
 
 		// Parse fields
 		$this->parseResults($item, $fields);
 
-		return $item;
+		$holder = $this->i('ResultHolder', 'Db')
+			->setResult(array($item), $this->m_sqlBuilder->getSql());
+
+		unset($item);
+
+		return $holder;
 	}
 
 	protected function parseResults(&$item, &$fields)
@@ -159,6 +171,8 @@ class QueryResult_Db_Component extends Component
 			}
 		}
 
+		$item = (object) $item;
+
 		return $this;
 	}
 
@@ -172,13 +186,25 @@ class QueryResult_Db_Component extends Component
 			return false;
 
 		if (!$fields)
-			return $items; // Nothing to do
+		{
+			$holder = $this->i('ResultHolder', 'Db')
+				->setResult($items, $this->m_sqlBuilder->getSql());
+
+			unset($items);
+
+			return $holder; // Nothing to do
+		}
 
 		// Parse fields
 		foreach ($items as &$item)
 			$this->parseResults($item, $fields);
 
-		return $items;
+		$holder = $this->i('ResultHolder', 'Db')
+			->setResult($items, $this->m_sqlBuilder->getSql());
+
+		unset($items);
+
+		return $holder;
 	}
 
 	public function addModel($model_name)

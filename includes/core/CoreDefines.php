@@ -66,3 +66,6 @@ define('IN_HOURS', 60 * IN_MINUTES);
 define('IN_DAYS', 24 * IN_HOURS);
 define('IN_WEEKS', 7 * IN_DAYS);
 define('IN_MONTHS', 30 * IN_DAYS);
+
+define('GENDER_FEMALE', 0);
+define('GENDER_MALE', 1);

@@ -33,6 +33,7 @@ $SiteConfig = array(
 			0
 		),
 		'url_string_index' => 'mOUjX93',
+		'disable_ie' => false,
 	),
 	'misc' => array(
 		'admin_email' => 'admin@' . $_SERVER['SERVER_NAME']
@@ -49,7 +50,7 @@ $SiteConfig = array(
 			'host' => 'localhost',
 			'user' => 'root',
 			'password' => '',
-			'db_name' => 'fw_db',
+			'db_name' => 'fw_demodb',
 			'charset' => 'UTF8',
 			'driver' => 'mysql',
 			'prefix' => ''

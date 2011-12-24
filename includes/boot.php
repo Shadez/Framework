@@ -54,9 +54,12 @@ define('CACHE_DIR', ROOT . DS . 'cache' . DS);
 define('LOCKERS_DIR', SITE_DIR . 'lockers' . DS);
 
 define('NL', "\n");
+define('CR', "\r");
 define('TAB', "\t");
 define('NLTAB', NL . TAB);
 define('TABNL', TAB . NL);
+define('CRNL', CR . NL);
+define('NLCR', NL . CR);
 
 // Load required files
 include(INCLUDES_DIR . 'AppCrash.php');
@@ -67,18 +70,25 @@ include(CORE_CLASSES_DIR . 'Component.php');
 include(CORE_DIR . 'CoreDefines.php');
 include(SITE_DIR . 'SiteDefines.php');
 
+// IE?
+define('IE_BROWSER', preg_match('/MSIE/six', $_SERVER['HTTP_USER_AGENT']));
+
 // Register classes autoloader
 Autoload::register();
 
 // Run application
-try {
+try
+{
 	// Create core
 	$core = Core_Component::create();
+
 	// Execute all actions
 	$core->execute();
+
 	// Collect MySQL statistics for all DBs
 	$db_types = array_keys($core->c('Config')->getValue('database'));
 	$totalStat = array('count' => 0, 'time' => 0.0);
+
 	foreach ($db_types as $type)
 	{
 		if (!$core->c('Db')->{$type}())
@@ -92,7 +102,8 @@ try {
 	if (!defined('SKIP_SHUTDOWN'))
 		$core->shutdown(); // Shutdown application
 }
-catch(Exception $e) {
+catch(Exception $e)
+{
 
 	$appCrash = new AppCrash($e);
 
@@ -106,7 +117,7 @@ catch(Exception $e) {
 
 if ($debug && !defined('AJAX_PAGE'))
 {
-	echo '<div class="debug">';
+	echo NL . NL . '<div class="debug">';
 	$totaltime = sprintf('%.2f', (array_sum(explode(' ', microtime())) - $tstart));
 	printf('<p>Page generated in ~%.2f sec.<br />Memory usage: ~%.2f mbytes.<br />Memory usage peak: ~%.2f mbytes.</p>', $totaltime, ((memory_get_usage(true)/1048576 * 100000)/100000) , ((memory_get_peak_usage(true) / 1048576 * 100000)/100000));
 	if ($totaltime > 1)

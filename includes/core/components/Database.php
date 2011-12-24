@@ -65,7 +65,7 @@ class Database_Component extends Component
 		$charset = &$configs['charset'];
 		$prefix = &$configs['prefix'];
 
-		$this->driver_type = &$configs['driver'];
+		$this->driver_type = $this->c('Config')->getValue('mysql.driver');
 
 		if ($delayed)
 		{
@@ -82,6 +82,7 @@ class Database_Component extends Component
 		if ($this->driver_type == 'mysqli')
 		{
 			$this->connectionLink = @mysqli_connect($host, $user, $password, $dbName);
+
 			if (!$this->connectionLink)
 			{
 				$this->errmsg = @mysqli_error($this->connectionLink);
@@ -91,6 +92,7 @@ class Database_Component extends Component
 			}
 
 			$this->dbLink = @mysqli_select_db($this->connectionLink, $dbName);
+
 			if (! $this->dbLink)
 			{
 				$this->c('Log')->writeError('%s : unable to switch to database "%s"!', __method__, $dbName);
@@ -100,6 +102,7 @@ class Database_Component extends Component
 		else
 		{
 			$this->connectionLink = @mysql_connect($host, $user, $password, true);
+
 			if (!$this->connectionLink)
 			{
 				$this->errmsg = @mysql_error($this->connectionLink);
@@ -109,6 +112,7 @@ class Database_Component extends Component
 			}
 
 			$this->dbLink = @mysql_select_db($dbName, $this->connectionLink);
+
 			if (!$this->dbLink)
 			{
 				$this->c('Log')->writeError('%s : unable to switch to database "%s"!', __method__, $dbName);
@@ -165,7 +169,7 @@ class Database_Component extends Component
 	 **/
 	public function TestLink()
 	{
-		return $this->connected;
+		return $this->isConnected();
 	}
 
 	/**

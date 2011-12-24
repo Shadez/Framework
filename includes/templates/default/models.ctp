@@ -1,4 +1,4 @@
 <h1>Models</h1>
-<a href="/tools/">Back to Tools</a>
+<a href="<?php echo $this->getUrl('tools/'); ?>">Back to Tools</a>
 <hr />
-<a href="/tools/models/create">Create</a>
+<a href="<?php echo $this->getUrl('tools/models/create'); ?>">Create</a>

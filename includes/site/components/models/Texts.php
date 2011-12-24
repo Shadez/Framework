@@ -18,42 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-$SiteConfig = array(
-	'site' => array(
-		'path' => '/shadez',
-		'log' => array(
-			'enabled' => true,
-			'level' => 4
-		),
-		'title' => 'Framework Demo',
-		'locale' => array(
-			'default' => 'ru'
-		),
-		'locale_indexes' => array(
-			0
-		),
-		'url_string_index' => 'mOUjX93',
-		'disable_ie' => false,
-	),
-	'misc' => array(
-		'admin_email' => 'admin@' . $_SERVER['SERVER_NAME']
-	),
-	'session' => array(
-		'identifier' => 'fw_sid',
-		'user' => array(
-			'storage' => 'fw_session'
-		),
-		'magic_string' => 'SESSION_CONVERT'
-	),
-	'database' => array(
-		'site' => array(
-			'host' => 'localhost',
-			'user' => 'root',
-			'password' => '',
-			'db_name' => 'fw_demodb',
-			'charset' => 'UTF8',
-			'driver' => 'mysql',
-			'prefix' => ''
-		)
-	)
-);
+class Texts_Model_Component extends Model_Db_Component
+{
+	public $m_model = 'Texts';
+	public $m_table = 'texts';
+	public $m_dbType = 'site';
+	public $m_fields = array(
+		'id' => 'Id',
+		'text' => array('type' => 'string'),
+	);
+}

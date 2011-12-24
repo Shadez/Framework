@@ -45,6 +45,14 @@ class Controller_Component extends Component
 		$this->core->setVar('l', $this->c('Locale'));
 		$this->core->setVar('controller', $this);
 
+		// If user's browser is Internet Explorer and admin won't allow
+		// IE on this site, show warning message.
+		if (IE_BROWSER && $this->c('Config')->getValue('site.disable_ie'))
+		{
+			include(TEMPLATES_DIR . 'elements' . DS . 'badbrowser.ctp');
+			return $this;
+		}
+
 		$this->setTemplates()
 			->preparePage()
 			->beforeActions()
@@ -117,6 +125,7 @@ class Controller_Component extends Component
 	{
 		$class = ($type ? $type . '_' : '') . 'Block_Component';
 		$block = new $class('Block', $this->core);
+
 		return $block->setBlockType($type)->setBlockState(true);
 	}
 
@@ -124,8 +133,10 @@ class Controller_Component extends Component
 	{
 		if ($this->m_errorPage)
 			return $this;
+
 		$class = ($type ? $type . '_' : '') . 'Unit_Component';
 		$unit = new $class('Unit', $this->core);
+
 		return $unit;
 	}
 
@@ -138,29 +149,9 @@ class Controller_Component extends Component
 		{
 			$block = &$this->{'block_' . $name}();
 			$block->setBlockName($name);
-			if ($block->getMainUnit() != null && method_exists($this, 'unit_' . $block->getMainUnit()))
-			{
-				if (isset($this->m_units[$block->getMainUnit()]))
-					$unit = $this->m_units[$block->getMainUnit()];
-				else
-				{
-					$unit = &$this->{'unit_' . $block->getMainUnit()}();
-					$unit->findData();
-				}
-				$block->setMainUnitObject($unit);
-				$this->m_units[$block->getMainUnit()] = $unit;
-			}
 		}
 
 		return $this;
-	}
-
-	public function getUnit($unitName)
-	{
-		if (method_exists($this, 'unit_' . $unitName))
-			return $this->{'unit_' . $unitName}();
-
-		return $this->c('Unit');
 	}
 
 	public function buildBlocks($blocks)
@@ -175,12 +166,16 @@ class Controller_Component extends Component
 	protected function addClientFiles()
 	{
 		if (is_array($this->m_css))
+		{
 			foreach($this->m_css as $type => $css)
 				$this->c('Document')->registerCss($css, $type);
+		}
 
 		if (is_array($this->m_js))
+		{
 			foreach($this->m_js as $type => $js)
 				$this->c('Document')->registerJs($js, $type);
+		}
 
 		return $this;
 	}
@@ -201,13 +196,21 @@ class Controller_Component extends Component
 			return $this;
 
 		if ($this->m_postBuild)
+		{
 			foreach ($this->m_postBuild as &$post)
+			{
 				if (is_array($post))
+				{
 					if (method_exists($post[0], $post[1]))
 						$post[0]->{$post[1]}();
+				}
 				else
+				{
 					if (function_exists($post))
 						$post();
+				}
+			}
+		}
 
 		return $this;
 	}
@@ -233,6 +236,7 @@ class Controller_Component extends Component
 			return $this;
 
 		$regions = $this->c('Document')->getAllRegions();
+
 		if (!$regions)
 			return $this;
 
@@ -262,6 +266,13 @@ class Controller_Component extends Component
 
 		include($template);
 
+		// Delete used core variables (not from core storage!)
+		if ($core_vars)
+		{
+			foreach ($core_vars as $varName => &$varValue)
+				unset($$varName);
+		}
+
 		return $this;
 	}
 
@@ -290,6 +301,7 @@ class Controller_Component extends Component
 	public function setErrorPage()
 	{
 		$this->m_errorPage = true;
+
 		header('HTTP/1.0 404 Not Found');
 
 		return $this;
@@ -300,11 +312,11 @@ class Controller_Component extends Component
 		return $this->m_isDefaultController;
 	}
 
-	public function delegateTo($controller)
+	public function delegateTo($c_name)
 	{
 		$this->m_skipBuild = true;
 
-		$this->c($controller, 'Controller');
+		$this->c($c_name, 'Controller');
 
 		return $this;
 	}

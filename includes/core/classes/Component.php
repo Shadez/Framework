@@ -311,22 +311,17 @@ abstract class Component
 		if (!defined('CLIENT_FILES_PATH'))
 			define('CLIENT_FILES_PATH', $this->c('Config')->getValue('site.path'));
 
-		$this->m_coreUrl = CLIENT_FILES_PATH . '/' . $this->m_locale;
+		$this->m_coreUrl = CLIENT_FILES_PATH;
 
 		return $this->m_coreUrl . '/' . $url;
 	}
 
-	public function getCoreUrl($url = '')
+	public function getCFP($url = '')
 	{
 		if (!defined('CLIENT_FILES_PATH'))
 			define('CLIENT_FILES_PATH', $this->c('Config')->getValue('site.path'));
 
 		return CLIENT_FILES_PATH . '/' . $url;
-	}
-
-	public function getAppUrl($url = '')
-	{
-		return $this->getCoreUrl($url);
 	}
 
 	public function getPage($asOffset = false)
