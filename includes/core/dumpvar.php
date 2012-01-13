@@ -11,6 +11,15 @@ function dump($Var, $Var_s = null, $level_limit = 4)
 	return true;
 }
 
+function dump_s($Var, $Var_s = null, $level_limit = 4)
+{
+	echo '<!-- ' . NL;
+	dump($Var, $Var_s, $level_limit);
+	echo NL . '-->';
+
+	return true;
+}
+
 /**
  * @author Melvil (https://github.com/Melvil)
  **/

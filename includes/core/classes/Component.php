@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2009-2011 Shadez <https://github.com/Shadez>
+ * Copyright (C) 2009-2012 Shadez <https://github.com/Shadez>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,6 +65,13 @@ abstract class Component
 	protected $m_locale = '';
 	protected $m_localeID = 0;
 	protected $m_coreUrl = '';
+
+	/**
+	 * Components rewrite info
+	 * @access private
+	 * @var	   array
+	 **/
+	private $m_componentsRewrite = array();
 
 	/**
 	 * Class constructor
@@ -179,11 +186,87 @@ abstract class Component
 
 		//$this->c('Log')->writeComponent('%s : creating component %s', __METHOD__, $c_name);
 
+		$rewrite = $this->getComponentRewrite($name, $type);
+
+		if ($rewrite)
+		{
+			// Load overriden class here
+			$fname = 'components' . DS . ($type ? strtolower($type) . 's' : '') . DS . ucfirst(strtolower($rewrite)) . '.php';
+
+			if (file_exists(SITE_DIR . $fname))
+				include(SITE_DIR . $fname);
+			elseif (file_exists(CORE_DIR . $fname))
+				include(CORE_DIR . $fname);
+		}
+
 		$component = new $c_name($c_name, $this->core);
 
-		// Since we are about use new at every i() call, we must skip addComponent() method.
+		// Since we are about to use new at every i() call, we must skip addComponent() method.
 
 		return $component->initialize()->setInitialized(true); // Init component and return it.
+	}
+
+	private function getComponentRewrite($c_name, $c_type = 'Default')
+	{
+		if (!$this->m_componentsRewrite)
+		{
+			include(SITE_DIR . 'ComponentsRewrite.php');
+
+			if (!isset($Components))
+				return false;
+
+			$this->m_componentsRewrite = $Components;
+
+			unset($Components);
+		}
+
+		if (isset($this->m_componentsRewrite[$c_type]))
+		{
+			if (isset($this->m_componentsRewrite[$c_type][$c_name]))
+			{
+				$allowable_types = array('config', 'get', 'post', 'session', 'cookie');
+				foreach ($allowable_types as $type)
+				{
+					if (!isset($this->m_componentsRewrite[$c_type][$c_name]['conditions'][$type]))
+						continue;
+
+					$cond_keys = array_keys($this->m_componentsRewrite[$c_type][$c_name]['conditions'][$type]);
+
+					if (!isset($cond_keys[0]) || !$cond_keys[0])
+						continue;
+
+					$var_key = $cond_keys[0];
+					$var_val = null;
+
+					switch ($type)
+					{
+						case 'config':
+							$var_val = $this->c('Config')->getValue($var_key);
+							break;
+						case 'get':
+							$var_val = isset($_GET[$var_key]) ? $_GET[$var_key] : null;
+							break;
+						case 'post':
+							$var_val = isset($_POST[$var_key]) ? $_POST[$var_key] : null;
+							break;
+						case 'session':
+							$var_val = isset($_SESSION[$var_key]) ? $_SESSION[$var_key] : null;
+							break;
+						case 'cookie':
+							$var_val = isset($_COOKIE[$var_key]) ? $_COOKIE[$var_key] : null;
+							break;
+						default:
+							return null;
+					}
+
+					foreach ($this->m_componentsRewrite[$c_type][$c_name]['conditions'][$type][$var_key] as $val => $cname)
+						if ($val == $var_val)
+							return $cname;
+				}
+			}
+		}
+
+		return null;
 	}
 	
 	/**
@@ -214,6 +297,19 @@ abstract class Component
 		$c_name = str_replace('-', '', $c_name);
 
 		//$this->c('Log')->writeComponent('%s : creating component %s', __METHOD__, $c_name);
+
+		$rewrite = $this->getComponentRewrite($name, $type);
+
+		if ($rewrite)
+		{
+			// Load overriden class here
+			$fname = 'components' . ($type ? strtolower($type) . 's' . DS : '') . DS . ucfirst(strtolower($rewrite)) . '.php';
+
+			if (file_exists(SITE_DIR . $fname))
+				include(SITE_DIR . $fname);
+			elseif (file_exists(CORE_DIR . $fname))
+				include(CORE_DIR . $fname);
+		}
 
 		$component = new $c_name($c_name, $this->core); // 
 

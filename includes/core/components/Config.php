@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2009-2011 Shadez <https://github.com/Shadez>
+ * Copyright (C) 2009-2012 Shadez <https://github.com/Shadez>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,12 +88,14 @@ class Config_Component extends Component
 			return false;
 
 		$value = false;
-		
+
 		$holder_path = $this->getConfigPath($path);
 
 		if (!$holder_path)
 			return false;
+
 		eval('if (isset($this->m_holder' . $holder_path  .')) $value = $this->m_holder' . $holder_path .';');
+
 		return $value;
 	}
 
@@ -135,7 +137,7 @@ class Config_Component extends Component
 		$str = '<?php
 
 /**
- * Copyright (C) 2009-2011 Shadez <https://github.com/Shadez>
+ * Copyright (C) 2009-2012 Shadez <https://github.com/Shadez>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2009-2011 Shadez <https://github.com/Shadez>
+ * Copyright (C) 2009-2012 Shadez <https://github.com/Shadez>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ class Models_Tool_Component extends Component
 		$text = '<?php
 
 /**
- * Copyright (C) 2009-2011 Shadez <https://github.com/Shadez>
+ * Copyright (C) 2009-2012 Shadez <https://github.com/Shadez>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

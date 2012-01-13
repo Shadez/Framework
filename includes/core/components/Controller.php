@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2009-2011 Shadez <https://github.com/Shadez>
+ * Copyright (C) 2009-2012 Shadez <https://github.com/Shadez>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,17 +53,23 @@ class Controller_Component extends Component
 			return $this;
 		}
 
-		$this->setTemplates()
-			->preparePage()
-			->beforeActions()
-			->initClientFiles()
-			->registerClientFiles()
-			->addClientFiles()
-			->beforeBuild()
-			->build($this->c('Core'))
-			->pageTitle()
-			->performPostBuild()
-			->complete();
+		// Perform controller actions
+
+		$this->setTemplates() 			// Sets template directories (*)
+			->preparePage() 			// Sets headers for ajax page (*)
+			->beforeActions() 			// beforeClientFilesRegister event (*)
+			->initClientFiles() 		// Loads controller files from Layout_Component (!)
+			->registerClientFiles() 	// Register some additional client files (depends on controller) (*)
+			->addClientFiles() 			// Send controller files to Document_Component (!)
+			->beforeBuild() 			// beforeBuildStarted event (*)
+			->build($this->c('Core'))	// Build method [*]
+			->pageTitle() 				// Sets page title (*)
+			->performPostBuild() 		// Post Build Actions (!)
+			->complete(); 				// Finish (!)
+
+		// (*) -> method may be overriden
+		// [*] -> method MUST be overriden
+		// (!) -> method MUST NOT be overriden (move it to private?)
 
 		return $this;
 	}
@@ -147,7 +153,7 @@ class Controller_Component extends Component
 
 		if (method_exists($this, 'block_' . $name))
 		{
-			$block = &$this->{'block_' . $name}();
+			$block = $this->{'block_' . $name}();
 			$block->setBlockName($name);
 		}
 

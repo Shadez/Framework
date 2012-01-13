@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2009-2011 Shadez <https://github.com/Shadez>
+ * Copyright (C) 2009-2012 Shadez <https://github.com/Shadez>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,5 +122,10 @@ class ResultHolder_Db_Component extends Component
 	public function getRowsCount()
 	{
 		return $this->m_dataSize;
+	}
+
+	public function getData()
+	{
+		return $this->m_data;
 	}
 }
