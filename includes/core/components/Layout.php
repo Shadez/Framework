@@ -49,8 +49,8 @@ class Layout_Component extends Component
 		$ClientCSS = array();
 		$ClientJS = array();
 
-		include(SITE_DIR . 'layouts' . DS . 'ClientCss.php');
-		include(SITE_DIR . 'layouts' . DS . 'ClientJs.php');
+		include_once(SITE_DIR . 'layouts' . DS . 'ClientCss.php');
+		include_once(SITE_DIR . 'layouts' . DS . 'ClientJs.php');
 
 		$this->m_css = $ClientCSS;
 		$this->m_js = $ClientJS;

@@ -25,14 +25,7 @@ class Block_Component extends Component
 	private $m_blockTemplateName = '';
 	private $m_blockTemplateDir = '';
 	private $m_blockRegion = '';
-	private $m_blockType = '';
-	private $m_blockUnit = null;
-	private $m_blockUnits = array();
-	private $m_blockUnitObject = null;
-	protected $m_model = null;
-	protected $m_contents = '';
 	private $m_builded = false;
-	protected $m_unitData = array();
 	private $m_rendered = false;
 
 	/**
@@ -48,18 +41,6 @@ class Block_Component extends Component
 		return $this;
 	}
 
-	/**
-	 * Sets block type
-	 * @access public
-	 * @param  string $type
-	 * @return Block_Component
-	 **/
-	public function setBlockType($type)
-	{
-		$this->m_blockType = $type;
-
-		return $this;
-	}
 	/**
 	 * Returns block name
 	 * @access public
@@ -215,9 +196,10 @@ class Block_Component extends Component
 			return $this;
 
 		$template = TEMPLATES_DIR . $this->m_blockTemplateDir . DS . $this->m_blockTemplateName . '.ctp';
+
 		if (!file_exists($template))
 		{
-			$this->c('Log')->writeError('%s : unable to find template "%s.ctp" (hash: %s)!', __METHOD__, $this->m_blockTemplateDir . DS . $this->m_blockTemplateName, $this->m_uniqueHash);
+			$this->c('Log')->writeError('%s : unable to find template "%s.ctp" for block %s (hash: %s)!', __METHOD__, $this->m_blockTemplateDir . DS . $this->m_blockTemplateName, $this->getBlockName(), $this->m_uniqueHash);
 			return $this;
 		}
 
@@ -238,162 +220,32 @@ class Block_Component extends Component
 
 		ob_start();
 
-		require($template);
+		require_once($template);
 		$this->c('Page')->addContents(ob_get_contents(), $this->m_blockRegion);
 
 		ob_clean();
 
-		return $this;
-	}
+		// Cleanup variables
+		if ($core_vars)
+		{
+			foreach ($core_vars as $varName => &$varValue)
+			{
+				unset($$varName);
+				$varName = null;
+				$varValue = null;
+			}
+		}
 
-	/**
-	 * Sets DB find parameters
-	 * @access public
-	 * @param  array $params
-	 * @return Block_Component
-	 **/
-	public function setFind($params)
-	{
-		if (!isset($params['model']))
-			return $this;
+		unset($varName, $varValue);
 
-		$class_name = $params['model'] . '_Model_Component';
-		$this->m_model = new $class_name($params['model'], $this->core);
-		$this->m_model->findParams($params);
+		if ($this->m_blockVariables)
+		{
+			foreach ($this->m_blockVariables as $varName => &$varValue)
+				unset($$varName);
+		}
 
-		return $this;
-	}
-
-	/**
-	 * Set item ID to find
-	 * @access public
-	 * @param  mixed $id
-	 * @return Block_Component
-	 **/
-	public function setItem($id)
-	{
-		if (!$this->m_model)
-			return $this;
-
-		$this->m_model->setItem($id);
+		unset($varName, $varValue);
 
 		return $this;
-	}
-
-	/**
-	 * Sets item var to find
-	 * @access public
-	 * @param  string $var
-	 * @return Block_Component
-	 **/
-	public function setItemVar($var)
-	{
-		if (!$this->m_model)
-			return $this;
-
-		$this->m_model->setItem(0, $var);
-
-		return $this;
-	}
-
-	/**
-	 * Sets search conditions
-	 * @access public
-	 * @param  array $conditions
-	 * @return Block_Component
-	 **/
-	public function setFindWhere($conditions)
-	{
-		if (!$this->m_model)
-			return $this;
-
-		$this->m_model->setConditions($conditions);
-
-		return $this;
-	}
-
-
-	/**
-	 * Sets random item request
-	 * @access public
-	 * @return Block_Component
-	 **/
-	public function setItemRandom()
-	{
-		if (!$this->m_model)
-			return $this;
-
-		$this->m_model->setItemRandom();
-
-		return $this;
-	}
-
-	/**
-	 * Sets DB search conditions
-	 * @access public
-	 * @param  array $conditions
-	 * @return Block_Component
-	 **/
-	public function setConditions($conditions)
-	{
-		if (!$this->m_model)
-			return $this;
-
-		$this->m_model->setConditions($conditions);
-
-		return $this;
-	}
-
-	/**
-	 * Sets join(s) conditions
-	 * @access public
-	 * @param  array $conditions
-	 * @return Block_Component
-	 **/
-	public function setJoin($conditions)
-	{
-		if (!$this->m_model)
-			return $this;
-
-		$this->m_model->setJoin($conditions);
-
-		return $this;
-	}
-
-	public function setMainUnit($unit_name)
-	{
-		$this->m_blockUnit = $unit_name;
-		$this->m_blockUnits[] = $unit_name;
-
-		return $this;
-	}
-
-	public function getMainUnit()
-	{
-		return $this->m_blockUnit;
-	}
-
-	public function getAllUnits()
-	{
-		return $this->m_blockUnits;
-	}
-
-	public function setUnitData($data)
-	{
-		$this->m_unitData = $data;
-
-		return $this;
-	}
-
-	public function setMainUnitObject($unit)
-	{
-		$this->m_blockUnitObject = $unit;
-
-		return $this;
-	}
-
-	public function mainUnit()
-	{
-		return $this->m_blockUnitObject;
 	}
 }

@@ -22,20 +22,6 @@ class Default_Controller_Component extends Controller_Component
 {
 	protected $m_isDefaultController = true;
 
-	public function initialize()
-	{
-		// Check contents
-		if (!$this->c('Content')->contentLoaded())
-			parent::initialize();
-		else
-		{
-			$this->c('Content', 'Controller');
-			return $this;
-		}
-
-		return $this;
-	}
-
 	public function build($core)
 	{
 		$this->buildBlock('404');

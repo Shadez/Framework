@@ -64,7 +64,6 @@ define('NLCR', NL . CR);
 // Load required files
 include(INCLUDES_DIR . 'AppCrash.php');
 include(CORE_DIR . 'dumpvar.php');
-include(CORE_CLASSES_DIR . 'CacheInfo.php');
 include(CORE_CLASSES_DIR . 'Autoload.php');
 include(CORE_CLASSES_DIR . 'Component.php');
 include(CORE_DIR . 'CoreDefines.php');
@@ -94,7 +93,7 @@ try
 		if (!$core->c('Db')->{$type}())
 			continue;
 
-		$mysql_statistics[$type] = $core->c('Db')->{$type}()->GetStatistics();
+		$mysql_statistics[$type] = $core->c('Db')->{$type}()->getStatistics();
 		$totalStat['count'] += $mysql_statistics[$type]['queryCount'];
 		$totalStat['time'] += $mysql_statistics[$type]['queryTimeGeneration'];
 	}
@@ -127,8 +126,10 @@ if ($debug && !defined('AJAX_PAGE'))
 		echo '<h1 style="color:#ff0000;">WARNING: seems that your page takes a lot of memory, please, contact with developer</h1>';
 
 	if ($mysql_statistics)
+	{
 		foreach ($mysql_statistics as $type => $stat)
 			printf('MySQL queries count for %s DB: %d, approx. time: %.2f ms.<br />', $type, $stat['queryCount'], $stat['queryTimeGeneration']);
+	}
 
 	printf('Total MySQL queries count: %d, total approx. time: %.2f ms.<br />', $totalStat['count'], $totalStat['time']);
 	echo '</div>';

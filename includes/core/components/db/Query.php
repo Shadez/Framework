@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Query_Component extends Component
+class Query_Db_Component extends Component
 {
 	protected $m_model = null;
 	protected $m_fields = array();
@@ -382,7 +382,7 @@ class Query_Component extends Component
 				{
 					$tempAlias = null;
 					// Check if this field is DbLocale field
-					// If it is, set it to temporary name (for cases when localization is missing in DB0)
+					// If it is, set it to temporary name (for cases when localization is missing in DB)
 					if (isset($model->m_fields[$table[$i]]) && $model->m_fields[$table[$i]] == 'DbLocale')
 					{
 						if (!isset($this->m_localeFields[$model->m_table]))

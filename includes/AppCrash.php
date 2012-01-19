@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-defined('BOOT_FILE') || die('Direct access to this file is not allowed!');
-
 class AppCrash
 {
 	protected $e = null;

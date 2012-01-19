@@ -354,21 +354,6 @@ abstract class Component
 		return $this->c('Page')->getContents($name);
 	}
 
-	public function getUnit($name, $new = false)
-	{
-		if ($new)
-		{
-			if (!in_array($name, array('', 'List', 'Item')))
-				$name = 'List';
-
-			$class = $name . '_Unit_Component';
-			$unit = new $class($name . '_Unit', $this->core);
-			return $unit->initialize();
-		}
-
-		return $this->c($name, 'Unit');
-	}
-
 	public function shutdownComponent()
 	{
 		foreach ($this as &$field)

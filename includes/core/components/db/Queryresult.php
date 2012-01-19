@@ -25,6 +25,11 @@ class QueryResult_Db_Component extends Component
 	protected $m_sqlBuilder = null;
 	protected $m_model = null;
 
+	public function initialize()
+	{
+		return $this->clear();
+	}
+
 	public function clear()
 	{
 		$this->m_sqlData = array();
@@ -47,7 +52,7 @@ class QueryResult_Db_Component extends Component
 			throw new ModelCrash_Exception_Component('Model ' . $name . ' was not found!');
 
 		if (!$this->m_sqlBuilder)
-			$this->m_sqlBuilder = new Query_Component('Query', $this->core);
+			$this->m_sqlBuilder = new Query_Db_Component('Query', $this->core);
 
 		$this->m_sqlBuilder->setModel($name);
 

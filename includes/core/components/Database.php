@@ -93,7 +93,7 @@ class Database_Component extends Component
 
 			$this->dbLink = @mysqli_select_db($this->connectionLink, $dbName);
 
-			if (! $this->dbLink)
+			if (!$this->dbLink)
 			{
 				$this->c('Log')->writeError('%s : unable to switch to database "%s"!', __method__, $dbName);
 				return false;
@@ -156,7 +156,7 @@ class Database_Component extends Component
 	 * @param    string $info
 	 * @return   mixed
 	 **/
-	public function GetDatabaseInfo($info)
+	public function getDatabaseInfo($info)
 	{
 		return (isset($this->databaseInfo[$info])) ? $this->databaseInfo[$info]:false;
 	}
@@ -167,7 +167,7 @@ class Database_Component extends Component
 	 * @return   bool
 	 * @deprecated Use isConnected() instead
 	 **/
-	public function TestLink()
+	public function testLink()
 	{
 		return $this->isConnected();
 	}
@@ -279,7 +279,7 @@ class Database_Component extends Component
 		return $result;
 	}
 
-	public function IndexResults($index_key)
+	public function indexResults($index_key)
 	{
 		$this->index_key = $index_key;
 	}
@@ -318,7 +318,7 @@ class Database_Component extends Component
 				if (is_string($funcArgs[$i]))
 					$funcArgs[$i] = addslashes(urldecode($funcArgs[$i]));
 				elseif (is_array($funcArgs[$i]))
-					$funcArgs[$i] = $this->ConvertArray($funcArgs[$i]);
+					$funcArgs[$i] = $this->convertArray($funcArgs[$i]);
 			}
 		}
 		$safe_sql = call_user_func_array('sprintf', $funcArgs);
@@ -366,7 +366,7 @@ class Database_Component extends Component
 		return $this->_prepareQuery($argv, $argc, SQL_QUERY);
 	}
 
-	public function RawQuery($query)
+	public function rawQuery($query)
 	{
 		$argv = func_get_args();
 		$argc = func_num_args();
@@ -386,7 +386,7 @@ class Database_Component extends Component
 	 * @param    array $source
 	 * @return   string
 	 **/
-	private function ConvertArray($source)
+	private function convertArray($source)
 	{
 		if (!is_array($source))
 		{
@@ -422,49 +422,49 @@ class Database_Component extends Component
 		parent::shutdownComponent();
 	}
 
-	public function GetServerVersion()
+	public function getServerVersion()
 	{
 		return $this->server_version;
 	}
 
-	public function GetLastErrorMessage()
+	public function getLastErrorMessage()
 	{
 		return $this->errmsg;
 	}
 
-	public function GetLastErrorNum()
+	public function getLastErrorNum()
 	{
 		return $this->errno;
 	}
 
-	private function DropLastErrors()
+	private function dropLastErrors()
 	{
 		$this->DropLastErrorMessage();
 		$this->DropLastErrorNumber();
 	}
 
-	private function DropLastErrorMessage()
+	private function dropLastErrorMessage()
 	{
 		$this->errmsg = null;
 	}
 
-	private function DropLastErrorNumber()
+	private function dropLastErrorNumber()
 	{
 		$this->errno = 0;
 	}
 
-	private function DropCounters()
+	private function dropCounters()
 	{
 		$this->queryCount = 0;
 		$this->queryTimeGeneration = 0.0;
 	}
 
-	public function GetStatistics()
+	public function getStatistics()
 	{
 		return array('queryCount' => $this->queryCount, 'queryTimeGeneration' => $this->queryTimeGeneration);
 	}
 
-	public function GetInsertID()
+	public function getInsertId()
 	{
 		return ($this->driver_type == 'mysqli') ? mysqli_insert_id($this->connectionLink) : mysql_insert_id($this->connectionLink);
 	}

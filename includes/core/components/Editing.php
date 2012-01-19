@@ -162,12 +162,12 @@ class Editing_Component extends Component
 			if (strtolower($this->m_model->m_fields[$field]) == 'locale')
 			{
 				$checker = 1;
-				return $field . '_' . $this->c('Locale')->GetLocale();
+				return $field . '_' . $this->c('Locale')->getLocale();
 			}
-			elseif (strtolower($this->m_model->m_fields[$field]) == 'dblocale' && $this->c('Locale')->GetLocaleID() != LOCALE_EN)
+			elseif (strtolower($this->m_model->m_fields[$field]) == 'dblocale' && $this->c('Locale')->getLocaleId() != LOCALE_EN)
 			{
 				$checker = 1;
-				return $field . '_' . $this->c('Locale')->GetLocaleID();
+				return $field . '_' . $this->c('Locale')->getLocaleId();
 			}
 			else
 				return $field;
@@ -194,8 +194,7 @@ class Editing_Component extends Component
 
 	public function setModel($modelName)
 	{
-		$this->clearValues()
-			->m_model = $this->i($modelName, 'Model');
+		$this->clearValues()->m_model = $this->i($modelName, 'Model');
 
 		if (!$this->m_model)
 			throw new ModelCrash_Exception_Component('Model ' . $modelName . ' was not found!');
@@ -280,7 +279,7 @@ class Editing_Component extends Component
 		$this->c('Db')->{$this->m_model->m_dbType}()->query($this->m_rawSql);
 
 		if ($this->m_insertType == 'insert')
-			$this->m_insertId = $this->c('Db')->{$this->m_model->m_dbType}()->GetInsertID();
+			$this->m_insertId = $this->c('Db')->{$this->m_model->m_dbType}()->getInsertId();
 
 		return $this;
 	}

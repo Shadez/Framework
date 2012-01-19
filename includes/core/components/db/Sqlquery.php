@@ -32,7 +32,7 @@ class SqlQuery_Db_Component extends Component
 		$query = array($sql);
 
 		if ($keyIndex != '' && $this->c('Db')->isDatabaseAvailable($db_type))
-			$this->c('Db')->{$db_type}()->IndexResults($keyIndex);
+			$this->c('Db')->{$db_type}()->indexResults($keyIndex);
 
 		if ($this->c('Db')->isDatabaseAvailable($db_type))
 			$this->m_data = call_user_func_array(array($this->c('Db')->{$db_type}(), $type), $query);

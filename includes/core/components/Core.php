@@ -26,15 +26,12 @@ class Core_Component extends Component
 	private $m_page    		 = null;
 	private $m_document      = null;
 	private $m_localeHandler = null;
-	private $m_cache	 	 = null;
 	private $m_actions 	 	 = array();
 	private $m_actionsCount  = 0;
 	private $m_variables	 = array();
 	private $m_terminated	 = false;
 	private $m_urlLocale	 = '';
 	private $m_rawUrl		 = '';
-	private $m_isCached		 = false;
-	private $m_cacheEntry	 = '';
 	private $m_isMobileAgent = false;
 	private $m_isInstalled   = false;
 	private $m_header		 = '';
@@ -342,46 +339,55 @@ class Core_Component extends Component
 		return $this->m_rawUrl;
 	}
 
+	/**
+	 * Returns current URL (built with m_actions)
+	 * @access public
+	 * @return string
+	 **/
 	public function getAppUrl()
 	{
 		return implode('/', $this->m_actions);
 	}
 
+	/**
+	 * Returns all core variables (that were setted via Core_Component::setVar())
+	 * @access public
+	 * @return array
+	 **/
 	public function getCoreVars()
 	{
 		return $this->m_variables;
 	}
 
+	/**
+	 * Redirect to $path (application URL included)
+	 * @access public
+	 * @param  string $path = ''
+	 * @param  int $code = 302
+	 **/
 	public function redirectUrl($path = '', $code = 302)
 	{
 		header('Location: ' . $this->getUrl($path), true, $code);
 		exit;
 	}
 
+	/**
+	 * Redirect to $path (application URL excluded)
+	 * @access public
+	 * @param  string $path = ''
+	 * @param  int $code = 302
+	 **/
 	public function redirectApp($path, $code = 302)
 	{
 		header('Location:' . $path, true, $code);
 		exit;
 	}
 
-	public function setCacheEntry($entry)
-	{
-		$this->m_isCached = true;
-		$this->m_cacheEntry = $entry;
-
-		return $this;
-	}
-
-	public function isCached()
-	{
-		return $this->m_isCached;
-	}
-
-	public function getCacheEntry()
-	{
-		return $this->m_cacheEntry;
-	}
-
+	/**
+	 * Add custom header
+	 * @param  string $header
+	 * @return Core_Component
+	 **/
 	public function addHeader($header)
 	{
 		$this->m_header .= $header . NLCR;
@@ -389,6 +395,10 @@ class Core_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sends header to user agent
+	 * @access public
+	 **/
 	public function sendHeaders()
 	{
 		header($this->m_header);

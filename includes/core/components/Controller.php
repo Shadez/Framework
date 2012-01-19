@@ -22,7 +22,6 @@ class Controller_Component extends Component
 {
 	private $m_postBuild = array();
 	private $m_blocks = array();
-	private $m_units = array();
 	protected $m_isDefaultController = false;
 	protected $m_isAjax = false;
 	protected $m_skipBuild = false;
@@ -127,23 +126,11 @@ class Controller_Component extends Component
 		return $this;
 	}
 
-	public function block($type = '')
+	public function block()
 	{
-		$class = ($type ? $type . '_' : '') . 'Block_Component';
-		$block = new $class('Block', $this->core);
+		$block = new Block_Component('Block', $this->core);
 
-		return $block->setBlockType($type)->setBlockState(true);
-	}
-
-	public function unit($type = '')
-	{
-		if ($this->m_errorPage)
-			return $this;
-
-		$class = ($type ? $type . '_' : '') . 'Unit_Component';
-		$unit = new $class('Unit', $this->core);
-
-		return $unit;
+		return $block->setBlockState(true);
 	}
 
 	public function buildBlock($name)
@@ -163,8 +150,10 @@ class Controller_Component extends Component
 	public function buildBlocks($blocks)
 	{
 		if (is_array($blocks))
+		{
 			foreach($blocks as $block)
 				$this->buildBlock($block);
+		}
 
 		return $this;
 	}
@@ -270,7 +259,7 @@ class Controller_Component extends Component
 		if ($core_vars)
 			extract($core_vars, EXTR_SKIP);
 
-		include($template);
+		require_once($template);
 
 		// Delete used core variables (not from core storage!)
 		if ($core_vars)

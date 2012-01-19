@@ -113,7 +113,7 @@ class Locale_Component extends Component
 		$this->m_localeName = $this->getAppropriateLocaleNameForLocale($locale_name);
 
 		if ($locale_id == -1)
-			$this->m_localeID = $this->GetLocaleIDForLocale($this->m_localeName);
+			$this->m_localeID = $this->getLocaleIdForLocale($this->m_localeName);
 		else
 			$this->m_localeID = $locale_id;
 
@@ -128,7 +128,7 @@ class Locale_Component extends Component
 		return $this;
 	}
 
-	public function GetLocaleIDForLocale($locale)
+	public function getLocaleIdForLocale($locale)
 	{
 		$this->clearLocaleName($locale);
 
@@ -182,7 +182,7 @@ class Locale_Component extends Component
 		return false;
 	}
 
-	public function GetLocale($type = LOCALE_SINGLE)
+	public function getLocale($type = LOCALE_SINGLE)
 	{
 		switch($type)
 		{
@@ -198,7 +198,7 @@ class Locale_Component extends Component
 		}
 	}
 
-	public function GetLocaleID()
+	public function getLocaleId()
 	{
 		return $this->m_localeID;
 	}
