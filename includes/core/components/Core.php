@@ -237,7 +237,7 @@ class Core_Component extends Component
 			$controller_name = preg_replace('/[^ \/_A-Za-z-]/', '', $controller_name);
 		}
 
-		if (!$controller_name)
+		if (!$controller_name || $this->c('Config')->getValue('site.home_only'))
 			return $this->c('Home', 'Controller');
 
 		return $this->c($controller_name, 'Controller');

@@ -286,7 +286,7 @@ class Controller_Component extends Component
 		$this->m_skipBuild = true;
 		$this->m_errorPage = true;
 
-		$this->c('Appsession')->setData('errorCode', $code);
+		$this->c('Session')->setSession('errorCode', $code);
 
 		$this->c('Default', 'Controller');
 

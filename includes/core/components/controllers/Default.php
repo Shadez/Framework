@@ -33,7 +33,7 @@ class Default_Controller_Component extends Controller_Component
 		return $this->block()
 			->setRegion('pagecontent')
 			->setVar('urlAddress', $this->core->getRawUrl())
-			->setVar('code', $this->c('Appsession')->getData('errorCode'))
+			->setVar('code', $this->c('Session')->getSession('errorCode'))
 			->setTemplate('404', 'default');
 	}
 }

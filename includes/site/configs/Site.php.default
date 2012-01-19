@@ -20,6 +20,7 @@
 
 $SiteConfig = array(
 	'site' => array(
+		'home_only' => false,
 		'path' => '',
 		'log' => array(
 			'enabled' => true,

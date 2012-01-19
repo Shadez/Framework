@@ -20,6 +20,7 @@
 
 $SiteConfig = array(
 	'site' => array(
+		'home_only' => false,
 		'path' => '/shadez',
 		'log' => array(
 			'enabled' => true,
