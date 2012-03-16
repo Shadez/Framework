@@ -30,6 +30,10 @@ class Query_Db_Component extends Component
 	protected $m_changedAliases = array();
 	protected $m_localeFields = array();
 
+	/**
+	 * Clears object data
+	 * @return int
+	 **/
 	public function clear()
 	{
 		$this->clearAliases();
@@ -45,6 +49,13 @@ class Query_Db_Component extends Component
 		return 0;
 	}
 
+	/**
+	 * Adds MySQL function to run
+	 * @param  string $function_name
+	 * @param  string $field
+	 * @param  string $field_alias = ''
+	 * @return  Query_Db_Component
+	 **/
 	public function runFunction($function_name, $field, $field_alias = '')
 	{
 		if (is_array($field))
@@ -60,6 +71,11 @@ class Query_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets active model
+	 * @param  string $model_name
+	 * @return  Query_Db_Component
+	 **/
 	public function setModel($model_name)
 	{
 		$this->m_model = $this->i($model_name, 'Model');
@@ -72,6 +88,13 @@ class Query_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets field alias
+	 * @param  string $model_name
+	 * @param  string $field_name
+	 * @param  string $alias
+	 * @return  Query_Db_Component
+	 **/
 	public function setAlias($model_name, $field_name, $alias)
 	{
 		if (!$this->getModelByName($model_name))
@@ -87,6 +110,10 @@ class Query_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Removes dynamic aliases
+	 * @return  Query_Db_Component
+	 **/
 	private function clearAliases()
 	{
 		if (!$this->m_changedAliases)
@@ -100,6 +127,12 @@ class Query_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Adds additional MySQL parser parameter
+	 * @param  string $type
+	 * @param  array $sql
+	 * @return  Query_Db_Component
+	 **/
 	private function appendSql($type, $sql)
 	{
 		if (!isset($this->m_sql[$type]))
@@ -110,11 +143,20 @@ class Query_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns active model object
+	 * @return  Model_Db_Component
+	 **/
 	public function getModel()
 	{
 		return $this->m_model;
 	}
 
+	/**
+	 * Finds model object by table name
+	 * @param  string $t
+	 * @return  Model_Db_Component
+	 **/
 	protected function getModelByTable($t)
 	{
 		if ($this->m_model->m_table == $t)
@@ -132,6 +174,11 @@ class Query_Db_Component extends Component
 		return null;
 	}
 
+	/**
+	 * Finds model object by model name
+	 * @param  string $n
+	 * @return  Model_Db_Component
+	 **/
 	protected function getModelByName($n)
 	{
 		if ($this->m_model->m_model == $n)
@@ -149,6 +196,11 @@ class Query_Db_Component extends Component
 		return null;
 	}
 
+	/**
+	 * Sets model fields
+	 * @param  string $fields
+	 * @return  Query_Db_Component
+	 **/
 	public function setFields($fields)
 	{
 		$this->m_fieldsCount = 0;
@@ -166,11 +218,23 @@ class Query_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns model fields
+	 * @param array &$fields
+	 * @param Model_Db_Component &$model
+	 * @return  void
+	 * @todo Do we need this?
+	 **/
 	private function getFields(&$fields, &$model)
 	{
 		
 	}
 
+	/**
+	 * Applies multi fields conditions
+	 * @param  array $conditions
+	 * @return  Query_Db_Component
+	 **/
 	public function fieldsConditions($conditions)
 	{
 		if (!$conditions)
@@ -191,12 +255,73 @@ class Query_Db_Component extends Component
 	}
 
 	/**
-	 * @param string $field
-	 * @param mixed  $condition
-	 * @param string $next = 'AND'
-	 * @param bool   $binary = false
+	 * Applies MySQL condition
+	 * @param  string $field
+	 * @param  mixed $condition
+	 * @param  string $next = 'AND'
+	 * @param  bool $binary = false
+	 * @param  string $insideCond = 'AND'
+	 * @return  Query_Db_Component
 	 **/
-	public function fieldCondition($field, $condition, $next = 'AND', $binary = false)
+	public function fieldCondition($field, $condition, $next = 'AND', $binary = false, $insideCond = 'AND')
+	{
+		if (is_array($field))
+		{
+			$sqlAppend = array(
+				'multi' => true,
+				'conditions' => array(),
+				'insideCond' => in_array(strtolower($insideCond), array('and', 'or')) ? strtoupper($insideCond) : 'AND',
+				'next' => $next
+			);
+
+			$fieldId = 0;
+
+			foreach ($field as $model => $fields)
+			{
+				if (!$fields)
+					continue;
+
+				foreach ($fields as $f)
+				{
+					if (!isset($condition[$fieldId]))
+						continue;
+
+					$sqlAppend['conditions'][$fieldId] = array($model, $f, $condition[$fieldId]);
+					++$fieldId;
+				}
+			}
+
+			return $this->appendSql('where', $sqlAppend);
+		}
+		else
+		{
+			$field_info = explode('.', $field);
+			if ($field_info && isset($field_info[1]))
+			{
+				$table = trim($field_info[0]);
+				$field = trim($field_info[1]);
+			}
+			else
+				$table = trim($this->getModel()->m_table);
+
+			return $this->appendSql('where', array(
+				'table' => $table,
+				'field' => $field,
+				'condition' => $condition,
+				'next' => $next,
+				'binary' => $binary
+			));
+		}
+	}
+
+	/**
+	 * Applies MySQL's LIKE operator condition
+	 * @param  string $field
+	 * @param  string $condition
+	 * @param  string $next = 'AND'
+	 * @return  Query_Db_Component
+	 **/
+	public function fieldLike($field, $condition, $next = 'AND')
 	{
 		$field_info = explode('.', $field);
 		if ($field_info && isset($field_info[1]))
@@ -212,10 +337,15 @@ class Query_Db_Component extends Component
 			'field' => $field,
 			'condition' => $condition,
 			'next' => $next,
-			'binary' => $binary
+			'like' => true
 		));
 	}
 
+	/**
+	 * Adds additional model to join
+	 * @param  string $model_name
+	 * @return  Query_Db_Component
+	 **/
 	public function addModel($model_name)
 	{
 		if (isset($this->m_childModels[$model_name]))
@@ -232,6 +362,16 @@ class Query_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Performs JOIN operator parsing
+	 * @param  string $type
+	 * @param  string $model
+	 * @param  string $join
+	 * @param  string $field_parent
+	 * @param  string $field_child
+	 * @param  array $custom_values = array()
+	 * @return  Query_Db_Component
+	 **/
 	public function join($type, $model, $join, $field_parent, $field_child, $custom_values = array())
 	{
 		if (!in_array(strtolower($type), array('left', 'right', 'inner', 'outer', '')))
@@ -250,6 +390,12 @@ class Query_Db_Component extends Component
 		));
 	}
 
+	/**
+	 * Performs ORDER BY operator parsing
+	 * @param  array $fields
+	 * @param  string $direct = 'asc'
+	 * @return  Query_Db_Component
+	 **/
 	public function order($fields, $direct = 'asc')
 	{
 		if (!in_array(strtolower($direct), array('asc', 'desc')))
@@ -260,16 +406,32 @@ class Query_Db_Component extends Component
 		return $this->appendSql('order', array($fields, $direct));
 	}
 
+	/**
+	 * Performs LIMIT  operator parsing
+	 * @param  int $limit
+	 * @param  int $offset = 0
+	 * @return Query_Db_Component
+	 **/
 	public function limit($limit, $offset = 0)
 	{
 		return $this->appendSql('limit', array($limit, $offset));
 	}
 
+	/**
+	 * Sets result index field
+	 * @param  string $field
+	 * @return Query_Db_Component
+	 **/
 	public function keyIndex($field)
 	{
 		return $this->appendSql('key_index', $field);
 	}
 
+	/**
+	 * Returns requested items from DB
+	 * @todo Cleanup requried?
+	 * @return Query_Db_Component
+	 **/
 	public function getItems()
 	{
 		$this->parseSqlData()
@@ -278,6 +440,11 @@ class Query_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns requested item from DB
+	 * @todo Cleanup required
+	 * @return Query_Db_Component
+	 **/
 	public function getItem()
 	{
 		return $this;
@@ -288,11 +455,21 @@ class Query_Db_Component extends Component
 		echo $this->m_rawSql;
 	}
 
+	/**
+	 * Builds SQL query
+	 * @return Query_Db_Component
+	 **/
 	public function buildSql()
 	{
 		return $this->parseSqlData();
 	}
 
+	/**
+	 * Returns function for a specific field
+	 * @param string $table
+	 * @param string $field
+	 * @return string
+	 **/
 	private function getFunctionForField($table, $field)
 	{
 		if (!isset($this->m_sql['function']))
@@ -305,6 +482,12 @@ class Query_Db_Component extends Component
 		return '';
 	}
 
+	/**
+	 * Returns alias for a specific field function
+	 * @param string $table
+	 * @param string $field
+	 * @return string
+	 **/
 	private function getAliasForFieldFunction($table, $field)
 	{
 		if (!isset($this->m_sql['function']))
@@ -317,6 +500,10 @@ class Query_Db_Component extends Component
 		return '';
 	}
 
+	/**
+	 * Parses SQL data into query
+	 * @return Query_Db_Component
+	 **/
 	private function parseSqlData()
 	{
 		$time_start = microtime(true);
@@ -408,14 +595,15 @@ class Query_Db_Component extends Component
 					$this->m_rawSql .= '`';
 				}
 
-				$this->m_rawSql .= NL;
-
 				$field_num++;
 
 				if ($field_num < $this->m_fieldsCount)
 					$this->m_rawSql .= ',';
+
+				$this->m_rawSql .= NL;
 			}
 		}
+
 		$this->m_rawSql .= 'FROM `' . $this->getModel()->m_table . '` AS `' . $table_aliases[$this->getModel()->m_table] . '`' . NL;
 
 		if (isset($this->m_sql['join']))
@@ -488,30 +676,59 @@ class Query_Db_Component extends Component
 
 			foreach ($this->m_sql['where'] as $cond)
 			{
-				if (!isset($cond['table']) || !isset($cond['field']) || !isset($cond['condition']))
+				if ((!isset($cond['table']) || !isset($cond['field']) || !isset($cond['condition'])) && !isset($cond['multi']))
 					continue;
 
-				$alias = $table_aliases[$cond['table']];
-				if (is_array($cond['condition']))
+				if (isset($cond['multi']))
 				{
-					$tmp = '';
-					$size_cond = sizeof($cond['condition']);
-					for ($i = 0; $i < $size_cond; ++$i)
+					if (!isset($cond['conditions']) || !$cond['conditions'])
+						continue;
+
+					$this->m_rawSql .= ' (';
+					$cSize = sizeof($cond['conditions']);
+					$cCurrent = 0;
+					foreach ($cond['conditions'] as $c)
 					{
-						if (!isset($cond['condition'][$i]))
+						if (!$c)
 							continue;
 
-						if ($i)
-							$tmp .= ',';
-						if (is_integer($cond['condition'][$i]))
-							$tmp .= $cond['condition'][$i];
-						elseif (is_string($cond['condition'][$i]))
-							$tmp .= '\'' . addslashes($cond['condition'][$i]) . '\'';
+						if (is_array($c[2]))
+						{
+							$tmp = $this->arrayConditionToString($c[2], $alias, $c[1]);
+
+							if ($tmp)
+								$this->m_rawSql .= $tmp;
+						}
+						else
+							$this->m_rawSql .= '`' . $alias . '`.`' . $c[1] . '`' . $c[2];
+
+						++$cCurrent;
+
+						if ($cCurrent < $cSize)
+							$this->m_rawSql .= ' ' . $cond['insideCond'] . ' ';
 					}
-					$this->m_rawSql .= '`' . $alias . '`.`' . $cond['field'] . '` IN(' . $tmp . ')';
+					$this->m_rawSql .= ' )';
+					
 				}
 				else
-					$this->m_rawSql .= ($cond['binary'] ? ' BINARY ' : '') . '`' . $alias . '`.`' . $cond['field'] . '`' . $cond['condition'];
+				{
+					$alias = $table_aliases[$cond['table']];
+					if (is_array($cond['condition']))
+					{
+						$tmp = $this->arrayConditionToString($cond['condition'
+						], $alias, $cond['field']);
+
+						if ($tmp)
+							$this->m_rawSql .= $tmp;
+					}
+					else
+					{
+						if (isset($cond['like']) && $cond['like'])
+							$this->m_rawSql .= '`' . $alias . '`.' . $cond['field'] . ' _PHLIKEST_' . $cond['condition'] . '_PHLIKEEND_';
+						else
+							$this->m_rawSql .= ($cond['binary'] ? ' BINARY ' : '') . '`' . $alias . '`.`' . $cond['field'] . '`' . $cond['condition'];
+					}
+				}
 
 				++$current;
 				if ($current < $count)
@@ -591,14 +808,63 @@ class Query_Db_Component extends Component
 			}
 		}
 
+		$time_end = microtime(true);
+
+		$l = explode('.', $time_start);
+		$e = isset($l[1]) ? $l[1] : 0;
+		$n = explode('.', $time_end);
+		$a = isset($n[1]) ? $n[1] : 0;
+
+		$total = (int) $e - (int) $a;
+
+		if ($total >= 5)
+		{
+			$this->c('Log')->writeDebug('%s : SQL generated in %d ms! Take a look on it!', __METHOD__, $total);
+			$this->c('Log')->writeDebug('%s : %s', __METHOD__, $this->m_rawSql);
+		}
+
 		return $this;
 	}
 
+	/**
+	 * Converts array type condition to string
+	 * @param array $cond
+	 * @param string $alias
+	 * @param string $field
+	 * @return string
+	 **/
+	private function arrayConditionToString($cond, $alias, $field)
+	{
+		$tmp = '';
+		$size_cond = sizeof($cond);
+		for ($i = 0; $i < $size_cond; ++$i)
+		{
+			if (!isset($cond[$i]))
+				continue;
+
+			if ($i)
+				$tmp .= ',';
+			if (is_integer($cond[$i]))
+				$tmp .= $cond[$i];
+			elseif (is_string($cond[$i]))
+				$tmp .= '\'' . addslashes($cond[$i]) . '\'';
+		}
+		return '`' . $alias . '`.`' . $field . '` IN(' . $tmp . ')';
+	}
+
+	/**
+	 * Returns Locale fields for current models
+	 * @return array
+	 **/
 	public function getLocaleFields()
 	{
 		return $this->m_localeFields;
 	}
 
+	/**
+	 * Returns raw SQL query
+	 * @return string
+	 **/
 	public function getSql()
 	{
 		if (!$this->m_rawSql)
@@ -607,11 +873,21 @@ class Query_Db_Component extends Component
 		return $this->m_rawSql;
 	}
 
+	/**
+	 * Returns index key for query results
+	 * @return string
+	 **/
 	public function getIndexKey()
 	{
 		return isset($this->m_sql['key_index']) ? $this->m_sql['key_index'][0] : false;
 	}
 
+	/**
+	 * Performs GROUP BY operator parsing
+	 * @param string $table
+	 * @param string $field
+	 * @return Query_Db_Component
+	 **/
 	public function group($model_name, $field_name)
 	{
 		$this->appendSql('group', array('model' => $model_name, 'field' => $field_name));

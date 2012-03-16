@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright (C) 2009-2011 Shadez <https://github.com/Shadez>
+ * Copyright (C) 2009-2012 Shadez <https://github.com/Shadez>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,12 @@ $SiteConfig = array(
 		),
 		'url_string_index' => 'mOUjX93',
 		'disable_ie' => false,
+		'events' => array(
+			'disabled' => false
+		),
+		'api' => array(
+			'disabled' => false
+		),
 	),
 	'misc' => array(
 		'admin_email' => 'admin@' . $_SERVER['SERVER_NAME']
@@ -51,7 +57,7 @@ $SiteConfig = array(
 			'host' => 'localhost',
 			'user' => 'root',
 			'password' => '',
-			'db_name' => 'fw_demodb',
+			'db_name' => 'images',
 			'charset' => 'UTF8',
 			'driver' => 'mysql',
 			'prefix' => ''

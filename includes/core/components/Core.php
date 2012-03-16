@@ -20,21 +20,96 @@
 
 class Core_Component extends Component
 {
+	/**
+	 * URL cleanup pattern
+	 * @var string
+	 * @const
+	 **/
 	const pattern_for_clear_url = '/[^ \/_0-9A-Za-zА-Яа-я-]/';
+
+	/**
+	 * Config_Component instance
+	 * @var Config_Component
+	 **/
 	private $m_configs 		 = null;
+
+	/**
+	 * Session_Component instance
+	 * @var Session_Component
+	 **/
+
 	private $m_session 		 = null;
+
+	/**
+	 * Page_Component instance
+	 * @var Page_Component
+	 **/
 	private $m_page    		 = null;
+
+	/**
+	 * Document_Component instance
+	 * @var Document_Component
+	 **/
 	private $m_document      = null;
+
+	/**
+	 * Locale_Component instance
+	 * @var Locale_Component
+	 **/
 	private $m_localeHandler = null;
+
+	/**
+	 * URL actions storage
+	 * @var array
+	 **/
 	private $m_actions 	 	 = array();
+
+	/**
+	 * URL actions count
+	 * @var int
+	 **/
 	private $m_actionsCount  = 0;
+
+	/**
+	 * Core variables (templates)
+	 * @var array
+	 **/
 	private $m_variables	 = array();
+
+	/**
+	 * Termination status
+	 * @var bool
+	 **/
 	private $m_terminated	 = false;
+
+	/**
+	 * Locale ID provided in URL
+	 * @var string
+	 **/
 	private $m_urlLocale	 = '';
+
+	/**
+	 * Raw URL (REQUEST_URI)
+	 * @var string
+	 **/
 	private $m_rawUrl		 = '';
+
+	/**
+	 * Mobile user-agent status
+	 * @var bool
+	 **/
 	private $m_isMobileAgent = false;
-	private $m_isInstalled   = false;
+
+	/**
+	 * Extra headers
+	 * @var string
+	 **/
 	private $m_header		 = '';
+
+	/**
+	 * Components rewrite rules
+	 * @var array
+	 **/
 	private $m_rewriteRules  = array();
 
 	/**
@@ -42,8 +117,7 @@ class Core_Component extends Component
 	 * Because of Component::__constuct() requires $core as second argument,
 	 * we need to construct Core_Component as the first application available class.
 	 * Without it, Component will go to loop and die after 100 iterations.
-
-	 * @access public
+	 *
 	 * @constructor
 	 */
 	public function __construct()
@@ -59,9 +133,14 @@ class Core_Component extends Component
 		if (!defined('CLIENT_FILES_PATH'))
 			define('CLIENT_FILES_PATH', $this->c('Config')->getValue('site.path'));
 
-		$this->detectMobile()->detectInstallation();
+		$this->detectMobile();
 	}
 
+	/**
+	 * Checks if user-agent is mobile browser
+	 * @param void
+	 * @return Core_Component
+	 **/
 	private function detectMobile()
 	{
 		$s = $_SERVER['HTTP_USER_AGENT'];
@@ -75,32 +154,32 @@ class Core_Component extends Component
 		return $this;
 	}
 
-	private function detectInstallation()
-	{
-		$this->m_isInstalled = file_exists(LOCKERS_DIR . '.installed');
-
-		return $this;
-	}
-
-	public function isInstalled()
-	{
-		return $this->m_isInstalled;
-	}
-
+	/**
+	 * Returns mobile user-agent status
+	 * @param void
+	 * @return bool
+	 **/
 	public function isMobile()
 	{
 		return $this->m_isMobileAgent;
 	}
 
+	/**
+	 * Class initializer
+	 * @param void
+	 * @return Core_Component
+	 **/
 	public function initialize()
 	{
+		$this->c('Events')->triggerEvent('onCoreStartup', array(), $this);
+
 		$this->m_configs	   = $this->c('Config');
 		$this->m_session  	   = $this->c('Session');
 		$this->m_document 	   = $this->c('Document');
 		$this->m_localeHandler = $this->c('Locale');
 
 		// Load Rewrite Rules
-		include(INCLUDES_DIR . 'Rewrite.php');
+		require_once(SITE_DIR . 'Rewrite.php');
 
 		if (isset($RewriteRules))
 		{
@@ -113,19 +192,22 @@ class Core_Component extends Component
 
 	/**
 	 * Creates Core_Component instance
-	 * @access public
 	 * @return Core_Component
 	 **/
 	public static function create()
 	{
 		$core = new Core_Component();
 
+		$core->c('Events')
+			->createEvent('onCoreStartup', array($core, 'onCoreStartup'))
+			->createEvent('onCoreUrlPassingComplete', array($core, 'onCoreUrlPassingComplete'))
+			->createEvent('onCoreControllerSetup', array($core, 'onCoreControllerSetup'));
+
 		return $core->initialize();
 	}
 
 	/**
 	 * Executes all requried actions
-	 * @access public
 	 * @return Core_Component
 	 **/
 	public function execute()
@@ -147,7 +229,6 @@ class Core_Component extends Component
 
 	/**
 	 * Shuts down the application
-	 * @access public
 	 * @return Core_Component
 	 **/
 	public function shutdown()
@@ -159,7 +240,6 @@ class Core_Component extends Component
 
 	/**
 	 * Parses URL string ($_SERVER['REQUEST_URI'])
-	 * @access private
 	 * @return Core_Component
 	 **/
 	private function parseUrl()
@@ -190,9 +270,16 @@ class Core_Component extends Component
 
 		$this->m_actionsCount = $index;
 
+		$this->c('Events')->triggerEvent('onCoreUrlPassingComplete', array('url' => $this->m_rawUrl, 'actions' => $this->m_actions), $this);
+
 		return $this;
 	}
 
+	/**
+	 * Returns URL locale ID
+	 * @param void
+	 * @return string
+	 **/
 	public function getUrlLocale()
 	{
 		return $this->m_urlLocale;
@@ -200,7 +287,6 @@ class Core_Component extends Component
 
 	/**
 	 * Checks whether URL action index is allowed locale string
-	 * @access private
 	 * @param  string $action
 	 * @param  int $index
 	 * @return bool
@@ -220,7 +306,6 @@ class Core_Component extends Component
 
 	/**
 	 * Performs controller initialization
-	 * @access private
 	 * @return Core_Component
 	 **/
 	private function initController()
@@ -228,8 +313,16 @@ class Core_Component extends Component
 		if (defined('SKIP_CONTROLLER'))
 			return $this;
 
-		// Check rewrite rules
 		$controller_name = $this->getRewriteRuleController();
+
+		/*if (!$controller_name && $this->getActionsCount() > 1)
+		{
+			// Try to find subcontroller
+			for ($i = $this->getActionsCount()-1; $i >= 0; --$i)
+			{
+				$controller_name .= (!$i ? '_' : '') . ucfirst($this->getUrlAction($i));
+			}
+		}*/
 
 		if (!$controller_name)
 		{
@@ -238,14 +331,19 @@ class Core_Component extends Component
 		}
 
 		if (!$controller_name || $this->c('Config')->getValue('site.home_only'))
+		{
+			$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => 'Home', 'default' => false), $this);
 			return $this->c('Home', 'Controller');
+		}
+
+		
+		$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => $controller_name, 'default' => false), $this);
 
 		return $this->c($controller_name, 'Controller');
 	}
 
 	/**
 	 * Checks rewrite rule with current URL and returns controller name (if found any)
-	 * @access private
 	 * @return string
 	 **/
 	private function getRewriteRuleController()
@@ -260,7 +358,6 @@ class Core_Component extends Component
 
 	/**
 	 * Returns URL action with index $index
-	 * @access public
 	 * @param  int $index
 	 * @return string
 	 **/
@@ -272,11 +369,21 @@ class Core_Component extends Component
 		return $this->m_actions['action' . $index];
 	}
 
+	/**
+	 * Returns all URL actions array
+	 * @param void
+	 * @return array
+	 **/
 	public function getActions()
 	{
 		return $this->m_actions;
 	}
 
+	/**
+	 * Returns URL actions count
+	 * @param void
+	 * @return int
+	 **/
 	public function getActionsCount()
 	{
 		return $this->m_actionsCount;
@@ -284,7 +391,6 @@ class Core_Component extends Component
 
 	/**
 	 * Sets global variable
-	 * @access public
 	 * @param  string $varName
 	 * @param  mixed $varValue
 	 * @return Core_Component
@@ -298,7 +404,6 @@ class Core_Component extends Component
 
 	/**
 	 * Returns global variable with $varName name
-	 * @access public
 	 * @param  string $varName
 	 * @return mixed
 	 **/
@@ -309,7 +414,6 @@ class Core_Component extends Component
 
 	/**
 	 * Terminates script and shows error message.
-	 * @access public
 	 * @param  string $errorMessage = ''
 	 * @return void
 	 **/
@@ -331,7 +435,6 @@ class Core_Component extends Component
 
 	/**
 	 * Returns raw URL
-	 * @access public
 	 * @return string
 	 **/
 	public function getRawUrl()
@@ -341,7 +444,6 @@ class Core_Component extends Component
 
 	/**
 	 * Returns current URL (built with m_actions)
-	 * @access public
 	 * @return string
 	 **/
 	public function getAppUrl()
@@ -351,7 +453,6 @@ class Core_Component extends Component
 
 	/**
 	 * Returns all core variables (that were setted via Core_Component::setVar())
-	 * @access public
 	 * @return array
 	 **/
 	public function getCoreVars()
@@ -361,7 +462,6 @@ class Core_Component extends Component
 
 	/**
 	 * Redirect to $path (application URL included)
-	 * @access public
 	 * @param  string $path = ''
 	 * @param  int $code = 302
 	 **/
@@ -373,7 +473,6 @@ class Core_Component extends Component
 
 	/**
 	 * Redirect to $path (application URL excluded)
-	 * @access public
 	 * @param  string $path = ''
 	 * @param  int $code = 302
 	 **/
@@ -396,11 +495,32 @@ class Core_Component extends Component
 	}
 
 	/**
-	 * Sends header to user agent
-	 * @access public
+	 * Sends header to user-agent
+	 * @return void
 	 **/
 	public function sendHeaders()
 	{
 		header($this->m_header);
 	}
+
+	/**
+	 * Event handler for onCoreStartup event
+	 * @param array $event
+	 * @return void
+	 **/
+	public function onCoreStartup($event) {}
+
+	/**
+	 * Event handler for onCoreUrlPassingComplete event
+	 * @param array $event
+	 * @return void
+	 **/
+	public function onCoreUrlPassingComplete($event) {}
+
+	/**
+	 * Event handler for onCoreControllerSetup event
+	 * @param array $event
+	 * @return void
+	 **/
+	public function onCoreControllerSetup($event) {}
 }

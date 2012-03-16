@@ -19,4 +19,12 @@
  **/
 
 $ClientCSS = array(
+	'_overall' => array(
+		'header' => array(
+			array(
+				'file' => '/css/style.css',
+				'version' => 1,
+			)
+		)
+	),
 );

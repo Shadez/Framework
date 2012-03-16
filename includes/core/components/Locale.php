@@ -20,7 +20,8 @@
 
 class Locale_Component extends Component
 {
-	protected $m_localeHolder = null;
+	protected $m_localeHolder = array();
+	protected $m_formatsHolder = array();
 	protected $m_localeName = '';
 	protected $m_localeID = -1;
 
@@ -78,32 +79,39 @@ class Locale_Component extends Component
 		}
 
 		$siteLocale = array();
-		$this->getLocaleFile(SITE_LOCALES_DIR, $siteLocale);
+		$siteFormats = array();
+		$this->getLocaleFile(SITE_LOCALES_DIR, $siteLocale, $siteFormats);
 
 		$this->m_localeHolder = $siteLocale;
+		$this->m_formatsHolder = $siteFormats;
 
 		return $this;
 	}
 
-	private function getLocaleFile($path, &$localeHolder)
+	private function getLocaleFile($path, &$localeHolder, &$formatsHolder)
 	{
-		$Core_Locale = array();
+		$Site_Formats = array();
 		$Site_Locale = array();
 
 		if (file_exists($path . 'locale_' . $this->m_localeName . '.php'))
 		{
-			include($path . 'locale_' . $this->m_localeName . '.php');
+			require_once($path . 'locale_' . $this->m_localeName . '.php');
 			$localeHolder = $Site_Locale;
+			require_once($path . 'formats_' . $this->m_localeName . '.php');
+			$localeHolder = $Site_Formats;
 		}
 		elseif(file_exists($path . 'locale_' . $this->c('Config')->getValue('site.locale.default') . '.php'))
 		{
-			include($path . 'locale_' . $this->c('Config')->getValue('site.locale.default') . '.php');
+			require_once($path . 'locale_' . $this->c('Config')->getValue('site.locale.default') . '.php');
 			$localeHolder = $Site_Locale;
+			require_once($path . 'formats_' . $this->c('Config')->getValue('site.locale.default') . '.php');
+			$localeHolder = $Site_Formats;
 		}
 		else
 			$this->core->terminate('Site locale (' . strtoupper($this->m_localeName) . ') was not found');
 
 		unset($Site_Locale);
+		unset($Site_Formats);
 
 		return $this;
 	}
@@ -265,5 +273,12 @@ class Locale_Component extends Component
 		}
 
 		return $str;
+	}
+
+	public function dateTimeFormat($type, $subtype, $timestamp = 0)
+	{
+		$timestamp = $timestamp ? $timestamp : time();
+
+		return isset($this->m_formatsHolder[$type][$subtype]) ? date($this->m_formatsHolder[$type][$subtype], $timestamp) : date('d.m.Y', $timestamp);
 	}
 }

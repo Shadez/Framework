@@ -36,12 +36,12 @@ class Router_Component extends Component
 	 */
 	protected function initRouter()
 	{
-		$router_file = INCLUDES_DIR . 'Routes.php';
+		$router_file = SITE_DIR . 'Routes.php';
 
 		if (!file_exists($router_file))
 			return $this;
 
-		include($router_file);
+		require_once($router_file);
 		$this->m_router = $Router;
 		$url = $this->core->getAppUrl();
 

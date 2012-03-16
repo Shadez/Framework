@@ -33,7 +33,7 @@ if(isset($_GET['clearLog'])) {
 	<a href="index.php?clearLog">Clear log</a> | <a href="">Reload</a>
 	<br />
 	<hr />
-	<?php @include('tmp.dbg'); ?>
+	<?php @require_once('tmp.dbg'); ?>
 
 </body>
 </html>

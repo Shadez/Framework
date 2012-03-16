@@ -47,7 +47,7 @@ class Config_Component extends Component
 
 		if (file_exists($file))
 		{
-			include($file);
+			require_once($file);
 			$this->m_holder = $SiteConfig;
 		}
 

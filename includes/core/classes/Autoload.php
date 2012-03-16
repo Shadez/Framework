@@ -18,15 +18,34 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
+/**
+ * This class provides support for classes autoloading
+ **/
 abstract class Autoload
 {
+	/**
+	 * Included classes
+	 * @var		array
+	 * @static
+	 **/
 	public static $classes = array();
 
+	/**
+	 * Registers autload handler
+	 * @return void
+	 * @static
+	 **/
 	public static function register()
 	{
 		spl_autoload_register(array(__CLASS__, 'autoloadClass'));
 	}
 
+	/**
+	 * Autload handler
+	 * @param  string $name
+	 * @return bool
+	 * @static
+	 **/
 	public static function autoloadClass($name)
 	{
 		$className = '';
@@ -36,9 +55,17 @@ abstract class Autoload
 		$name = str_replace('-', '', $name);
 
 		$pieces = explode('_', $name);
+
+		$piecesSize = sizeof($pieces);
+		if (isset($pieces[$piecesSize-2]) && strtolower($pieces[$piecesSize-2]) == 'controller')
+		{
+			//dump($pieces);
+		}
+
 		if ($pieces)
 		{
 			$className = $pieces[0];
+
 			if (isset($pieces[1]) && isset($pieces[2]) && isset($pieces[3]))
 			{
 				$classType = strtolower($pieces[2]);
@@ -73,7 +100,7 @@ abstract class Autoload
 			{
 				if (file_exists($folder['path'] . $path))
 				{
-					include($folder['path'] . $path);
+					require_once($folder['path'] . $path);
 
 					if (!class_exists($name, true))
 					{
@@ -82,7 +109,7 @@ abstract class Autoload
 							// Try to find component from core directory
 							if (file_exists($folders[1]['path'] . $path))
 							{
-								include($folders[1]['path'] . $path);
+								require_once($folders[1]['path'] . $path);
 								if (!class_exists($name, true))
 									$throwException = true;
 							}
@@ -101,7 +128,7 @@ abstract class Autoload
 			$new_class = str_replace(' ', '', $new_class);
 
 			if (strtolower($classType) == 'controllers')
-				eval('Class ' . $new_class . ' extends Default_Controller_Component {};'); // Create default controller
+				eval('Class ' . $new_class . ' extends Default_Controller_Component {};'); // Create default controller (404 trigger)
 
 			return false;
 		}

@@ -28,7 +28,6 @@ abstract class Component
 {
 	/**
 	 * All available components
-	 * @access protected
 	 * @var    array
 	 * @static
 	 **/
@@ -36,14 +35,12 @@ abstract class Component
 
 	/**
 	 * Core component instance
-	 * @access public
 	 * @var    Core_Component
 	 **/
 	public $core = null;
 
 	/**
 	 * Current component name
-	 * @access protected
 	 * @var    string
 	 **/
 	protected $m_component = null;
@@ -57,7 +54,6 @@ abstract class Component
 
 	/**
 	 * Unique component hash
-	 * @access protected
 	 * @var    string
 	 **/
 	protected $m_uniqueHash = '';
@@ -65,17 +61,16 @@ abstract class Component
 	protected $m_locale = '';
 	protected $m_localeID = 0;
 	protected $m_coreUrl = '';
+	protected $m_cfPath = '';
 
 	/**
 	 * Components rewrite info
-	 * @access private
 	 * @var	   array
 	 **/
 	private $m_componentsRewrite = array();
 
 	/**
 	 * Class constructor
-	 * @access public
 	 * @param  string $name
 	 * @param  Component $core
 	 * @return void
@@ -91,6 +86,11 @@ abstract class Component
 		$this->m_uniqueHash = uniqid(dechex(time()), true);
 	}
 
+	/**
+	 * Returns locale path
+	 * @param  void
+	 * @return string
+	 **/
 	public function localePath()
 	{
 		return $this->m_locale . '/';
@@ -98,7 +98,6 @@ abstract class Component
 
 	/**
 	 * Class destructor
-	 * @access public
 	 * @return void
 	 **/
 	public function __destruct()
@@ -114,7 +113,6 @@ abstract class Component
 	
 	/**
 	 * Initializes Component's object
-	 * @access public
 	 * @return Component
 	 **/
 	public function initialize()
@@ -123,8 +121,7 @@ abstract class Component
 	}
 
 	/**
-	 * Initialization checker
-	 * @access public
+	 * Returns initialization status
 	 * @return bool
 	 **/
 	public function isInitialized()
@@ -133,8 +130,7 @@ abstract class Component
 	}
 	
 	/**
-	 * Sets initialization state
-	 * @access public
+	 * Sets initialization status
 	 * @param  bool $value
 	 * @return Component
 	 **/
@@ -147,7 +143,6 @@ abstract class Component
 	
 	/**
 	 * Returns or tries to create component
-	 * @access public
 	 * @param  string $name
 	 * @param  string $type = ''
 	 * @return Component
@@ -163,7 +158,6 @@ abstract class Component
 	/**
 	 * Creates and returns component instance.
 	 * Please, note that component instance will be created at every Component::i() call!
-	 * @access public
 	 * @param  string $name
 	 * @param  string $type = ''
 	 * @return Component
@@ -174,10 +168,10 @@ abstract class Component
 			throw new CoreCrash_Exception_Component('You must provide component name!');
 
 		$singletons = array(
-			'Core', 'Db'
+			'Core', 'Db', 'Events'
 		); // Component names that must have only one instance during app work
 
-		if (in_array($name, $singletons))
+		if (in_array(ucfirst(strtolower($name)), $singletons))
 			throw new CoreCrash_Exception_Component('You are not allowed to create more that 1 instance of ' . $name . ' Component (use Component::c() method instead)!');
 
 		$c_name = ucfirst(strtolower($name)) . ($type ? '_' . $type : '') . '_Component';
@@ -194,9 +188,9 @@ abstract class Component
 			$fname = 'components' . DS . ($type ? strtolower($type) . 's' : '') . DS . ucfirst(strtolower($rewrite)) . '.php';
 
 			if (file_exists(SITE_DIR . $fname))
-				include(SITE_DIR . $fname);
+				require_once(SITE_DIR . $fname);
 			elseif (file_exists(CORE_DIR . $fname))
-				include(CORE_DIR . $fname);
+				require_once(CORE_DIR . $fname);
 		}
 
 		$component = new $c_name($c_name, $this->core);
@@ -206,11 +200,17 @@ abstract class Component
 		return $component->initialize()->setInitialized(true); // Init component and return it.
 	}
 
+	/**
+	 * Returns component name for rewrited one
+	 * @param  string $c_name
+	 * @param  string $c_type = 'Default'
+	 * @return string
+	 **/
 	private function getComponentRewrite($c_name, $c_type = 'Default')
 	{
 		if (!$this->m_componentsRewrite)
 		{
-			include(SITE_DIR . 'ComponentsRewrite.php');
+			require_once(SITE_DIR . 'ComponentsRewrite.php');
 
 			if (!isset($Components))
 				return false;
@@ -271,7 +271,6 @@ abstract class Component
 	
 	/**
 	 * Tries to find existed instance of $name component or creates new object
-	 * @access private
 	 * @param  string $name
 	 * @param  string $type = ''
 	 * @return Component
@@ -306,9 +305,9 @@ abstract class Component
 			$fname = 'components' . ($type ? strtolower($type) . 's' . DS : '') . DS . ucfirst(strtolower($rewrite)) . '.php';
 
 			if (file_exists(SITE_DIR . $fname))
-				include(SITE_DIR . $fname);
+				require_once(SITE_DIR . $fname);
 			elseif (file_exists(CORE_DIR . $fname))
-				include(CORE_DIR . $fname);
+				require_once(CORE_DIR . $fname);
 		}
 
 		$component = new $c_name($c_name, $this->core); // 
@@ -320,7 +319,6 @@ abstract class Component
 
 	/**
 	 * Adds component into components list
-	 * @access private
 	 * @param  string $name
 	 * @param  Component $c
 	 * @return Component
@@ -335,25 +333,45 @@ abstract class Component
 		return $this;
 	}
 
+	/**
+	 * Returns direct path for $file
+	 * @param  string $file = ''
+	 * @return string
+	 **/
 	public function getPath($file = '')
 	{
 		$path = $this->c('Config')->getValue('site.path');
+
 		if ($file)
 			$path .= $file;
 
 		return $path;
 	}
 
+	/**
+	 * Checks if region $name exists
+	 * @param  string $name
+	 * @return bool
+	 **/
 	public function issetRegion($name)
 	{
 		return $this->c('Document')->regionExists($name);
 	}
 
+	/**
+	 * Returns region contents
+	 * @param  string $name
+	 * @return string
+	 **/
 	public function region($name)
 	{
 		return $this->c('Page')->getContents($name);
 	}
 
+	/**
+	 * Shuts down current component
+	 * @return Component
+	 **/
 	public function shutdownComponent()
 	{
 		foreach ($this as &$field)
@@ -362,6 +380,11 @@ abstract class Component
 		return $this;
 	}
 
+	/**
+	 * Prepares current component to be shutted down
+	 * @static
+	 * @return void
+	 **/
 	public static function prepareShutdown()
 	{
 		foreach (self::$m_components as $type => &$components)
@@ -376,11 +399,17 @@ abstract class Component
 					unset($component, self::$m_components[$type][$name]);
 				}
 			}
+
 			if ($type != 'default')
 				unset(self::$m_components[$type]);
 		}
 	}
 
+	/**
+	 * Returns site URL for $url piece
+	 * @param  string $url = ''
+	 * @return string
+	 **/
 	public function getUrl($url = '')
 	{
 		if (!$this->m_locale)
@@ -397,14 +426,24 @@ abstract class Component
 		return $this->m_coreUrl . '/' . $url;
 	}
 
+	/**
+	 * Returns client files path for $url path
+	 * @param  string $url = ''
+	 * @return string
+	 **/
 	public function getCFP($url = '')
 	{
 		if (!defined('CLIENT_FILES_PATH'))
 			define('CLIENT_FILES_PATH', $this->c('Config')->getValue('site.path'));
 
-		return CLIENT_FILES_PATH . '/' . $url;
+		return CLIENT_FILES_PATH . ($url{0} == '/' ? '' : '/') . $url;
 	}
 
+	/**
+	 * Returns raw page number or page number with offset (-1)
+	 * @param  bool $asOffset = false
+	 * @return int
+	 **/
 	public function getPage($asOffset = false)
 	{
 		if (!isset($_GET['page']))

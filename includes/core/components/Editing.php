@@ -105,7 +105,7 @@ class Editing_Component extends Component
 		return $value;
 	}
 
-	protected function g(&$passedName, &$use, &$type)
+	private function g(&$passedName, &$use, &$type)
 	{
 		$checker = 0;
 		$field = $this->getAppropriateFieldName($passedName, $checker);
@@ -130,6 +130,13 @@ class Editing_Component extends Component
 		return true;
 	}
 
+	public function initialize()
+	{
+		$this->clearValues();
+
+		return $this;
+	}
+
 	protected function getModelFieldName($name)
 	{
 		if (strpos($name, '_loc') !== false)
@@ -144,7 +151,8 @@ class Editing_Component extends Component
 
 		foreach ($locales as $loc)
 		{
-			if (strpos($name, '_' . $loc) !== false)
+//			if (strpos($name, '_' . $loc) !== false)
+			if (preg_match('/_(de|en|e|fr|ru)\Z/', $name))
 			{
 				$n = explode('_' . $loc, $name);
 				return $n[0];
@@ -194,7 +202,7 @@ class Editing_Component extends Component
 
 	public function setModel($modelName)
 	{
-		$this->clearValues()->m_model = $this->i($modelName, 'Model');
+		$this->m_model = $this->i($modelName, 'Model');
 
 		if (!$this->m_model)
 			throw new ModelCrash_Exception_Component('Model ' . $modelName . ' was not found!');
@@ -291,10 +299,17 @@ class Editing_Component extends Component
 
 	public function load()
 	{
-		$this->m_data = $this->i('QueryResult', 'Db')
+		$d = $this->i('QueryResult', 'Db')
 			->model($this->m_model->m_model)
 			->setItemId($this->m_id)
 			->loadItem();
+
+		if (!$d)
+			return $this;
+
+		$this->m_data = $d->getRow();
+
+		unset($d);
 
 		return $this;
 	}
@@ -346,7 +361,7 @@ class Editing_Component extends Component
 		return substr($sql, 0, (strlen($sql) - 1));
 	}
 
-	private function parseSql()
+	private function parseSql($parseOnly = false, $type = 0)
 	{
 		$this->m_rawSql = '';
 
@@ -360,10 +375,15 @@ class Editing_Component extends Component
 		}
 		elseif ($this->m_insertType == 'insert')
 		{
-			if ($this->m_deleteBeforeInsert)
+			if ($this->m_deleteBeforeInsert && !$parseOnly)
 				$this->c('Db')->{$this->m_model->m_dbType}()->query("DELETE FROM `%s` WHERE `%s` = '%s'", $this->m_model->m_table, $this->getPrimaryField(), addslashes($this->m_id));
 
-			$this->m_rawSql .= 'INSERT INTO `' . $this->m_model->m_table . '` (' . $this->getFields() . ') VALUES (' . $this->getFieldsValues() . ')';
+			if ($type == 1)
+				$this->m_rawSql = 'INSERT INTO `' . $this->m_model->m_table . '` (' . $this->getFields() . ') VALUES ';
+			elseif ($type == 2)
+				$this->m_rawSql = '(' . $this->getFieldsValues() . ')';
+			else
+				$this->m_rawSql .= 'INSERT INTO `' . $this->m_model->m_table . '` (' . $this->getFields() . ') VALUES (' . $this->getFieldsValues() . ')';
 		}
 		else
 			return $this;
@@ -388,5 +408,23 @@ class Editing_Component extends Component
 		$this->m_primaryField = $primaryField;
 
 		return $this->m_primaryField;
+	}
+
+	public function getSql($type = 0)
+	{
+		if (!$this->m_rawSql || ($type == 1 || $type == 2))
+			$this->parseSql(true, $type);
+
+		return $this->m_rawSql;
+	}
+
+	public function getModelType()
+	{
+		return $this->m_model ? $this->m_model->m_dbType : '';
+	}
+
+	public function getModelInfo()
+	{
+		return $this->m_model ? array('name' => $this->m_model->m_model, 'dbType' => $this->m_model->m_dbType, 'type' => $this->m_insertType) : null;
 	}
 }

@@ -27,6 +27,8 @@ class ResultHolder_Db_Component extends Component
 	private $m_sqlQuery = '';
 	private $m_assigned = false;
 	private $m_offsetUsed = false;
+	private $m_iterators = array();
+	private $m_iteratorId = 0;
 
 	public function setResult($data, $query)
 	{
@@ -40,9 +42,24 @@ class ResultHolder_Db_Component extends Component
 		$this->m_rowIndex = 0;
 		$this->m_sqlQuery = $query;
 
+		$this->setIterators();
+
 		unset($data, $query);
 
 		return $this->setAssigned(true);
+	}
+
+	private function setIterators()
+	{
+		$this->m_iterators = array();
+
+		foreach ($this->m_dataMap as $idx => $key)
+			$this->m_iterators[$idx] = $this->i('ResultIterator', 'Db')
+				->setData($this->m_data[$key]);
+
+		$this->m_iterators[$this->m_dataSize] = $this->i('ResultIterator', 'Db')->lastIterator();
+
+		return $this;
 	}
 
 	private function setAssigned($assigned)
@@ -79,6 +96,31 @@ class ResultHolder_Db_Component extends Component
 			return null;
 
 		return $this->m_data[$this->m_dataMap[$this->m_rowIndex]];
+	}
+
+	public function begin()
+	{
+		return $this->m_iterators[0];
+	}
+
+	public function end()
+	{
+		return $this->m_iterators[$this->m_dataSize];
+	}
+
+	public function iter($toNext = true)
+	{
+		if ($toNext)
+			$this->m_iteratorId++;
+
+		return $this->m_iterators[$this->m_iteratorId];
+	}
+
+	public function rewind($id = 0)
+	{
+		$this->m_iteratorId = min($id, $this->m_dataSize-1);
+
+		return $this;
 	}
 
 	public function getRowField($field)
@@ -127,5 +169,17 @@ class ResultHolder_Db_Component extends Component
 	public function getData()
 	{
 		return $this->m_data;
+	}
+
+	public function getFieldValues($field)
+	{
+		$data = array();
+
+		foreach ($this->m_data as $row)
+			foreach ($row as $f => $v)
+				if ($f == $field)
+					$data[] = $v;
+
+		return $data;
 	}
 }

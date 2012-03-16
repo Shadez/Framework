@@ -56,52 +56,36 @@ class Document_Component extends Component
 		return isset($this->m_regions[$name]);
 	}
 
+	public function setCSS($css)
+	{
+		$this->m_clientCss = $css;
+
+		return $this;
+	}
+
+	public function setJS($js)
+	{
+		$this->m_clientJs = $js;
+
+		return $this;
+	}
+
 	public function registerCss($css, $type = 'header')
 	{
-		if (!is_array($css) || !$type)
-			return $this;
-
 		if (!isset($this->m_clientCss[$type]))
 			$this->m_clientCss[$type] = array();
 
-		if (!isset($css['file']))
-		{
-			// Multiply css files
-			foreach ($css as $key => $file)
-			{
-				if (!isset($file['file']))
-					continue;
-
-				$this->m_clientCss[$type][$key] = $file;
-			}
-		}
-		else
-			$this->m_clientCss[$type][$css['file']] = $css;
+		$this->m_clientCss[$type][] = $css;
 
 		return $this;
 	}
 
 	public function registerJs($js, $type = 'header')
 	{
-		if (!is_array($js) || !$type)
-			return $this;
-
 		if (!isset($this->m_clientJs[$type]))
 			$this->m_clientJs[$type] = array();
 
-		if (!isset($js['file']))
-		{
-			// Multiply css files
-			foreach ($js as $key => $file)
-			{
-				if (!isset($file['file']) && !isset($file['text']))
-					continue;
-
-				$this->m_clientJs[$type][$key] = $file;
-			}
-		}
-		else
-			$this->m_clientJs[$type][$js['file']] = $js;
+		$this->m_clientJs[$type][] = $js;
 
 		return $this;
 	}
@@ -118,7 +102,7 @@ class Document_Component extends Component
 			if (isset($css['browser']) && $css['browser'])
 				$files_string .= '<!--[if ' . $css['browser'] . ']>' . NL;
 
-			$files_string .= '<link rel="stylesheet" type="text/css" href="' . (!isset($css['external']) ? $css['file'] : $this->getPath($css['file'])) . (isset($css['version']) ? '?v=' . $css['version'] : '') . '" media="' . (isset($css['media']) ? $css['media'] : 'all') . '" />' . NL;
+			$files_string .= '<link rel="stylesheet" type="text/css" href="' . (isset($css['external']) ? $css['file'] : $this->getCFP($css['file'])) . (isset($css['version']) ? '?v=' . $css['version'] : '') . '" media="' . (isset($css['media']) ? $css['media'] : 'all') . '" />' . NL;
 
 			if (isset($css['browser']) && $css['browser'])
 				$files_string .= '<![endif]-->' . NL;
@@ -137,9 +121,9 @@ class Document_Component extends Component
 		foreach ($this->m_clientJs[$type] as &$js)
 		{
 			if (isset($js['file']))
-				$files_string .= '<script language="javascript" type="text/javascript" src="' . (!isset($js['external']) ? $js['file'] : $this->getPath($js['file'])) . (isset($js['version']) ? '?v=' . $js['version'] : '') . '"></script>' . NL;
-			elseif (isset($js['text']))
-				$files_string .= '<script language="javascript" type="text/javascript">' . NL . '    ' . $js['text'] . NL . '</script>' . NL;
+				$files_string .= '<script language="javascript" type="text/javascript" src="' . (isset($js['external']) ? $js['file'] : $this->getCFP($js['file'])) . (isset($js['version']) ? '?v=' . $js['version'] : '') . '"></script>' . NL;
+			elseif (isset($js['code']))
+				$files_string .= '<script language="javascript" type="text/javascript">' . NL . '    ' . $js['code'] . NL . '</script>' . NL;
 		}
 
 		return $files_string;

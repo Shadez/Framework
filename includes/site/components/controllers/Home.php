@@ -22,10 +22,8 @@ class Home_Controller_Component extends Controller_Component
 {
 	protected $m_pageTitle = 'Home';
 
-	public function build($core)
+	protected function actionIndex($core)
 	{
-		$core->setVar('title', $this->m_pageTitle);
-
 		$this->buildBlock('main');
 
 		return $this;
@@ -34,8 +32,7 @@ class Home_Controller_Component extends Controller_Component
 	protected function block_main()
 	{
 		return $this->block()
-			->setVar('text', $this->c('Site')->getDBText())
-			->setTemplate('main', 'fw' . DS . 'contents')
+			->setTemplate('image', 'images' . DS . 'contents')
 			->setRegion('pagecontent');
 	}
 }

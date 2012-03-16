@@ -17,3 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
+
+define('IMGTYPE_JPEG', 1);
+define('IMGTYPE_PNG',  2);
+define('IMGTYPE_GIF',  3);

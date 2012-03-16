@@ -201,6 +201,8 @@ class Database_Component extends Component
 
 		$safe_sql = str_replace('%%', '%', $safe_sql);
 
+		$safe_sql = str_replace(array('_PHLIKEST_', '_PHLIKEEND_'), array('LIKE \'%', '%\''), $safe_sql);
+
 		if ($this->driver_type == 'mysqli')
 		{
 			$performed_query = @mysqli_query($this->connectionLink, $safe_sql);

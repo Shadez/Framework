@@ -20,6 +20,11 @@
 
 // Application entry point
 
+define('WEBROOT_DIR', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 define('BOOT_FILE', dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'boot.php');
+define('SITE_DIR',  dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'site' . DIRECTORY_SEPARATOR);
+define('TEMPLATES_DIR', dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR);
 
-include(BOOT_FILE);
+$debug = false; // Display debug info?
+
+require_once(BOOT_FILE);

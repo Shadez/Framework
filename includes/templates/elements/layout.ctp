@@ -1,12 +1,16 @@
 <!doctype html>
 <html>
 <head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 <title><?php echo $this->c('Layout')->getPageTitle(); ?></title>
+
+<?php
+echo $this->c('Document')->releaseCss('header');
+echo $this->c('Document')->releaseJs('header');
+?>
 </head>
 <body>
-<?php
-if ($this->issetRegion('left')) echo $this->region('left');
-if ($this->issetRegion('pagecontent')) echo $this->region('pagecontent');
-?>
+
+<?php echo $this->region('pagecontent'); ?>
 </body>
 </html>

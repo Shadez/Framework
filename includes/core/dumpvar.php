@@ -55,14 +55,21 @@ function dumpVar(&$Var, $Level = 0, $Var_s = null, $level_limit = 5)
 		}
 		echo   NL;
 		if ($Level == 0 || !is_object($Var))
+		{
 			for (Reset($Var), $Level++; list($k, $v)=each($Var);)
 			{
-				for ($i = 0; $i < $Level*3; $i++) echo ' ';
+				for ($i = 0; $i < $Level*3; $i++)
+					echo ' ';
+
+				if (is_object($Var))
+					$k = str_replace(get_class($Var), get_class($Var) . '::', $k);
+
 				echo '<b>'.HtmlSpecialChars($k).'</b> => ';
 				// if (is_object($v) || ($k === 'GLOBALS' && is_array($v))) { echo   "\n"; continue; }
 				if ($k === 'GLOBALS' && is_array($v)) { echo   NL; continue; }
 				dumpVar($v, $Level, null, $level_limit);
 			}
+		}
 	}
 	else
 	{

@@ -40,6 +40,10 @@ class Model_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns the ID field for current model
+	 * @return string
+	 **/
 	protected function getModelIdField()
 	{
 		foreach ($this->m_fields as $field => $type)
@@ -49,6 +53,10 @@ class Model_Db_Component extends Component
 		return 'id';
 	}
 
+	/**
+	 * Returns model field names
+	 * @return array
+	 **/
 	public function getFields()
 	{
 		$data = array();
@@ -94,6 +102,11 @@ class Model_Db_Component extends Component
 		return $this->m_fields;
 	}
 
+	/**
+	 * Removes dynamic (or static) field alias by field name
+	 * @param  string $fieldName
+	 * @return Model_Db_Component
+	 **/
 	public function removeAliasByFieldName($fieldName)
 	{
 		if (isset($this->m_aliases[$fieldName]))
@@ -102,6 +115,11 @@ class Model_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Removes dynamic (or static) field alias by alias name
+	 * @param  string $aliasName
+	 * @return Model_Db_Component
+	 **/
 	public function removeAliasByAliasName($aliasName)
 	{
 		if (!$this->m_aliases)
@@ -124,6 +142,10 @@ class Model_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Restores original model fields
+	 * @return Model_Db_Component
+	 **/
 	public function restoreFields()
 	{
 		$this->m_fields = $this->m_defaultFields;
@@ -131,6 +153,10 @@ class Model_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Restores original model aliases
+	 * @return Model_Db_Component
+	 **/
 	public function restoreAliases()
 	{
 		$this->m_aliases = $this->m_defaultAliases;

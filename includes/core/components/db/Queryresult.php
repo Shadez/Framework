@@ -52,7 +52,7 @@ class QueryResult_Db_Component extends Component
 			throw new ModelCrash_Exception_Component('Model ' . $name . ' was not found!');
 
 		if (!$this->m_sqlBuilder)
-			$this->m_sqlBuilder = new Query_Db_Component('Query', $this->core);
+			$this->m_sqlBuilder = $this->i('Query', 'Db');
 
 		$this->m_sqlBuilder->setModel($name);
 
@@ -240,9 +240,16 @@ class QueryResult_Db_Component extends Component
 		return $this;
 	}
 
-	public function fieldCondition($field, $condition, $next = 'AND', $binary = false)
+	public function fieldCondition($field, $condition, $next = 'AND', $binary = false, $insideCond = 'AND')
 	{
-		$this->m_sqlBuilder->fieldCondition($field, $condition, $next, $binary);
+		$this->m_sqlBuilder->fieldCondition($field, $condition, $next, $binary, $insideCond);
+
+		return $this;
+	}
+
+	public function fieldLike($field, $text, $next = 'AND')
+	{
+		$this->m_sqlBuilder->fieldLike($field, $text, $next);
 
 		return $this;
 	}
@@ -273,5 +280,10 @@ class QueryResult_Db_Component extends Component
 		$this->m_sqlBuilder->group($model_name, $field_name);
 
 		return $this;
+	}
+
+	public function getSql()
+	{
+		return $this->m_sqlBuilder ? $this->m_sqlBuilder->getSql() : '';
 	}
 }

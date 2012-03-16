@@ -49,8 +49,8 @@ class Layout_Component extends Component
 		$ClientCSS = array();
 		$ClientJS = array();
 
-		include_once(SITE_DIR . 'layouts' . DS . 'ClientCss.php');
-		include_once(SITE_DIR . 'layouts' . DS . 'ClientJs.php');
+		require_once(SITE_DIR . 'layouts' . DS . 'ClientCss.php');
+		require_once(SITE_DIR . 'layouts' . DS . 'ClientJs.php');
 
 		$this->m_css = $ClientCSS;
 		$this->m_js = $ClientJS;
@@ -60,56 +60,56 @@ class Layout_Component extends Component
 		return $this;
 	}
 
-	protected function checkCondition(&$files, &$aHolder)
+	public function loadClientFiles(&$css, &$js, $action)
 	{
-		if (!$files)
-			return false;
+		$client_files = array(
+			'css' => array(),
+			'js'  => array()
+		);
 
-		$aHolder = array();
+		$file_types = array('_overall');
 
-		foreach ($files as $region => $holder)
+		if ($this->core->getUrlAction(1))
+			$file_types[] = $this->core->getUrlAction(1);
+
+		$all_files = array('css' => $this->m_css, 'js' => $this->m_js);
+
+		foreach ($all_files as $fileType => $holder)
 		{
-			if (!isset($aHolder[$region]))
-				$aHolder[$region] = array();
-
-			foreach ($holder as $file)
+			if (isset($holder['_overall']))
 			{
-				$aHolder[$region][] = $file;
+				foreach ($holder['_overall'] as $type => $files)
+				{
+					if (!isset($client_files[$fileType][$type]))
+						$client_files[$fileType][$type] = array();
+
+					foreach ($files as $f)
+						$client_files[$fileType][$type][] = $f;
+				}
+			}
+
+			if ($action && isset($holder[$action]))
+			{
+				foreach ($holder[$action] as $subAction => $types)
+				{
+					if (in_array($subAction, $file_types))
+					{
+						foreach ($types as $type => $files)
+						{
+							if (!isset($client_files[$fileType][$type]))
+								$client_files[$fileType][$type] = array();
+
+							foreach ($files as $f)
+								$client_files[$fileType][$type][] = $f;
+						}
+					}
+				}
 			}
 		}
 
+		$css = $client_files['css'];
+		$js = $client_files['js'];
+
 		return $this;
-	}
-
-	public function getControllerCss($controller)
-	{
-		if (!isset($this->m_css[$controller]))
-			return null;
-
-		$css = $this->m_css[$controller];
-
-		$sendTo = array();
-
-		$this->checkCondition($css, $sendTo);
-
-		unset($css);
-
-		return $sendTo;
-	}
-
-	public function getControllerJs($controller)
-	{
-		if (!isset($this->m_js[$controller]))
-			return null;
-
-		$js = $this->m_js[$controller];
-
-		$sendTo = array();
-
-		$this->checkCondition($js, $sendTo);
-
-		unset($js);
-
-		return $sendTo;
 	}
 }

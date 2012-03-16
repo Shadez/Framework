@@ -41,6 +41,13 @@ class Controller_Component extends Component
 
 	public function initialize()
 	{
+		$this->c('Events')
+			->createEvent('onControllerStartup', array($this, 'onControllerStartup'))
+			->createEvent('onControllerClientFilesSetup', array($this, 'onControllerClientFilesSetup'))
+			->createEvent('onControllerClientFilesComplete', array($this, 'onControllerClientFilesComplete'))
+			->createEvent('onControllerBuildStartup', array($this, 'onControllerBuildStartup'))
+			->createEvent('onControllerBuildComplete', array($this, 'onControllerBuildComplete'));
+
 		$this->core->setVar('l', $this->c('Locale'));
 		$this->core->setVar('controller', $this);
 
@@ -48,40 +55,49 @@ class Controller_Component extends Component
 		// IE on this site, show warning message.
 		if (IE_BROWSER && $this->c('Config')->getValue('site.disable_ie'))
 		{
-			include(TEMPLATES_DIR . 'elements' . DS . 'badbrowser.ctp');
+			require_once(TEMPLATES_DIR . 'elements' . DS . 'badbrowser.ctp');
 			return $this;
 		}
 
 		// Perform controller actions
 
+		$this->c('Events')->triggerEvent('onControllerStartup', array('controller' => $this), $this);
+
+		$action = $this->core->getUrlAction(0);
+
+		if (!$action)
+			$action = 'home';
+
+		$this->c('Layout')->loadClientFiles($this->m_css, $this->m_js, $action);
+
 		$this->setTemplates() 			// Sets template directories (*)
 			->preparePage() 			// Sets headers for ajax page (*)
 			->beforeActions() 			// beforeClientFilesRegister event (*)
-			->initClientFiles() 		// Loads controller files from Layout_Component (!)
-			->registerClientFiles() 	// Register some additional client files (depends on controller) (*)
-			->addClientFiles() 			// Send controller files to Document_Component (!)
-			->beforeBuild() 			// beforeBuildStarted event (*)
-			->build($this->c('Core'))	// Build method [*]
-			->pageTitle() 				// Sets page title (*)
-			->performPostBuild() 		// Post Build Actions (!)
-			->complete(); 				// Finish (!)
+			->addClientFiles();			// Send controller files to Document_Component
+
+		$this->c('Events')->triggerEvent('onControllerClientFilesComplete', array('controller' => $this), $this);
+
+		$this->beforeBuild(); 			// beforeBuildStarted event (*)
+
+		$this->c('Events')->triggerEvent('onControllerBuildStartup', array('controller' => $this), $this);
+
+		$action = $this->core->getUrlAction(1);
+
+		$this->build($this->core); // Build method [*]
+
+		if ($action && method_exists($this, 'action' . $action))
+			call_user_func(array($this, 'action' . $action), $this->core); // Build action [*]
+		elseif (method_exists($this, 'actionIndex'))
+			$this->actionIndex($this->core); // Build default action [*]
+
+		$this->c('Events')->triggerEvent('onControllerBuildComplete', array('controller' => $this), $this);
+
+		$this->pageTitle() 				// Sets page title (*)
+			->performPostBuild() 		// Post Build Actions
+			->complete(); 				// Finish
 
 		// (*) -> method may be overriden
 		// [*] -> method MUST be overriden
-		// (!) -> method MUST NOT be overriden (move it to private?)
-
-		return $this;
-	}
-
-	protected function initClientFiles()
-	{
-		if ($this->m_clientFilesController)
-			$controller = $this->m_clientFilesController;
-		else
-			$controller = strtolower(substr($this->m_component, 0, strpos($this->m_component, '_')));
-
-		$this->m_css = $this->c('Layout')->getControllerCss($controller);
-		$this->m_js = $this->c('Layout')->getControllerJs($controller);
 
 		return $this;
 	}
@@ -111,11 +127,6 @@ class Controller_Component extends Component
 		return $this;
 	}
 
-	protected function registerClientFiles()
-	{
-		return $this;
-	}
-
 	protected function setTemplates()
 	{
 		$this->m_templates = array(
@@ -128,9 +139,7 @@ class Controller_Component extends Component
 
 	public function block()
 	{
-		$block = new Block_Component('Block', $this->core);
-
-		return $block->setBlockState(true);
+		return $this->i('Block')->setBlockState(true);
 	}
 
 	public function buildBlock($name)
@@ -158,19 +167,10 @@ class Controller_Component extends Component
 		return $this;
 	}
 
-	protected function addClientFiles()
+	private function addClientFiles()
 	{
-		if (is_array($this->m_css))
-		{
-			foreach($this->m_css as $type => $css)
-				$this->c('Document')->registerCss($css, $type);
-		}
-
-		if (is_array($this->m_js))
-		{
-			foreach($this->m_js as $type => $js)
-				$this->c('Document')->registerJs($js, $type);
-		}
+		$this->c('Document')->setCSS($this->m_css)
+			->setJS($this->m_js);
 
 		return $this;
 	}
@@ -217,7 +217,7 @@ class Controller_Component extends Component
 		return $this;
 	}
 
-	protected function complete()
+	private function complete()
 	{
 		if ($this->m_skipBuild || $this->m_errorPage)
 			return $this;
@@ -276,7 +276,10 @@ class Controller_Component extends Component
 		$this->m_isAjax = true;
 
 		if ($define)
+		{
 			define('AJAX_PAGE', true);
+			header('Content-type: text/javascript');
+		}
 
 		return $this;
 	}
@@ -315,4 +318,33 @@ class Controller_Component extends Component
 
 		return $this;
 	}
+
+	protected function outputImage($image, $type)
+	{
+		switch ($type)
+		{
+			case 1:
+				header('Content-type: image/jpeg');
+				imagejpeg($image);
+				exit;
+			case 2:
+				header('Content-type: image/png');
+				imagepng($image);
+				exit;
+			case 3:
+				header('Content-type: image/gif');
+				imagegif($image);
+				exit;
+		}
+	}
+
+	/*
+	 * Events
+	 */
+
+	public function onControllerStartup($event) {}
+	public function onControllerClientFilesSetup($event) {}
+	public function onControllerClientFilesComplete($event) {}
+	public function onControllerBuildStartup($event) {}
+	public function onControllerBuildComplete($event) {}
 }

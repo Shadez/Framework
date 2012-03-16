@@ -19,4 +19,24 @@
  **/
 
 $ClientJS = array(
+	'_overall' => array(
+		'header' => array(
+			array(
+				'file' => 'http://bp.yahooapis.com/2.4.21/browserplus-min.js',
+				'external' => true
+			),
+			array(
+				'file' => '/js/plupload/plupload.js',
+			),
+			array(
+				'file' => '/js/plupload/plupload.html5.js',
+			),
+			array(
+				'file' => '/js/jquery-latest.min.js',
+			),
+			array(
+				'code' => 'jQuery.noConflict();'
+			)
+		)
+	)
 );

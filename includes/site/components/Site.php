@@ -20,10 +20,4 @@
 
 class Site_Component extends Component
 {
-	public function getDBText()
-	{
-		return $this->i('QueryResult', 'Db')
-			->model('Texts')
-			->loadItems();
-	}
 }
