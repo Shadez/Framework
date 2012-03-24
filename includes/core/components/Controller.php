@@ -110,7 +110,7 @@ class Controller_Component extends Component
 	protected function preparePage()
 	{
 		if ($this->m_isAjax)
-			header('Content-type: text/javascript');
+			$this->core->setHeader('Content-type', 'text/javascript', true);
 
 		return $this;
 	}
@@ -278,7 +278,7 @@ class Controller_Component extends Component
 		if ($define)
 		{
 			define('AJAX_PAGE', true);
-			header('Content-type: text/javascript');
+			$this->core->setHeader('Content-type', 'text/javascript', true);
 		}
 
 		return $this;
@@ -300,7 +300,7 @@ class Controller_Component extends Component
 	{
 		$this->m_errorPage = true;
 
-		header('HTTP/1.0 404 Not Found');
+		$this->core->setHeader('HTTP/1.0 404 Not Found', '');
 
 		return $this;
 	}
@@ -324,15 +324,15 @@ class Controller_Component extends Component
 		switch ($type)
 		{
 			case 1:
-				header('Content-type: image/jpeg');
+				$this->core->setHeader('Content-type', 'image/jpeg', true);
 				imagejpeg($image);
 				exit;
 			case 2:
-				header('Content-type: image/png');
+				$this->core->setHeader('Content-type', 'image/png', true);
 				imagepng($image);
 				exit;
 			case 3:
-				header('Content-type: image/gif');
+				$this->core->setHeader('Content-type', 'image/gif', true);
 				imagegif($image);
 				exit;
 		}

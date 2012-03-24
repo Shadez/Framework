@@ -104,7 +104,7 @@ class Core_Component extends Component
 	 * Extra headers
 	 * @var string
 	 **/
-	private $m_header		 = '';
+	private $m_userHeaders   = array();
 
 	/**
 	 * Components rewrite rules
@@ -485,22 +485,62 @@ class Core_Component extends Component
 	/**
 	 * Add custom header
 	 * @param  string $header
+	 * @param  string $content = ''
+	 * @param  bool $release = false
 	 * @return Core_Component
 	 **/
-	public function addHeader($header)
+	protected function setHeader($header, $content = '', $release = false)
 	{
-		$this->m_header .= $header . NLCR;
+		if ($release)
+		{
+			if ($content)
+				header($header . ': ' . $content);
+			else
+				header($header);
+
+			return $this;
+		}
+
+		if (!isset($this->m_userHeaders[$header]))
+			$this->m_userHeaders[$header] = array(
+				'header' => $header,
+				'content' => $content
+			);
+		else
+			$this->m_userHeaders[$header]['content'] = $content;
 
 		return $this;
 	}
 
-	/**
-	 * Sends header to user-agent
-	 * @return void
-	 **/
-	public function sendHeaders()
+	protected function removeHeader($header)
 	{
-		header($this->m_header);
+		if (is_array($header))
+		{
+			foreach ($header as $h)
+				if (isset($this->m_userHeaders[$h]))
+					unset($this->m_userHeaders[$h]);
+		}
+		else
+			if (isset($this->m_userHeaders[$header]))
+				unset($this->m_userHeaders[$header]);
+
+		return $this;
+	}
+
+	public function releaseHeaders()
+	{
+		if (!$this->m_userHeaders)
+			return $this;
+
+		foreach ($this->m_userHeaders as $header)
+		{
+			if (!isset($header['header']) || !isset($header['content']))
+				continue;
+
+			header($header . ': ' . $header['content']);
+		}
+
+		return $this;
 	}
 
 	/**
