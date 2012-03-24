@@ -100,6 +100,13 @@ try
 				continue;
 
 			$mysql_statistics[$type] = $core->c('Db')->getStatistics($type);
+
+			if (!$mysql_statistics[$type])
+			{
+				unset($mysql_statistics[$type]);
+				continue;
+			}
+
 			$totalStat['count'] += $mysql_statistics[$type]['queryCount'];
 			$totalStat['time'] += $mysql_statistics[$type]['queryGenerationTime'];
 		}
