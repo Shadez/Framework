@@ -92,14 +92,17 @@ try
 	$db_types = array_keys($core->c('Config')->getValue('database'));
 	$totalStat = array('count' => 0, 'time' => 0.0);
 
-	foreach ($db_types as $type)
+	if ($debug)
 	{
-		if (!$core->c('Db')->{$type}())
-			continue;
+		foreach ($db_types as $type)
+		{
+			if (!$core->c('Db')->{$type}())
+				continue;
 
-		$mysql_statistics[$type] = $core->c('Db')->{$type}()->getStatistics();
-		$totalStat['count'] += $mysql_statistics[$type]['queryCount'];
-		$totalStat['time'] += $mysql_statistics[$type]['queryTimeGeneration'];
+			$mysql_statistics[$type] = $core->c('Db')->getStatistics($type);
+			$totalStat['count'] += $mysql_statistics[$type]['queryCount'];
+			$totalStat['time'] += $mysql_statistics[$type]['queryGenerationTime'];
+		}
 	}
 
 	if (!defined('SKIP_SHUTDOWN'))
@@ -117,26 +120,44 @@ catch(Exception $e)
 	exit(1);
 }
 
+if (!function_exists('outputDebugInfo'))
+{
+	/**
+	 * Outputs debug info.
+	 * You can implement this function in index.php if you want to change debug outputing
+	 * (if you're using XML, for example, you shouldn't use raw HTML)
+	 *
+	 * @param  float $tstart
+	 * @param  array $mysql_statistics
+	 * @param  array $totalStat
+	 * @return void
+	 **/
+	function outputDebugInfo($tstart, $mysql_statistics, $totalStat)
+	{
+		echo '<style type="text/css">
+			.debug {padding:5px; border:1px solid #000000;}
+		</style>';
+		echo NL . NL . '<div class="debug">' . NL;
+		$totaltime = sprintf('%.2f', (array_sum(explode(' ', microtime())) - $tstart));
+		printf('Page generated in ~%.2f sec.<br />Memory usage: ~%.2f mbytes.<br />Memory usage peak: ~%.2f mbytes.<br />', $totaltime, ((memory_get_usage(true)/1048576 * 100000)/100000) , ((memory_get_peak_usage(true) / 1048576 * 100000)/100000));
+		if ($totaltime > 1)
+			echo '<h1 style="color:#ff0000;">WARNING: seems that your page generation time is too large, please, contact with developer</h1>';
+
+		if (memory_get_usage(true) > 7500000)
+			echo '<h1 style="color:#ff0000;">WARNING: seems that your page takes a lot of memory, please, contact with developer</h1>';
+
+		if ($mysql_statistics)
+		{
+			foreach ($mysql_statistics as $type => $stat)
+				printf('MySQL queries count for %s DB: %d, approx. time: %.2f ms.<br />', $type, $stat['queryCount'], $stat['queryGenerationTime']);
+		}
+
+		printf('Total MySQL queries count: %d, total approx. time: %.2f ms.<br />', $totalStat['count'], $totalStat['time']);
+		echo NL . '</div>';
+	}
+}
+
 if ($debug && !defined('AJAX_PAGE'))
 {
-	echo '<style type="text/css">
-		.debug {padding:5px; border:1px solid #000000;}
-	</style>';
-	echo NL . NL . '<div class="debug">' . NL;
-	$totaltime = sprintf('%.2f', (array_sum(explode(' ', microtime())) - $tstart));
-	printf('Page generated in ~%.2f sec.<br />Memory usage: ~%.2f mbytes.<br />Memory usage peak: ~%.2f mbytes.<br />', $totaltime, ((memory_get_usage(true)/1048576 * 100000)/100000) , ((memory_get_peak_usage(true) / 1048576 * 100000)/100000));
-	if ($totaltime > 1)
-		echo '<h1 style="color:#ff0000;">WARNING: seems that your page generation time is too large, please, contact with developer</h1>';
-
-	if (memory_get_usage(true) > 7500000)
-		echo '<h1 style="color:#ff0000;">WARNING: seems that your page takes a lot of memory, please, contact with developer</h1>';
-
-	if ($mysql_statistics)
-	{
-		foreach ($mysql_statistics as $type => $stat)
-			printf('MySQL queries count for %s DB: %d, approx. time: %.2f ms.<br />', $type, $stat['queryCount'], $stat['queryTimeGeneration']);
-	}
-
-	printf('Total MySQL queries count: %d, total approx. time: %.2f ms.<br />', $totalStat['count'], $totalStat['time']);
-	echo NL . '</div>';
+	outputDebugInfo($tstart, $mysql_statistics, $totalStat);
 }

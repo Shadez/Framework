@@ -35,7 +35,7 @@ class Database_Component extends Component
 
 	/** Queries counter **/
 	private $queryCount = 0;
-	private $queryTimeGeneration = 0.0;
+	private $queryGenerationTime = 0.0;
 	private $db_prefix = '';
 
 	/** Error messages **/
@@ -47,6 +47,16 @@ class Database_Component extends Component
 
 	private $index_key = '';
 
+	public function __call($name, $args)
+	{
+		$this->c('Log')->writeError('%s : calling method %s with args (%s)', __METHOD__, $name, print_r($args, true));
+	}
+
+	public function initialize()
+	{
+		return $this;
+	}
+
 	/**
 	 * Connect to DB
 	 * @access   public
@@ -56,93 +66,89 @@ class Database_Component extends Component
 	public function connect($configs, $delayed = true)
 	{
 		if ($this->isConnected())
-			return true; // Already connected
+			return $this; // Already connected
 
-		$host = &$configs['host'];
-		$user = &$configs['user'];
-		$password = &$configs['password'];
-		$dbName = &$configs['db_name'];
-		$charset = &$configs['charset'];
-		$prefix = &$configs['prefix'];
+		if (!$this->configs)
+		{
+			$this->configs = $configs;
 
-		$this->driver_type = $this->c('Config')->getValue('mysql.driver');
+			$this->driver_type = $configs['driver'];
+		}
 
 		if ($delayed)
 		{
-			$this->configs = $configs;
-			return true;
+			return $this;
 		}
 
 		if (!in_array($this->driver_type, array('mysql', 'mysqli')))
-			$this->driver_type = 'mysqli'; // Set as default
+			$this->driver_type = 'mysql'; // Set as default
 
 		if (!extension_loaded($this->driver_type))
 			$this->core->terminate('database driver extension (' . $this->driver_type . ') was not loaded');
 
 		if ($this->driver_type == 'mysqli')
 		{
-			$this->connectionLink = @mysqli_connect($host, $user, $password, $dbName);
+			$this->connectionLink = @mysqli_connect($this->configs['host'], $this->configs['user'], $this->configs['password'], $this->configs['db_name']);
 
 			if (!$this->connectionLink)
 			{
 				$this->errmsg = @mysqli_error($this->connectionLink);
 				$this->errno = @mysqli_errno($this->connectionLink);
-				$this->c('Log')->writeError('%s : unable to connect to MySQL Server (host: "%s", dbName: "%s"). Error: %s. Check your configs.', __method__, $host, $dbName, $this->errmsg ? $this->errmsg:'none');
-				return false;
+				$this->c('Log')->writeError('%s : unable to connect to MySQL Server (host: "%s", dbName: "%s"). Error: %s. Check your configs.', __method__, $this->configs['host'], $this->configs['db_name'], $this->errmsg ? $this->errmsg:'none');
+
+				return $this;
 			}
 
-			$this->dbLink = @mysqli_select_db($this->connectionLink, $dbName);
+			$this->dbLink = @mysqli_select_db($this->connectionLink, $this->configs['db_name']);
 
 			if (!$this->dbLink)
 			{
-				$this->c('Log')->writeError('%s : unable to switch to database "%s"!', __method__, $dbName);
-				return false;
+				$this->c('Log')->writeError('%s : unable to switch to database "%s"!', __method__, $this->configs['db_name']);
+
+				return $this;
 			}
 		}
 		else
 		{
-			$this->connectionLink = @mysql_connect($host, $user, $password, true);
+			$this->connectionLink = @mysql_connect($this->configs['host'], $this->configs['user'], $this->configs['password'], true);
 
 			if (!$this->connectionLink)
 			{
 				$this->errmsg = @mysql_error($this->connectionLink);
 				$this->errno = @mysql_errno($this->connectionLink);
-				$this->c('Log')->writeError('%s : unable to connect to MySQL Server (host: "%s", dbName: "%s"). Error: %s. Check your configs.', __method__, $host, $dbName, $this->errmsg ? $this->errmsg:'none');
-				return false;
+				$this->c('Log')->writeError('%s : unable to connect to MySQL Server (host: "%s", dbName: "%s"). Error: %s. Check your configs.', __method__, $this->configs['host'], $this->configs['db_name'], $this->errmsg ? $this->errmsg:'none');
+
+				return $this;
 			}
 
-			$this->dbLink = @mysql_select_db($dbName, $this->connectionLink);
+			$this->dbLink = @mysql_select_db($this->configs['db_name'], $this->connectionLink);
 
 			if (!$this->dbLink)
 			{
-				$this->c('Log')->writeError('%s : unable to switch to database "%s"!', __method__, $dbName);
-				return false;
+				$this->c('Log')->writeError('%s : unable to switch to database "%s"!', __method__, $this->configs['db_name']);
+
+				return $this;
 			}
 		}
 
 		$this->connected = true;
 
-		if ($charset == null)
+		if ($this->configs['charset'] == null)
 			$this->query("SET NAMES UTF8");
 		else
-			$this->query("SET NAMES %s", $charset);
+			$this->query("SET NAMES %s", $this->configs['charset']);
 
-		$this->db_prefix = $prefix;
+		$this->db_prefix = $this->configs['prefix'];
 		$this->server_version = $this->selectCell("SELECT VERSION()");
 
-		$this->databaseInfo = array(
-			'host' => $host,
-			'user' => $user,
-			'password' => $password,
-			'name' => $dbName,
-			'db_name' => $dbName,
-			'charset' => ($charset == null) ? 'UTF8' : $charset,
-			'prefix' =>	$prefix,
-			'hash' => sha1(time()),
-			'driver' => $this->driver_type
-		);
+		$this->databaseInfo = $this->configs;
+		$this->databaseInfo['hash'] = sha1(time());
+		$this->databaseInfo['hash'] = sha1(time());
 
-		return true;
+		if (!$this->configs['charset'])
+			$this->databaseInfo['charset'] = 'UTF8';
+
+		return $this;
 	}
 
 	public function delayedConnect()
@@ -272,7 +278,7 @@ class Database_Component extends Component
 		$query_end = microtime(true);
 		$queryTime = round($query_end - $query_start, 4);
 		$this->c('Log')->writeSql('[%s ms]: %s', $queryTime, $safe_sql);
-		$this->queryTimeGeneration += $queryTime;
+		$this->queryGenerationTime += $queryTime;
 
 		unset($performed_query);
 
@@ -458,12 +464,12 @@ class Database_Component extends Component
 	private function dropCounters()
 	{
 		$this->queryCount = 0;
-		$this->queryTimeGeneration = 0.0;
+		$this->queryGenerationTime = 0.0;
 	}
 
 	public function getStatistics()
 	{
-		return array('queryCount' => $this->queryCount, 'queryTimeGeneration' => $this->queryTimeGeneration);
+		return array('queryCount' => $this->queryCount, 'queryGenerationTime' => $this->queryGenerationTime);
 	}
 
 	public function getInsertId()
