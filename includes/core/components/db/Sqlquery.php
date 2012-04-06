@@ -22,12 +22,7 @@ class SqlQuery_Db_Component extends Component
 {
 	protected $m_data = array();
 
-	public function selectItem($sql, $db_type, $keyIndex = '')
-	{
-		return $this->_query($sql, $db_type, 'selectRow', $keyIndex);
-	}
-
-	protected function _query($sql, $db_type, $type, $keyIndex = '')
+	protected function query($sql, $db_type, $type, $keyIndex = '')
 	{
 		$query = array($sql);
 
@@ -42,9 +37,14 @@ class SqlQuery_Db_Component extends Component
 		return $this;
 	}
 
+	public function selectItem($sql, $db_type, $keyIndex = '')
+	{
+		return $this->query($sql, $db_type, 'selectRow', $keyIndex);
+	}
+
 	public function selectItems($sql, $db_type, $keyIndex = '')
 	{
-		return $this->_query($sql, $db_type, 'select', $keyIndex);
+		return $this->query($sql, $db_type, 'select', $keyIndex);
 	}
 
 	public function getData()

@@ -489,7 +489,7 @@ class Core_Component extends Component
 	 * @param  bool $release = false
 	 * @return Core_Component
 	 **/
-	protected function setHeader($header, $content = '', $release = false)
+	public function setHeader($header, $content = '', $release = false)
 	{
 		if ($release)
 		{
@@ -512,7 +512,7 @@ class Core_Component extends Component
 		return $this;
 	}
 
-	protected function removeHeader($header)
+	public function removeHeader($header)
 	{
 		if (is_array($header))
 		{
@@ -541,6 +541,18 @@ class Core_Component extends Component
 		}
 
 		return $this;
+	}
+
+	public function addCreatedComponentsObjectCount()
+	{
+		$this->m_createdObjectsCount++;
+
+		return $this;
+	}
+
+	public function getCreatedComponentsObjectsCount()
+	{
+		return $this->m_createdObjectsCount;
 	}
 
 	/**

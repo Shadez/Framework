@@ -28,7 +28,8 @@ abstract class Autoload
 	 * @var		array
 	 * @static
 	 **/
-	public static $classes = array();
+	private static $classes = array();
+	private static $stackTrace = array();
 
 	/**
 	 * Registers autload handler
@@ -38,6 +39,16 @@ abstract class Autoload
 	public static function register()
 	{
 		spl_autoload_register(array(__CLASS__, 'autoloadClass'));
+	}
+
+	public static function getLoadedComponents()
+	{
+		return self::$classes;
+	}
+
+	public static function getComponentsStackTrace()
+	{
+		return self::$stackTrace;
 	}
 
 	/**
@@ -100,18 +111,25 @@ abstract class Autoload
 			{
 				if (file_exists($folder['path'] . $path))
 				{
+					self::writeStackTrace('Loading file ' . $path);
 					require_once($folder['path'] . $path);
+					self::writeStackTrace('File ' . $path . ' was loaded');
 
 					if (!class_exists($name, true))
 					{
+						self::writeStackTrace('Class ' . $name . ' was not found in ' . $path);
 						if ($folder['type'] == 'site')
 						{
 							// Try to find component from core directory
 							if (file_exists($folders[1]['path'] . $path))
 							{
+								self::writeStackTrace('Loading file ' . $path);
 								require_once($folders[1]['path'] . $path);
 								if (!class_exists($name, true))
+								{
 									$throwException = true;
+									self::writeStackTrace('Class ' . $name . ' was not found in ' . $folders[1]['path'] . ', exception will be thrown');
+								}
 							}
 						}
 					}
@@ -120,6 +138,7 @@ abstract class Autoload
 						throw new Exception('Class ' . $name . ' was not found!');
 
 					self::$classes[$name] = class_exists($name, true);
+
 					return true;
 				}
 			}
@@ -134,5 +153,10 @@ abstract class Autoload
 		}
 
 		return false;
+	}
+
+	private static function writeStackTrace($msg)
+	{
+		self::$stackTrace[] = '<strong>[Autoload]</strong> [' . date('d-m-Y H:i:s') . ']: ' . $msg;
 	}
 }

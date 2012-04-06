@@ -96,9 +96,6 @@ try
 	{
 		foreach ($db_types as $type)
 		{
-			if (!$core->c('Db')->{$type}())
-				continue;
-
 			$mysql_statistics[$type] = $core->c('Db')->getStatistics($type);
 
 			if (!$mysql_statistics[$type])
@@ -110,6 +107,9 @@ try
 			$totalStat['count'] += $mysql_statistics[$type]['queryCount'];
 			$totalStat['time'] += $mysql_statistics[$type]['queryGenerationTime'];
 		}
+
+		$objects_count = $core->getCreatedComponentsObjectsCount();
+		$components_stacktrace = Autoload::getComponentsStackTrace();
 	}
 
 	if (!defined('SKIP_SHUTDOWN'))
@@ -139,12 +139,26 @@ if (!function_exists('outputDebugInfo'))
 	 * @param  array $totalStat
 	 * @return void
 	 **/
-	function outputDebugInfo($tstart, $mysql_statistics, $totalStat)
+	function outputDebugInfo($tstart, $mysql_statistics, $totalStat, $classes, $objects_count, $components_stacktrace)
 	{
 		echo '<style type="text/css">
 			.debug {padding:5px; border:1px solid #000000;}
-		</style>';
-		echo NL . NL . '<div class="debug">' . NL;
+			#toggleDebugInfo {cursor:pointer;}
+			.n {border-top: none;}
+		</style>
+		<script language="javascript">
+		function toggleDebug() {
+			var el = document.getElementById("debug");
+			el.style.display = (el.style.display == "none") ? "" : "none";
+			if (el.style.display == "none")
+				document.getElementById("toggleDebugInfo").innerHTML = "Show debug info";
+			else
+				document.getElementById("toggleDebugInfo").innerHTML = "Hide debug info";
+		}
+		</script>
+		<div class="debug" id="toggleDebugInfo" onclick="toggleDebug();">Show debug info</div>
+		';
+		echo NL . NL . '<div class="debug n" id="debug" style="display:none">' . NL;
 		$totaltime = sprintf('%.2f', (array_sum(explode(' ', microtime())) - $tstart));
 		printf('Page generated in ~%.2f sec.<br />Memory usage: ~%.2f mbytes.<br />Memory usage peak: ~%.2f mbytes.<br />', $totaltime, ((memory_get_usage(true)/1048576 * 100000)/100000) , ((memory_get_peak_usage(true) / 1048576 * 100000)/100000));
 		if ($totaltime > 1)
@@ -160,11 +174,16 @@ if (!function_exists('outputDebugInfo'))
 		}
 
 		printf('Total MySQL queries count: %d, total approx. time: %.2f ms.<br />', $totalStat['count'], $totalStat['time']);
+
+		echo '<br />Loaded components:<br /><div id="loadedComponents"><small><ul><li>';
+		echo implode('<li>', array_keys($classes));
+		echo '</ul></small>Total loaded classes count: ' . sizeof($classes) . '<br />Total objects created: ' . $objects_count . '</div><br />Components Stack Trace:<br />';
+		echo implode('<br />', $components_stacktrace);
 		echo NL . '</div>';
 	}
 }
 
 if ($debug && !defined('AJAX_PAGE'))
 {
-	outputDebugInfo($tstart, $mysql_statistics, $totalStat);
+	outputDebugInfo($tstart, $mysql_statistics, $totalStat, Autoload::getLoadedComponents(), $objects_count, $components_stacktrace);
 }

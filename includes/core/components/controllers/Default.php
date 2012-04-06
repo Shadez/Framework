@@ -25,6 +25,7 @@ class Default_Controller_Component extends Controller_Component
 	public function build($core)
 	{
 		$this->buildBlock('404');
+
 		return $this;
 	}
 

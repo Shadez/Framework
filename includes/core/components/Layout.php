@@ -24,6 +24,7 @@ class Layout_Component extends Component
 	private $m_js = array();
 	protected $m_pageTitle = '';
 	protected $m_menuTitle = '';
+	protected $m_siteTitle = '';
 
 	public function setMenuTitle($title)
 	{
@@ -41,7 +42,18 @@ class Layout_Component extends Component
 
 	public function getPageTitle()
 	{
-		return $this->m_pageTitle;
+		$title = '';
+
+		if ($this->m_menuTitle)
+			$title = $this->m_menuTitle;
+
+		if ($this->m_pageTitle)
+			$title .= ($title ? ' :: ' : '') . $this->m_pageTitle;
+
+		if ($this->m_siteTitle)
+			$title .= ($title ? ' :: ' : '') . $this->m_siteTitle;
+
+		return $title;
 	}
 
 	public function initialize()
@@ -56,6 +68,8 @@ class Layout_Component extends Component
 		$this->m_js = $ClientJS;
 
 		unset($ClientCSS, $ClientJS);
+
+		$this->m_siteTitle = $this->c('Config')->getValue('site.title');
 
 		return $this;
 	}

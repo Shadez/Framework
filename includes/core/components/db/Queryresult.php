@@ -125,10 +125,10 @@ class QueryResult_Db_Component extends Component
 	{
 		$item = $this->c('SqlQuery', 'Db')->selectItem($this->m_sqlBuilder->getSql(), $this->m_model->m_dbType, $this->m_sqlBuilder->getIndexKey())->getData();
 
-		$fields = $this->m_sqlBuilder->getLocaleFields();
-
 		if (!$item)
 			return false;
+
+		$fields = $this->m_sqlBuilder->getLocaleFields();
 
 		if (!$fields)
 		{

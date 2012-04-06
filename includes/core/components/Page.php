@@ -40,7 +40,7 @@ class Page_Component extends Component
 
 		if (!$region)
 		{ 
-			foreach ($this->m_contents as &$cont)
+			foreach ($this->m_contents as $cont)
 				$contents .= $cont;
 		}
 		else
@@ -49,6 +49,7 @@ class Page_Component extends Component
 			if (isset($this->m_contents[$region]))
 				$contents = $this->m_contents[$region];
 		}
+
 		return $contents;
 	}
 }

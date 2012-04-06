@@ -152,7 +152,7 @@ class Editing_Component extends Component
 		foreach ($locales as $loc)
 		{
 //			if (strpos($name, '_' . $loc) !== false)
-			if (preg_match('/_(de|en|e|fr|ru)\Z/', $name))
+			if (preg_match('/_(de|en|es|fr|ru)\Z/', $name))
 			{
 				$n = explode('_' . $loc, $name);
 				return $n[0];

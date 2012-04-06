@@ -20,50 +20,13 @@
 
 class Db_Component extends Component
 {
-	private $m_databases = array();
-	private $m_activeDatabases = array();
-	private $m_databasesCount = array();
+	private $m_availableDatabases = array();
 
 	public function __call($method, $args)
 	{
-		if (method_exists($this, $method))
-			return call_user_func_array(array($this, $method), $args);
-
 		$db_type = strtolower($method);
 
 		return $this->getDb($db_type);
-	}
-
-	protected function getDb($db_type)
-	{
-		$db_h = isset($this->m_databases[$db_type]) ? $this->m_databases[$db_type] : null;
-
-		$db = null;
-
-		if (is_array($db_h))
-		{
-			if (isset($this->m_activeDatabases[$db_type]))
-				$db = isset($this->m_databases[$db_type][$this->m_activeDatabases[$db_type]]) ? $this->m_databases[$db_type][$this->m_activeDatabases[$db_type]] : null;
-			else
-				$db = isset($this->m_databases[$db_type][1]) ? isset($this->m_databases[$db_type][1]) : null;
-		}
-		else
-			$db = $db_h;
-
-		if (!$db)
-			$this->core->terminate('Database ' . $db_type . ' was not found');
-
-		if (!$db->isConnected())
-			$db->delayedConnect();
-
-		unset($db_h);
-
-		return $db;
-	}
-
-	public function isDatabaseAvailable($type)
-	{
-		return isset($this->m_databases[$type]);
 	}
 
 	public function initialize()
@@ -78,70 +41,130 @@ class Db_Component extends Component
 			if (!$db)
 				continue;
 
-			$this->m_databasesCount[$type] = array();
+			if (!isset($this->m_availableDatabases[$type]))
+				$this->m_availableDatabases[$type] = array();
 
 			if (isset($db['host']))
 			{
-				$this->m_databases[$type] = $this->i('Database')->connect($db); // Delayed connection, will be connected only on first request
+				$db['connected'] = false;
+				$db['object'] = null;
 
-				$this->m_databasesCount[$type] = array(
+				$this->m_availableDatabases[$type] = array(
 					'single' => true,
-					'count' => 1
+					'configs' => $db,
+					'activeId' => 1
 				);
 			}
 			elseif (!isset($db['host']) && is_array($db))
 			{
-				$id = 0;
-
-				$this->m_databasesCount[$type] = array(
+				$this->m_availableDatabases[$type] = array(
 					'single' => false,
+					'configs' => array(),
+					'activeId' => -1,
 					'count' => 0
 				);
 
-				foreach ($db as $id => $data)
+				foreach ($db as $id => $conf)
 				{
-					if (!isset($this->m_databases[$type]))
-						$this->m_databases[$type] = array();
+					$conf['connected'] = false;
+					$conf['object'] = null;
 
-					$this->m_databases[$type][$id] = $this->i('Database')->connect($data); // Delayed connection, will be connected only on first request
+					$this->m_availableDatabases[$type]['configs'][$id] = $conf;
 
-					$this->m_databasesCount[$type]['count']++;
+					if ($this->m_availableDatabases[$type]['activeId'] == -1 && $id > 0)
+						$this->m_availableDatabases[$type]['activeId'] = $id;
+
+					$this->m_availableDatabases[$type]['count']++;
 				}
-
-				$this->switchTo($type, $id);
 			}
 		}
 
 		return $this;
 	}
 
+	protected function getDb($type, $skipConnection = false)
+	{
+		if (!isset($this->m_availableDatabases[$type]))
+			throw new DBCrash_Exception_Component('unknown database type: ' . $type);
+
+		$dbo = null;
+
+		if ($this->m_availableDatabases[$type]['single'])
+		{
+			if ($this->m_availableDatabases[$type]['configs']['connected'])
+				$dbo = $this->m_availableDatabases[$type]['configs']['object'];
+			else
+			{
+				$dbo = $this->i('Database')->connect($this->m_availableDatabases[$type]['configs'], $skipConnection);
+
+				$this->m_availableDatabases[$type]['configs']['connected'] = true;
+				$this->m_availableDatabases[$type]['configs']['object'] = $dbo;
+			}
+		}
+		else
+		{
+			$activeId = $this->m_availableDatabases[$type]['activeId'];
+
+			if (!isset($this->m_availableDatabases[$type]['configs'][$activeId]))
+				return null;
+
+			if ($this->m_availableDatabases[$type]['configs'][$activeId]['connected'])
+				$dbo = $this->m_availableDatabases[$type]['configs'][$activeId]['object'];
+			else
+			{
+				$dbo = $this->i('Database')->connect($this->m_availableDatabases[$type][$activeId]['configs'], $skipConnection);
+
+				$this->m_availableDatabases[$type]['configs'][$activeId]['connected'] = true;
+				$this->m_availableDatabases[$type]['configs'][$activeId]['object'] = $dbo;
+			}
+		}
+
+		return $dbo;
+	}
+
+	public function isDatabaseAvailable($type)
+	{
+		return isset($this->m_availableDatabases[$type]);
+	}
+
 	public function switchTo($type, $id)
 	{
-		$this->m_activeDatabases[$type] = $id;
+		if (!isset($this->m_availableDatabases[$type]))
+			throw new DBCrash_Exception_Component('unknown database type: ' . $type);
 
+		$this->m_availableDatabases[$type]['activeId'] = $id;
+			
 		return $this;
 	}
 
 	public function getStatistics($type)
 	{
-		if (!isset($this->m_databasesCount[$type]))
+		if (!isset($this->m_availableDatabases[$type]))
 			return false;
 
-		if ($this->m_databasesCount[$type]['single'])
-			return $this->getDb($type)->getStatistics();
+		if ($this->m_availableDatabases[$type]['single'])
+		{
+			if ($this->isDatabaseAvailable($type))
+				return $this->getDb($type, true)->getStatistics();
+		}
 		else
 		{
 			$stat = array('queryCount' => 0, 'queryGenerationTime' => 0.0);
 
-			for ($i = 1; $i <= $this->m_databasesCount[$type]['count']; ++$i)
+			for ($i = 1; $i <= $this->m_availableDatabases[$type]['count']; ++$i)
 			{
-				$tmp = $this->switchTo($type, $i)->getDb($type)->getStatistics();
+				$this->switchTo($type, $i);
 
-				$stat['queryCount'] += $tmp['queryCount'];
-				$stat['queryGenerationTime'] += $tmp['queryGenerationTime'];
+				if ($this->isDatabaseAvailable($type))
+				{
+					$tmp = $this->getDb($type, true)->getStatistics();
+
+					$stat['queryCount'] += $tmp['queryCount'];
+					$stat['queryGenerationTime'] += $tmp['queryGenerationTime'];
+				}
 			}
 		}
 
-		return $stat;
+		return false;
 	}
 }

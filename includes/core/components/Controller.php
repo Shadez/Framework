@@ -185,6 +185,11 @@ class Controller_Component extends Component
 		return $this;
 	}
 
+	public function getName()
+	{
+		return strtolower(str_replace('_Controller_Component', '', get_class($this)));
+	}
+
 	private function performPostBuild()
 	{
 		if ($this->m_errorPage)
@@ -221,6 +226,9 @@ class Controller_Component extends Component
 	{
 		if ($this->m_skipBuild || $this->m_errorPage)
 			return $this;
+
+		if ($this->isDefaultController())
+			$this->core->setHeader('HTTP/1.0 404 Not Found', '', true);
 
 		return $this->renderRegions()->view();
 	}

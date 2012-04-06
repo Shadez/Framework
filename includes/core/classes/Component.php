@@ -195,6 +195,8 @@ abstract class Component
 
 		$component = new $c_name($c_name, $this->core);
 
+		$this->core->addCreatedComponentsObjectCount();
+
 		// Since we are about to use new at every i() call, we must skip addComponent() method.
 
 		return $component->initialize()->setInitialized(true); // Init component and return it.
@@ -311,6 +313,8 @@ abstract class Component
 		}
 
 		$component = new $c_name($c_name, $this->core); // 
+
+		$this->core->addCreatedComponentsObjectCount();
 
 		$this->addComponent($name, $c_type, $component);
 

@@ -221,6 +221,7 @@ class Block_Component extends Component
 		ob_start();
 
 		require_once($template);
+
 		$this->c('Page')->addContents(ob_get_contents(), $this->m_blockRegion);
 
 		ob_clean();

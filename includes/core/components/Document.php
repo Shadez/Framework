@@ -99,13 +99,20 @@ class Document_Component extends Component
 
 		foreach ($this->m_clientCss[$type] as &$css)
 		{
-			if (isset($css['browser']) && $css['browser'])
-				$files_string .= '<!--[if ' . $css['browser'] . ']>' . NL;
+			if (!isset($css['file']) && isset($css['style']))
+			{
+				$files_string .= '<style type="text/css">' . NL . $css['style'] . NL . '</style>' . NL;
+			}
+			elseif (isset($css['file']))
+			{
+				if (isset($css['browser']) && $css['browser'])
+					$files_string .= '<!--[if ' . $css['browser'] . ']>' . NL;
 
-			$files_string .= '<link rel="stylesheet" type="text/css" href="' . (isset($css['external']) ? $css['file'] : $this->getCFP($css['file'])) . (isset($css['version']) ? '?v=' . $css['version'] : '') . '" media="' . (isset($css['media']) ? $css['media'] : 'all') . '" />' . NL;
+				$files_string .= '<link rel="stylesheet" type="text/css" href="' . (isset($css['external']) ? $css['file'] : $this->getCFP($css['file'])) . (isset($css['version']) ? '?v=' . $css['version'] : '') . '" media="' . (isset($css['media']) ? $css['media'] : 'all') . '" />' . NL;
 
-			if (isset($css['browser']) && $css['browser'])
-				$files_string .= '<![endif]-->' . NL;
+				if (isset($css['browser']) && $css['browser'])
+					$files_string .= '<![endif]-->' . NL;
+			}
 		}
 
 		return $files_string;

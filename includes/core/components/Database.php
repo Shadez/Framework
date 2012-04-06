@@ -71,14 +71,11 @@ class Database_Component extends Component
 		if (!$this->configs)
 		{
 			$this->configs = $configs;
-
 			$this->driver_type = $configs['driver'];
 		}
 
 		if ($delayed)
-		{
 			return $this;
-		}
 
 		if (!in_array($this->driver_type, array('mysql', 'mysqli')))
 			$this->driver_type = 'mysql'; // Set as default
@@ -164,7 +161,7 @@ class Database_Component extends Component
 	 **/
 	public function getDatabaseInfo($info)
 	{
-		return (isset($this->databaseInfo[$info])) ? $this->databaseInfo[$info]:false;
+		return isset($this->databaseInfo[$info]) ? $this->databaseInfo[$info] : false;
 	}
 
 	/**
@@ -203,7 +200,6 @@ class Database_Component extends Component
 		// Execute query and calculate execution time
 		$make_array = array();
 		$query_start = microtime(true);
-		$this->queryCount++;
 
 		$safe_sql = str_replace('%%', '%', $safe_sql);
 
@@ -227,15 +223,17 @@ class Database_Component extends Component
 			$this->c('Log')->writeDebug('%s : unable to execute SQL query (%s). MySQL error: %s',	__method__, $safe_sql, $this->errmsg ? sprintf('"%s" (Error #%d)', $this->errmsg, $this->errno) : 'none');
 			return false;
 		}
+		
 		$result = false;
 
 		switch($queryType)
 		{
 			case SINGLE_CELL:
 				if ($this->driver_type == 'mysqli')
-					$tmp = @mysqli_fetch_array($performed_query); // this works faster than mysql_result
+					$tmp = @mysqli_fetch_array($performed_query); // this works faster than mysqli_result
 				else
 					$tmp = @mysql_fetch_array($performed_query); // this works faster than mysql_result
+
 				$result = $tmp[0];
 				unset($tmp);
 				break;
@@ -248,22 +246,30 @@ class Database_Component extends Component
 			case MULTIPLY_ROW:
 				$result = array();
 				if ($this->driver_type == 'mysqli')
+				{
 					while ($_result = @mysqli_fetch_assoc($performed_query))
 						$result[] = $_result;
+				}
 				else
+				{
 					while ($_result = @mysql_fetch_assoc($performed_query))
 						$result[] = $_result;
+				}
 
 				unset($_result);
 				break;
 			case OBJECT_QUERY:
 				$result = array();
 				if ($this->driver_type == 'mysqli')
+				{
 					while ($_result = @mysqli_fetch_object($performed_query))
 						$result[] = $_result;
+				}
 				else
+				{
 					while ($_result = @mysql_fetch_object($performed_query))
 						$result[] = $_result;
+				}
 
 				unset($_result);
 				break;
@@ -277,8 +283,11 @@ class Database_Component extends Component
 
 		$query_end = microtime(true);
 		$queryTime = round($query_end - $query_start, 4);
+
 		$this->c('Log')->writeSql('[%s ms]: %s', $queryTime, $safe_sql);
+
 		$this->queryGenerationTime += $queryTime;
+		$this->queryCount++;
 
 		unset($performed_query);
 
@@ -290,6 +299,8 @@ class Database_Component extends Component
 	public function indexResults($index_key)
 	{
 		$this->index_key = $index_key;
+
+		return $this;
 	}
 
 	private function postActions(&$result)
@@ -300,6 +311,7 @@ class Database_Component extends Component
 		if ($this->index_key)
 		{
 			$tmp = array();
+
 			foreach ($result as $original)
 				if (isset($original[$this->index_key]))
 					$tmp[$original[$this->index_key]] = $original;
@@ -329,7 +341,9 @@ class Database_Component extends Component
 					$funcArgs[$i] = $this->convertArray($funcArgs[$i]);
 			}
 		}
+
 		$safe_sql = call_user_func_array('sprintf', $funcArgs);
+
 		if (!$safe_sql)
 			$this->c('Log')->writeError('%s : unable to execute sql query, dump:("%s")!', __METHOD__, print_r($funcArgs, true));
 
@@ -340,6 +354,7 @@ class Database_Component extends Component
 				$this->c('Log')->writeError('%s : fatal error: database prefix was not defined, unable to execute SQL query (%s)!',	__method__, $safe_sql);
 				return false;
 			}
+
 			$safe_sql = str_replace('DBPREFIX', $this->db_prefix, $safe_sql);
 		}
 
@@ -350,6 +365,7 @@ class Database_Component extends Component
 	{
 		$argv = func_get_args();
 		$argc = func_num_args();
+
 		return $this->_prepareQuery($argv, $argc, SINGLE_CELL);
 	}
 
@@ -357,6 +373,7 @@ class Database_Component extends Component
 	{
 		$argv = func_get_args();
 		$argc = func_num_args();
+
 		return $this->_prepareQuery($argv, $argc, SINGLE_ROW);
 	}
 
@@ -364,6 +381,7 @@ class Database_Component extends Component
 	{
 		$argv = func_get_args();
 		$argc = func_num_args();
+
 		return $this->_prepareQuery($argv, $argc, MULTIPLY_ROW);
 	}
 
@@ -371,6 +389,7 @@ class Database_Component extends Component
 	{
 		$argv = func_get_args();
 		$argc = func_num_args();
+
 		return $this->_prepareQuery($argv, $argc, SQL_QUERY);
 	}
 
@@ -378,6 +397,7 @@ class Database_Component extends Component
 	{
 		$argv = func_get_args();
 		$argc = func_num_args();
+
 		return $this->_prepareQuery($argv, $argc, SQL_RAW_QUERY);
 	}
 
@@ -385,6 +405,7 @@ class Database_Component extends Component
 	{
 		$argv = func_get_args();
 		$argc = func_num_args();
+
 		return $this->_prepareQuery($argv, $argc, OBJECT_QUERY);
 	}
 
@@ -401,6 +422,7 @@ class Database_Component extends Component
 			$this->c('Log')->writeError('%s : source must have an array type!', __method__);
 			return null;
 		}
+
 		$returnString = null;
 		$count = count($source);
 
@@ -427,7 +449,10 @@ class Database_Component extends Component
 
 		$this->DropLastErrors();
 		$this->DropCounters();
+
 		parent::shutdownComponent();
+
+		return $this;
 	}
 
 	public function getServerVersion()
@@ -449,22 +474,30 @@ class Database_Component extends Component
 	{
 		$this->DropLastErrorMessage();
 		$this->DropLastErrorNumber();
+
+		return $this;
 	}
 
 	private function dropLastErrorMessage()
 	{
 		$this->errmsg = null;
+
+		return $this;
 	}
 
 	private function dropLastErrorNumber()
 	{
 		$this->errno = 0;
+
+		return $this;
 	}
 
 	private function dropCounters()
 	{
 		$this->queryCount = 0;
 		$this->queryGenerationTime = 0.0;
+
+		return $this;
 	}
 
 	public function getStatistics()
