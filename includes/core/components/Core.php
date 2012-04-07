@@ -306,7 +306,6 @@ class Core_Component extends Component
 
 	public function isControllerExists($name)
 	{
-		// Home_wow_controller_component
 		$name = strtolower($name);
 
 		$d = explode('_', $name);

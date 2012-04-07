@@ -35,6 +35,6 @@ class Default_Controller_Component extends Controller_Component
 			->setRegion('pagecontent')
 			->setVar('urlAddress', $this->core->getRawUrl())
 			->setVar('code', $this->c('Session')->getSession('errorCode'))
-			->setTemplate('404', 'elements');
+			->setTemplate('404', 'default');
 	}
 }

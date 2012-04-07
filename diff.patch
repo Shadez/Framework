@@ -1,113 +1,0 @@
-diff --git a/includes/boot.php b/includes/boot.php
-index 7e2c094..4175228 100644
---- a/includes/boot.php
-+++ b/includes/boot.php
-@@ -31,6 +31,7 @@ $tstart = array_sum(explode(' ', microtime()));
- 
- define('ROOT', dirname(dirname(__FILE__)));
- define('DS', DIRECTORY_SEPARATOR);
-+
- if (!defined('WEBROOT_DIR'))
- 	define('WEBROOT_DIR', ROOT . DS . 'webroot' . DS);
- 
-@@ -54,6 +55,9 @@ define('SITE_LOCALES_DIR', SITE_DIR . 'locales' . DS);
- define('SITE_TEMPLATES_DIR', SITE_DIR . 'templates' . DS);
- define('SITE_LAYOUTS_DIR', SITE_DIR . 'layouts' . DS);
- 
-+if (!defined('TEMPLATE_EXT'))
-+	define('TEMPLATE_EXT', 'ctp');
-+
- define('NL', "\n");
- define('CR', "\r");
- define('TAB', "\t");
-diff --git a/includes/core/components/Block.php b/includes/core/components/Block.php
-index e95063b..bec8573 100644
---- a/includes/core/components/Block.php
-+++ b/includes/core/components/Block.php
-@@ -195,11 +195,11 @@ class Block_Component extends Component
- 		if (!$this->m_blockTemplateDir || !$this->m_blockTemplateName)
- 			return $this;
- 
--		$template = TEMPLATES_DIR . $this->m_blockTemplateDir . DS . $this->m_blockTemplateName . '.ctp';
-+		$template = TEMPLATES_DIR . $this->m_blockTemplateDir . DS . $this->m_blockTemplateName . '.' . TEMPLATE_EXT;
- 
- 		if (!file_exists($template))
- 		{
--			$this->c('Log')->writeError('%s : unable to find template "%s.ctp" for block %s (hash: %s)!', __METHOD__, $this->m_blockTemplateDir . DS . $this->m_blockTemplateName, $this->getBlockName(), $this->m_uniqueHash);
-+			$this->c('Log')->writeError('%s : unable to find template "%s.%s" for block %s (hash: %s)!', __METHOD__, $this->m_blockTemplateDir . DS . $this->m_blockTemplateName, TEMPLATE_EXT, $this->getBlockName(), $this->m_uniqueHash);
- 			return $this;
- 		}
- 
-diff --git a/includes/core/components/Controller.php b/includes/core/components/Controller.php
-index 7d784dc..c38849d 100644
---- a/includes/core/components/Controller.php
-+++ b/includes/core/components/Controller.php
-@@ -55,7 +55,7 @@ class Controller_Component extends Component
- 		// IE on this site, show warning message.
- 		if (IE_BROWSER && $this->c('Config')->getValue('site.disable_ie'))
- 		{
--			require_once(TEMPLATES_DIR . 'elements' . DS . 'badbrowser.ctp');
-+			require_once(TEMPLATES_DIR . 'elements' . DS . 'badbrowser.' . TEMPLATE_EXT);
- 			return $this;
- 		}
- 
-@@ -130,8 +130,8 @@ class Controller_Component extends Component
- 	protected function setTemplates()
- 	{
- 		$this->m_templates = array(
--			(TEMPLATES_DIR . 'elements' . DS . 'ajax.ctp'),
--			(TEMPLATES_DIR . 'elements' . DS . 'layout.ctp'),
-+			(TEMPLATES_DIR . 'elements' . DS . 'ajax.' . TEMPLATE_EXT),
-+			(TEMPLATES_DIR . 'elements' . DS . 'layout.' . TEMPLATE_EXT),
- 		);
- 
- 		return $this;
-diff --git a/includes/core/components/Db.php b/includes/core/components/Db.php
-index 46ed759..1491a75 100644
---- a/includes/core/components/Db.php
-+++ b/includes/core/components/Db.php
-@@ -24,6 +24,9 @@ class Db_Component extends Component
- 
- 	public function __call($method, $args)
- 	{
-+		if (method_exists($this, $method))
-+			return call_user_func_array(array($this, $method), $args);
-+
- 		$db_type = strtolower($method);
- 
- 		return $this->getDb($db_type);
-diff --git a/includes/core/components/controllers/Content.php b/includes/core/components/controllers/Content.php
-diff --git a/includes/core/components/controllers/Default.php b/includes/core/components/controllers/Default.php
-index aa28d82..84d72a2 100644
---- a/includes/core/components/controllers/Default.php
-+++ b/includes/core/components/controllers/Default.php
-@@ -35,6 +35,6 @@ class Default_Controller_Component extends Controller_Component
- 			->setRegion('pagecontent')
- 			->setVar('urlAddress', $this->core->getRawUrl())
- 			->setVar('code', $this->c('Session')->getSession('errorCode'))
--			->setTemplate('404', 'default');
-+			->setTemplate('404', 'elements');
- 	}
- }
-\ No newline at end of file
-diff --git a/includes/core/components/controllers/Tools.php b/includes/core/components/controllers/Tools.php
-index b7cdc80..c7283a1 100644
---- a/includes/core/components/controllers/Tools.php
-+++ b/includes/core/components/controllers/Tools.php
-@@ -33,6 +33,7 @@ class Tools_Controller_Component extends Controller_Component
- 		}
- 
- 		$this->buildBlock('tools');
-+
- 		return $this;
- 	}
- 
-diff --git a/includes/core/components/controllers/tools/Models.php b/includes/core/components/controllers/tools/Models.php
-index 78041e8..630f377 100644
---- a/includes/core/components/controllers/tools/Models.php
-+++ b/includes/core/components/controllers/tools/Models.php
-@@ -1 +1 @@
--<?php/** * Copyright (C) 2009-2012 Shadez <https://github.com/Shadez> * * This program is free software; you can redistribute it and/or modify * it under the terms of the GNU General Public License as published by * the Free Software Foundation; either version 2 of the License, or * (at your option) any later version. * * This program is distributed in the hope that it will be useful, * but WITHOUT ANY WARRANTY; without even the implied warranty of * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the * GNU General Public License for more details. * * You should have received a copy of the GNU General Public License * along with this program; if not, write to the Free Software * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA **/class Models_Tools_Controller_Component extends Controller_Component{	protected $m_action = '';	public function build($core)	{		$this->m_action = $core->getUrlAction(2);		if ($this->m_action == 'create')		{			$core->setVar('models', $this->c('Models', 'Tool'));			if (!isset($_GET['step']))				$this->buildBlock($this->m_action);			else			{				switch (intval($_GET['step']))				{					case 1:					case 2:					case 3:						$this->c('Models', 'Tool')->setStep($_GET['step']);						break;				}				$this->buildBlock('modelscreatestep');			}		}		else			$this->buildBlock('main');		return $this;	}	protected function block_main()	{		return $this->block()			->setTemplate('models', 'default')			->setRegion('pagecontent');	}	protected function block_create()	{		return $this->block()			->setTemplate('modelscreate', 'default')			->setRegion('pagecontent');	}	protected function block_modelscreatestep()	{		return $this->block()			->setTemplate('modelscreate' . $_GET['step'], 'default')			->setRegion('pagecontent');	}}
-\ No newline at end of file
-+<?php/** * Copyright (C) 2009-2012 Shadez <https://github.com/Shadez> * * This program is free software; you can redistribute it and/or modify * it under the terms of the GNU General Public License as published by * the Free Software Foundation; either version 2 of the License, or * (at your option) any later version. * * This program is distributed in the hope that it will be useful, * but WITHOUT ANY WARRANTY; without even the implied warranty of * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the * GNU General Public License for more details. * * You should have received a copy of the GNU General Public License * along with this program; if not, write to the Free Software * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA **/class Models_Tools_Controller_Component extends Controller_Component{	protected $m_action = '';	public function build($core)	{		$this->m_action = $core->getUrlAction(2);		if ($this->m_action == 'create')		{			$core->setVar('models', $this->c('Models', 'Tool'));			if (!isset($_GET['step']))				$this->buildBlock($this->m_action);			else			{				switch (intval($_GET['step']))				{					case 1:					case 2:					case 3:						$this->c('Models', 'Tool')->setStep(intval($_GET['step']));						break;				}				$this->buildBlock('modelscreatestep');			}		}		else			$this->buildBlock('main');		return $this;	}	protected function block_main()	{		return $this->block()			->setTemplate('models', 'default')			->setRegion('pagecontent');	}	protected function block_create()	{		return $this->block()			->setTemplate('modelscreate', 'default')			->setRegion('pagecontent');	}	protected function block_modelscreatestep()	{		return $this->block()			->setTemplate('modelscreate' . intval($_GET['step']), 'default')			->setRegion('pagecontent');	}}
-\ No newline at end of file
