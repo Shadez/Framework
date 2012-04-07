@@ -347,9 +347,6 @@ class Core_Component extends Component
 			$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => 'Home', 'default' => false), $this);
 			return $this->c('Home', 'Controller');
 		}
-		
-		$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => $controller_name, 'default' => false), $this);
-
 
 		$tmp_name = '';
 		$actions_count = $this->getActionsCount();
@@ -364,12 +361,54 @@ class Core_Component extends Component
 			$tmp_name = 'Home_' . $tmp_name;
 
 			if (!$this->isControllerExists($tmp_name, true))
+			{
+				$found = false;
+				$counter = $this->getActionsCount();
+				$new_name = $tmp_name;
+
+				while (!$found || $counter > 0)
+				{
+					if (!$new_name)
+						break;
+
+					$d = explode('_', $new_name);
+
+					unset($d[0], $d[1]);
+
+					$new_name = 'Home_' . implode('_', $d);
+
+					if ($this->isControllerExists($new_name))
+					{
+						$found = true;
+						$counter = 0;
+					}
+
+					--$counter;
+
+					if ($counter == 0)
+						$found = true;
+				}
+
+				if ($found)
+				{
+					$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => $new_name, 'default' => false), $this);
+					return $this->c($new_name, 'Controller');
+				}
+
+				$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => 'Default', 'default' => true), $this);
 				return $this->c('Default', 'Controller');
+			}
 			else
+			{
+				$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => $tmp_name, 'default' => false), $this);
 				return $this->c($tmp_name, 'Controller');
+			}
 		}
 		else
+		{
+			$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => $tmp_name, 'default' => false), $this);
 			return $this->c($tmp_name, 'Controller');
+		}
 	}
 
 	/**
