@@ -57,6 +57,8 @@ define('ERORR_INVALID_PASSWORD_RECOVERY_ANSWER', 128);
 define('ERORR_NEW_PASSWORD_NOT_MATCH', 256);
 define('ERORR_NEW_PASSWORD_FAIL', 512);
 define('ERROR_USERNAME_TAKEN', 1024);
+define('ERROR_RECAPTCHA_FAILED', 2048);
+define('ERROR_USERNAME_BANNED', 4096);
 
 /** Time **/
 define('IN_MILISECONDS', 1000);
@@ -66,6 +68,3 @@ define('IN_HOURS', 60 * IN_MINUTES);
 define('IN_DAYS', 24 * IN_HOURS);
 define('IN_WEEKS', 7 * IN_DAYS);
 define('IN_MONTHS', 30 * IN_DAYS);
-
-define('GENDER_FEMALE', 0);
-define('GENDER_MALE', 1);

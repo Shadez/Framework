@@ -315,7 +315,10 @@ class Core_Component extends Component
 		$t = '';
 
 		for ($i = $size-1; $i >= 0; --$i)
-			$t .= DS . mb_convert_case($d[$i], MB_CASE_TITLE, 'UTF-8');
+			if ($i == 0)
+				$t .= DS . mb_convert_case($d[$i], MB_CASE_TITLE, 'UTF-8');
+			else
+				$t .= DS . mb_convert_case($d[$i], MB_CASE_LOWER, 'UTF-8');
 
 		$path = trim(SITE_DIR . 'components' . DS . 'controllers' . $t . '.php');
 
@@ -355,18 +358,18 @@ class Core_Component extends Component
 			$tmp_name .= $this->getUrlAction($i) . '_';
 
 		$tmp_name = ucfirst(substr($tmp_name, 0, strlen($tmp_name)-1));
-	
+
 		if (!$this->isControllerExists($tmp_name))
 		{
 			$tmp_name = 'Home_' . $tmp_name;
 
 			if (!$this->isControllerExists($tmp_name, true))
-				return $this->c('Home', 'Controller');
+				return $this->c('Default', 'Controller');
 			else
 				return $this->c($tmp_name, 'Controller');
 		}
 		else
-			return $this->c($controller_name, 'Controller');
+			return $this->c($tmp_name, 'Controller');
 	}
 
 	/**

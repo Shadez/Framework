@@ -42,7 +42,11 @@ class Router_Component extends Component
 			return $this;
 
 		require_once($router_file);
+
 		$this->m_router = $Router;
+
+		unset($Router);
+
 		$url = $this->core->getAppUrl();
 
 		if (!$url)

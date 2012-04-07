@@ -70,9 +70,14 @@ abstract class Autoload
 		$piecesSize = sizeof($pieces);
 		$extraFind = false;
 		$pathLocked = false;
-		if (isset($pieces[$piecesSize-2]) && strtolower($pieces[$piecesSize-2]) == 'controller')
+		$homeController = false;
+		if (isset($pieces[$piecesSize-2]) && strtolower($pieces[$piecesSize-2]) == 'controller' && strtolower($name) != 'controller_component')
+		{
+			$extraFind = true;
+
 			if (strtolower($pieces[0]) == 'home')
-				$extraFind = true;
+				$homeController = true;
+		}
 
 		if ($pieces)
 		{
@@ -82,9 +87,12 @@ abstract class Autoload
 			{
 				unset($pieces[$piecesSize-1]);
 				unset($pieces[$piecesSize-2]);
-				unset($pieces[0]);
+
+				if ($homeController)
+					unset($pieces[0]);
+
 				$piecesSize = sizeof($pieces);
-				$path = 'controllers' . DS . implode(DS, array_reverse($pieces)) . DS . 'Home.php';
+				$path = 'controllers' . DS . implode(DS, array_reverse($pieces)) . ($homeController ? DS . 'Home' : '') . '.php';
 				$pathLocked = true;
 				$proof = 'Component';
 			}
