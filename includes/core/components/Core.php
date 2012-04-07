@@ -304,6 +304,25 @@ class Core_Component extends Component
 		return true;
 	}
 
+	public function isControllerExists($name)
+	{
+		// Home_wow_controller_component
+		$name = strtolower($name);
+
+		$d = explode('_', $name);
+
+		$size = sizeof($d);
+
+		$t = '';
+
+		for ($i = $size-1; $i >= 0; --$i)
+			$t .= DS . mb_convert_case($d[$i], MB_CASE_TITLE, 'UTF-8');
+
+		$path = trim(SITE_DIR . 'components' . DS . 'controllers' . $t . '.php');
+
+		return file_exists($path);
+	}
+
 	/**
 	 * Performs controller initialization
 	 * @return Core_Component
@@ -314,15 +333,6 @@ class Core_Component extends Component
 			return $this;
 
 		$controller_name = $this->getRewriteRuleController();
-
-		/*if (!$controller_name && $this->getActionsCount() > 1)
-		{
-			// Try to find subcontroller
-			for ($i = $this->getActionsCount()-1; $i >= 0; --$i)
-			{
-				$controller_name .= (!$i ? '_' : '') . ucfirst($this->getUrlAction($i));
-			}
-		}*/
 
 		if (!$controller_name)
 		{
@@ -335,11 +345,29 @@ class Core_Component extends Component
 			$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => 'Home', 'default' => false), $this);
 			return $this->c('Home', 'Controller');
 		}
-
 		
 		$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => $controller_name, 'default' => false), $this);
 
-		return $this->c($controller_name, 'Controller');
+
+		$tmp_name = '';
+		$actions_count = $this->getActionsCount();
+
+		for ($i = $actions_count - 1; $i >= 0; -- $i)
+			$tmp_name .= $this->getUrlAction($i) . '_';
+
+		$tmp_name = ucfirst(substr($tmp_name, 0, strlen($tmp_name)-1));
+	
+		if (!$this->isControllerExists($tmp_name))
+		{
+			$tmp_name = 'Home_' . $tmp_name;
+
+			if (!$this->isControllerExists($tmp_name, true))
+				return $this->c('Home', 'Controller');
+			else
+				return $this->c($tmp_name, 'Controller');
+		}
+		else
+			return $this->c($controller_name, 'Controller');
 	}
 
 	/**

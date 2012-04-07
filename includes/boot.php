@@ -31,6 +31,7 @@ $tstart = array_sum(explode(' ', microtime()));
 
 define('ROOT', dirname(dirname(__FILE__)));
 define('DS', DIRECTORY_SEPARATOR);
+
 if (!defined('WEBROOT_DIR'))
 	define('WEBROOT_DIR', ROOT . DS . 'webroot' . DS);
 
@@ -53,6 +54,9 @@ define('SITE_COMPONENTS_DIR', SITE_DIR . 'components' . DS);
 define('SITE_LOCALES_DIR', SITE_DIR . 'locales' . DS);
 define('SITE_TEMPLATES_DIR', SITE_DIR . 'templates' . DS);
 define('SITE_LAYOUTS_DIR', SITE_DIR . 'layouts' . DS);
+
+if (!defined('TEMPLATE_EXT'))
+	define('TEMPLATE_EXT', 'ctp');
 
 define('NL', "\n");
 define('CR', "\r");

@@ -55,7 +55,7 @@ class Controller_Component extends Component
 		// IE on this site, show warning message.
 		if (IE_BROWSER && $this->c('Config')->getValue('site.disable_ie'))
 		{
-			require_once(TEMPLATES_DIR . 'elements' . DS . 'badbrowser.ctp');
+			require_once(TEMPLATES_DIR . 'elements' . DS . 'badbrowser.' . TEMPLATE_EXT);
 			return $this;
 		}
 
@@ -130,8 +130,8 @@ class Controller_Component extends Component
 	protected function setTemplates()
 	{
 		$this->m_templates = array(
-			(TEMPLATES_DIR . 'elements' . DS . 'ajax.ctp'),
-			(TEMPLATES_DIR . 'elements' . DS . 'layout.ctp'),
+			(TEMPLATES_DIR . 'elements' . DS . 'ajax.' . TEMPLATE_EXT),
+			(TEMPLATES_DIR . 'elements' . DS . 'layout.' . TEMPLATE_EXT),
 		);
 
 		return $this;

@@ -33,6 +33,7 @@ class Tools_Controller_Component extends Controller_Component
 		}
 
 		$this->buildBlock('tools');
+
 		return $this;
 	}
 

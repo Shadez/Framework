@@ -68,16 +68,27 @@ abstract class Autoload
 		$pieces = explode('_', $name);
 
 		$piecesSize = sizeof($pieces);
+		$extraFind = false;
+		$pathLocked = false;
 		if (isset($pieces[$piecesSize-2]) && strtolower($pieces[$piecesSize-2]) == 'controller')
-		{
-			//dump($pieces);
-		}
+			if (strtolower($pieces[0]) == 'home')
+				$extraFind = true;
 
 		if ($pieces)
 		{
 			$className = $pieces[0];
 
-			if (isset($pieces[1]) && isset($pieces[2]) && isset($pieces[3]))
+			if ($extraFind)
+			{
+				unset($pieces[$piecesSize-1]);
+				unset($pieces[$piecesSize-2]);
+				unset($pieces[0]);
+				$piecesSize = sizeof($pieces);
+				$path = 'controllers' . DS . implode(DS, array_reverse($pieces)) . DS . 'Home.php';
+				$pathLocked = true;
+				$proof = 'Component';
+			}
+			elseif (isset($pieces[1]) && isset($pieces[2]) && isset($pieces[3]))
 			{
 				$classType = strtolower($pieces[2]);
 				if ($classType != 'db')
@@ -86,7 +97,7 @@ abstract class Autoload
 				$proof = $pieces[3];
 				$path = $classType . DS . strtolower($pieces[1]) . DS;
 			}
-			else if (isset($pieces[1]) && isset($pieces[2]))
+			elseif (isset($pieces[1]) && isset($pieces[2]))
 			{
 				$classType = strtolower($pieces[1]);
 				if ($classType != 'db')
@@ -102,7 +113,8 @@ abstract class Autoload
 			if ($proof != 'Component')
 				throw new Exception('Wrong class name: ' . $name . ', unable to continue!');
 
-			$path .= ucfirst(strtolower($className)) . '.php';
+			if (!$pathLocked)
+				$path .= ucfirst(strtolower($className)) . '.php';
 
 			$throwException = false;
 			$classFound = false;

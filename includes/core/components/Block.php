@@ -195,11 +195,11 @@ class Block_Component extends Component
 		if (!$this->m_blockTemplateDir || !$this->m_blockTemplateName)
 			return $this;
 
-		$template = TEMPLATES_DIR . $this->m_blockTemplateDir . DS . $this->m_blockTemplateName . '.ctp';
+		$template = TEMPLATES_DIR . $this->m_blockTemplateDir . DS . $this->m_blockTemplateName . '.' . TEMPLATE_EXT;
 
 		if (!file_exists($template))
 		{
-			$this->c('Log')->writeError('%s : unable to find template "%s.ctp" for block %s (hash: %s)!', __METHOD__, $this->m_blockTemplateDir . DS . $this->m_blockTemplateName, $this->getBlockName(), $this->m_uniqueHash);
+			$this->c('Log')->writeError('%s : unable to find template "%s.%s" for block %s (hash: %s)!', __METHOD__, $this->m_blockTemplateDir . DS . $this->m_blockTemplateName, TEMPLATE_EXT, $this->getBlockName(), $this->m_uniqueHash);
 			return $this;
 		}
 
