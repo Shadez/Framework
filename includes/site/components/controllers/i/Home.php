@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class I_Controller_Component extends Controller_Component
+class Home_I_Controller_Component extends Controller_Component
 {
 	public function build($core)
 	{

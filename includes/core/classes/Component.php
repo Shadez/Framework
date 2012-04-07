@@ -417,15 +417,12 @@ abstract class Component
 	public function getUrl($url = '')
 	{
 		if (!$this->m_locale)
-			$this->m_locale = $this->c('Locale')->GetLocale();
+			$this->m_locale = $this->c('Locale')->getLocale();
 
 		if ($this->m_coreUrl != null)
 			return $this->m_coreUrl . '/' . $url;
 
-		if (!defined('CLIENT_FILES_PATH'))
-			define('CLIENT_FILES_PATH', $this->c('Config')->getValue('site.path'));
-
-		$this->m_coreUrl = CLIENT_FILES_PATH;
+		$this->m_coreUrl = $this->c('Config')->getValue('site.path');
 
 		return $this->m_coreUrl . '/' . $url;
 	}
@@ -438,7 +435,14 @@ abstract class Component
 	public function getCFP($url = '')
 	{
 		if (!defined('CLIENT_FILES_PATH'))
-			define('CLIENT_FILES_PATH', $this->c('Config')->getValue('site.path'));
+		{
+			$cdn_url = $this->c('Config')->getValue('site.cdn_url');
+
+			if (!$cdn_url)
+				define('CLIENT_FILES_PATH', $this->c('Config')->getValue('site.path'));
+			else
+				define('CLIENT_FILES_PATH', $cdn_url);
+		}
 
 		return CLIENT_FILES_PATH . ($url{0} == '/' ? '' : '/') . $url;
 	}
@@ -446,13 +450,14 @@ abstract class Component
 	/**
 	 * Returns raw page number or page number with offset (-1)
 	 * @param  bool $asOffset = false
+	 * @param  string $index = 'page'
 	 * @return int
 	 **/
-	public function getPage($asOffset = false)
+	public function getPage($asOffset = false, $index = 'page')
 	{
-		if (!isset($_GET['page']))
+		if (!$index || !isset($_GET[$index]))
 			return $asOffset ? 0 : 1;
 
-		return $asOffset ? (intval($_GET['page']) - 1) : intval($_GET['page']);
+		return $asOffset ? max(0, intval($_GET[$index]) - 1) : max(1, intval($_GET[$index]));
 	}
 }

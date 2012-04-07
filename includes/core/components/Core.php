@@ -131,7 +131,14 @@ class Core_Component extends Component
 		self::$m_components['default']['Core'] = $this;
 
 		if (!defined('CLIENT_FILES_PATH'))
-			define('CLIENT_FILES_PATH', $this->c('Config')->getValue('site.path'));
+		{
+			$cdn_url = $this->c('Config')->getValue('site.cdn_url');
+
+			if (!$cdn_url)
+				define('CLIENT_FILES_PATH', $this->c('Config')->getValue('site.path'));
+			else
+				define('CLIENT_FILES_PATH', $cdn_url);
+		}
 
 		$this->detectMobile();
 	}
