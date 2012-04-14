@@ -327,9 +327,15 @@ class Core_Component extends Component
 			else
 				$t .= DS . mb_convert_case($d[$i], MB_CASE_LOWER, 'UTF-8');
 
-		$path = trim(SITE_DIR . 'components' . DS . 'controllers' . $t . '.php');
+		$path = trim('components' . DS . 'controllers' . $t . '.php');
 
-		return file_exists($path);
+		foreach (array(SITE_DIR, CORE_DIR) as $type)
+		{
+			if (file_exists($type . $path))
+				return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -370,30 +376,35 @@ class Core_Component extends Component
 			if (!$this->isControllerExists($tmp_name, true))
 			{
 				$found = false;
-				$counter = $this->getActionsCount();
 				$new_name = $tmp_name;
+				$name_pieces = explode('_', substr($new_name, 5));
+				$psize = sizeof($name_pieces);
+				$cname = '';
 
-				while (!$found || $counter > 0)
+				for ($i = 0; $i < $psize; ++$i)
 				{
-					if (!$new_name)
-						break;
-
-					$d = explode('_', $new_name);
-
-					unset($d[0], $d[1]);
-
-					$new_name = 'Home_' . implode('_', $d);
-
-					if ($this->isControllerExists($new_name))
+					if (!$found)
 					{
-						$found = true;
-						$counter = 0;
+						$cname = implode('_', $name_pieces);
+
+						if ($this->isControllerExists($cname, true))
+						{
+							$found = true;
+							$new_name = $cname;
+						}
+
+						array_unshift($name_pieces, 'Home');
+						$cname = implode('_', $name_pieces);
+
+						if ($this->isControllerExists($cname, true))
+						{
+							$found = true;
+							$new_name = $cname;
+						}
+
+						array_shift($name_pieces);
+						array_shift($name_pieces);
 					}
-
-					--$counter;
-
-					if ($counter == 0)
-						$found = true;
 				}
 
 				if ($found)

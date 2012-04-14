@@ -33,6 +33,7 @@ class Controller_Component extends Component
 	protected $m_menuTitle = '';
 	protected $m_clientFilesController = '';
 	protected $m_installerController = false;
+	protected $m_webActionIndex = -1;
 
 	protected $m_templates = array();
 
@@ -81,7 +82,32 @@ class Controller_Component extends Component
 
 		$this->c('Events')->triggerEvent('onControllerBuildStartup', array('controller' => $this), $this);
 
-		$action = $this->core->getUrlAction(1);
+		// Try to find controller in url
+		$action = '';
+		if ($this->m_webActionIndex >= 0)
+			$action = $this->core->getUrlAction($this->m_webActionIndex);
+		else
+		{
+			$c_name = $this->getName();
+			if (strpos(strtolower($c_name), 'home_') !== false && strtolower($c_name) != 'home_controller_component')
+			{
+				$c_name = strtolower(str_replace('home_', '', $c_name));
+				$useNext = false;
+				foreach ($this->core->getActions() as $act)
+				{
+					if ($useNext)
+					{
+						$action = strtolower($act);
+						break;
+					}
+
+					if (strtolower($act) == $c_name)
+						$useNext = true;
+				}
+			}
+			elseif (strtolower($c_name) == 'home_controller_component')
+				$action = $this->core->getUrlAction(1);
+		}
 
 		$this->build($this->core); // Build method [*]
 

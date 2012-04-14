@@ -27,11 +27,6 @@ class Tools_Controller_Component extends Controller_Component
 		if ($core->getUrlAction(1) != null)
 			$this->m_action = $core->getUrlAction(1);
 
-		if (in_array($this->m_action, array('models')))
-		{
-			return $this->delegateTo(ucfirst(strtolower($this->m_action)) . '_Tools');
-		}
-
 		$this->buildBlock('tools');
 
 		return $this;
