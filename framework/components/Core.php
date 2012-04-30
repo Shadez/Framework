@@ -155,7 +155,7 @@ class Core_Component extends Component
 			if (!$disabled)
 			{
 				$cookie_locale = $this->c('Cookie')->read('locale');
-				$redirect = '/' . $this->getUrl(($cookie_locale ? $cookie_locale : $this->c('Config')->getValue('i18n.default')) . $this->m_rawUrl);
+				$redirect = $this->getUrl(($cookie_locale ? $cookie_locale : $this->c('Config')->getValue('i18n.default')) . $this->m_rawUrl);
 				$this->redirectTo($redirect);
 			}
 		}
