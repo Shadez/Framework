@@ -39,7 +39,6 @@ class Api_Controller_Component extends Controller_Component
 		elseif (isset($_GET['method']))
 			$resp = $this->c('Api')->runApiMethod(addslashes($_GET['method']));
 
-		dump($resp);
 		$this->getCore()->setVar('content', $resp);
 	}
 }
