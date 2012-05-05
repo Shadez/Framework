@@ -27,12 +27,7 @@ abstract class Component
 	protected $m_uniqueHash = '';
 	protected $m_time = 0;
 
-	public function __call($method, $args)
-	{
-		return $this;
-	}
-
-	public function __construct($name, Core_Component &$core)
+	public function __construct($name, Core_Component $core)
 	{
 		if (!$name)
 			throw new CoreCrash_Exception_Component('component name was not provided');
@@ -45,7 +40,7 @@ abstract class Component
 
 	public function __destruct()
 	{
-		foreach ($this as $variable => &$value)
+		foreach ($this as $variable => $value)
 		{
 			if (isset($this->{$variable}))
 				unset($this->{$variable});

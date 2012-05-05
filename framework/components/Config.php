@@ -67,7 +67,7 @@ class Config_Component extends Component
 		if (!$pieces)
 			return false;
 
-		foreach ($pieces as &$piece)
+		foreach ($pieces as $piece)
 			$holder_path .= '[\'' . $piece . '\']';
 
 		return $holder_path;
@@ -83,12 +83,7 @@ class Config_Component extends Component
 			return false;
 
 		if (!$indexes)
-		{
-			if (!$address)
-				return $holder;
-			else
-				return $holder;
-		}
+			return $holder;
 
 		return $this->findValue($indexes, $holder);
 	}

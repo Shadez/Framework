@@ -34,8 +34,6 @@ class AppCrash
 		$this->e = $e;
 
 		$this->analyze();
-
-		return $this;
 	}
 
 	protected function analyze()
