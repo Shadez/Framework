@@ -218,7 +218,7 @@ class Core_Component extends Component
 			$controller_name = preg_replace('/[^ \/_A-Za-z-]/', '', $controller_name);
 		}
 
-		if (!$controller_name || $this->c('Config')->getValue('app.controller.home_only'))
+		if (!$controller_name || $this->c('Config')->getValue('controller.home_only'))
 		{
 			$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => 'Home', 'default' => false), $this);
 
