@@ -755,14 +755,14 @@ class QueryBuilder_Db_Component extends Component
 				$this->m_rawSql .= 'GROUP BY `' . $table_aliases[$this->getModelByName($g['model'])->m_table] . '`.`' . $g['field'] . '`' . NL;
 		}
 
-		if (isset($this->m_sql['order']))
+		if (isset($this->m_sql['random'], $this->m_sql['random'][0]))
+		{
+			if (isset($this->m_sql['random'][0]['useRandom']) && $this->m_sql['random'][0]['useRandom'])
+				$this->m_rawSql .= 'ORDER BY RAND()' . NL;
+		}
+		else if (isset($this->m_sql['order']))
 		{
 			$this->m_rawSql .= 'ORDER BY ' . NL;
-			if (isset($this->m_sql['random']))
-			{
-				dump($this->m_sql['random']);
-				die;
-			}
 
 			$multiorder = false;
 			foreach ($this->m_sql['order'] as &$entry)

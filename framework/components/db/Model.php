@@ -279,6 +279,10 @@ abstract class Model_Db_Component extends Component
 
 			$this->m_rawSql .= $this->getPrimaryFieldsValues() . ' LIMIT 1';
 		}
+		elseif (isset($this->m_sqlData['random']) && $this->m_sqlData['random'])
+		{
+			$this->m_rawSql .= '1 ORDER BY RAND() LIMIT 1';
+		}
 
 		return $this;
 	}
@@ -386,6 +390,14 @@ abstract class Model_Db_Component extends Component
 		$this->m_sqlData['pf'] = array(
 			'values' => $primaryfieldsValues
 		);
+
+		return $this->generateLoadSql()
+			->performSql(true);
+	}
+
+	public function loadRandom()
+	{
+		$this->m_sqlData['random'] = true;
 
 		return $this->generateLoadSql()
 			->performSql(true);
