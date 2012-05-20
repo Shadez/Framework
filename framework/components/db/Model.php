@@ -36,11 +36,49 @@ abstract class Model_Db_Component extends Component
 	public $m_table = 'model';
 	public $m_dbType = '';
 	public $m_fields = array();
+	public $m_fieldTypes = array();
 	public $m_aliases = array();
 	public $m_formFields = array();
 
+	private function setProperFieldName(&$name)
+	{
+		$newName = '';
+
+		if (!isset($this->m_fields[$name]))
+		{
+			// Check field types
+			if (!isset($this->m_fieldTypes[$name]))
+				return false;
+
+			switch ($this->m_fieldTypes[$name])
+			{
+				case 'DbLocale':
+					$newName = $name . '_' . $this->c('I18n')->getLocale(LOCALE_SINGLE);
+					if (isset($this->m_fields[$newName]))
+					{
+						$name = $newName;
+						return true;
+					}
+					return false;
+				case 'DbLocaleId':
+					$newName = $name . '_' . $this->c('I18n')->getLocaleId();
+					if (isset($this->m_fields[$newName]))
+					{
+						$name = $newName;
+						return true;
+					}
+					return false;
+			}
+		}
+
+		return true;
+	}
+
 	public function __set($name, $value)
 	{
+		if (!$this->setProperFieldName($name))
+			return false;
+
 		if (!$name || !isset($this->m_fields[$name]))
 			return false;
 
@@ -70,6 +108,9 @@ abstract class Model_Db_Component extends Component
 
 	public function __get($name)
 	{
+		if (!$this->setProperFieldName($name))
+			return false;
+
 		if (isset($this->m_values[$name]))
 			return $this->m_values[$name];
 		elseif (isset($this->m_data[$name]))
@@ -305,6 +346,11 @@ abstract class Model_Db_Component extends Component
 	public function getAliases()
 	{
 		return $this->m_aliases;
+	}
+
+	public function getFieldTypes()
+	{
+		return $this->m_fieldTypes;
 	}
 
 	public function restoreFields()

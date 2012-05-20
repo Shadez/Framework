@@ -86,7 +86,7 @@ class Database_Component extends Component
 
 		$query_time = round(microtime(true) - $query_start, 4);
 
-		$this->c('Log')->writeSql('[%s ms]: %s', $query_time, $sql);
+		$this->c('Log')->writeSql('[' . $this->m_configs['type'] . ', %s ms]: %s', $query_time, $sql);
 
 		$this->m_queriesTime += $query_time;
 		$this->m_queriesCount++;

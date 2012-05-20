@@ -108,6 +108,39 @@ class QueryResult_Db_Component extends Component
 		return $this;
 	}
 
+	public function loadRandomItem()
+	{
+		$this->m_sqlBuilder->limit(1)
+			->random(true);
+
+		$item = $this->c('Db')->getDb($this->m_model->m_dbType)->selectWithParams($this->getSql(), $this->getParams())->getData();
+
+		if (!$item)
+			return false;
+
+		$fields = $this->m_sqlBuilder->getLocaleFields();
+
+		if (!$fields)
+		{
+			$holder = $this->i('ResultHolder', 'Db')
+				->setResult($item, $this->m_sqlBuilder->getSql());
+
+			unset($item);
+
+			return $holder; // Nothing to do
+		}
+
+		// Parse fields
+		$this->parseResults($item[0], $fields);
+
+		$holder = $this->i('ResultHolder', 'Db')
+			->setResult($item, $this->m_sqlBuilder->getSql());
+
+		unset($item);
+
+		return $holder;
+	}
+
 	public function loadItem()
 	{
 		$this->m_sqlBuilder->limit(1);

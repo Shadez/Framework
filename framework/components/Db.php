@@ -51,6 +51,7 @@ class Db_Component extends Component
 			{
 				$db['connected'] = false;
 				$db['object'] = null;
+				$db['type'] = $type;
 
 				$this->m_availableDatabases[$type] = array(
 					'single' => true,
@@ -73,6 +74,7 @@ class Db_Component extends Component
 					$conf['object'] = null;
 
 					$this->m_availableDatabases[$type]['configs'][$id] = $conf;
+					$this->m_availableDatabases[$type]['configs'][$id]['type'] = $type;
 
 					if ($this->m_availableDatabases[$type]['activeId'] == -1 && $id > 0)
 						$this->m_availableDatabases[$type]['activeId'] = $id;

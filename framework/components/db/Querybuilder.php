@@ -758,6 +758,12 @@ class QueryBuilder_Db_Component extends Component
 		if (isset($this->m_sql['order']))
 		{
 			$this->m_rawSql .= 'ORDER BY ' . NL;
+			if (isset($this->m_sql['random']))
+			{
+				dump($this->m_sql['random']);
+				die;
+			}
+
 			$multiorder = false;
 			foreach ($this->m_sql['order'] as &$entry)
 			{
@@ -882,6 +888,13 @@ class QueryBuilder_Db_Component extends Component
 	public function group($model_name, $field_name)
 	{
 		$this->appendSql('group', array('model' => $model_name, 'field' => $field_name));
+
+		return $this;
+	}
+
+	public function random($val)
+	{
+		$this->appendSql('random', array('useRandom' => $val));
 
 		return $this;
 	}
