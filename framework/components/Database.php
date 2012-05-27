@@ -56,6 +56,23 @@ class Database_Component extends Component
 		return $this;
 	}
 
+	private function convertArray(&$input)
+	{
+		if (!$input)
+			return $this;
+
+		$input = array_map(function($v) {
+			if (is_string($v))
+				return '\'' . $v . '\'';
+
+			return $v;
+		}, $input);
+
+		$input = implode(', ', $input);
+
+		return $this;
+	}
+
 	private function execute($stmtSql, $params = array(), $fetch = false)
 	{
 		if (!$this->m_pdo)
@@ -65,12 +82,23 @@ class Database_Component extends Component
 		$sql = '';
 
 		$this->m_resultData = array();
+		$logSql = '';
 
 		try
 		{
 			$stmt = $this->m_pdo->prepare($stmtSql);
+
+			foreach ($params as &$p)
+				if (is_array($p))
+					$this->convertArray($p);
+
 			$stmt->execute($params);
 			$sql = $stmt->queryString;
+			$logSql = $sql;
+
+			if ($params)
+				foreach ($params as $t => $p)
+					$logSql = str_replace($t, '\'' . $p . '\'', $logSql);
 
 			if ($fetch)
 				$this->m_resultData = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -86,7 +114,7 @@ class Database_Component extends Component
 
 		$query_time = round(microtime(true) - $query_start, 4);
 
-		$this->c('Log')->writeSql('[' . $this->m_configs['type'] . ', %s ms]: %s', $query_time, $sql);
+		$this->c('Log')->writeSql('[' . $this->m_configs['type'] . ', %s ms]: %s', $query_time, $logSql);
 
 		$this->m_queriesTime += $query_time;
 		$this->m_queriesCount++;

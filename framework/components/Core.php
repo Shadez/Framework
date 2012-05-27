@@ -104,6 +104,11 @@ class Core_Component extends Component
 		return isset($this->m_urlActions[$idx]) ? $this->m_urlActions[$idx] : '';
 	}
 
+	public function getActionsUrl()
+	{
+		return implode('/', $this->m_urlActions);
+	}
+
 	public function getActions()
 	{
 		return $this->m_urlActions;

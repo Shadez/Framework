@@ -25,12 +25,14 @@ abstract class Model_Db_Component extends Component
 	private $m_values = array();
 	private $m_data = array();
 	private $m_updatingData = false;
+	private $m_dataLoaded = false;
 
 	protected $m_primaryFields = array();
 	protected $m_primaryFieldsCount = 0;
 	protected $m_rawSql = '';
 	protected $m_sqlData = array();
 	protected $m_validationGroups = array();
+	protected $m_customData = array();
 
 	public $m_model = 'Model';
 	public $m_table = 'model';
@@ -109,7 +111,13 @@ abstract class Model_Db_Component extends Component
 	public function __get($name)
 	{
 		if (!$this->setProperFieldName($name))
-			return false;
+		{
+			// Check custom data
+			if (!isset($this->m_customData[$name]))
+				return false;
+
+			return $this->m_customData[$name];
+		}
 
 		if (isset($this->m_values[$name]))
 			return $this->m_values[$name];
@@ -122,6 +130,7 @@ abstract class Model_Db_Component extends Component
 	public function setData($data)
 	{
 		$this->m_data = $data;
+		$this->m_dataLoaded = true;
 		$this->m_updatingData = true;
 
 		return $this;
@@ -385,36 +394,51 @@ abstract class Model_Db_Component extends Component
 	/**
 	 * load(array('id' => 5));
 	 **/
-	public function load($primaryfieldsValues)
+	public function load($primaryfieldsValues, $type = false)
 	{
 		$this->m_sqlData['pf'] = array(
 			'values' => $primaryfieldsValues
 		);
 
-		return $this->generateLoadSql()
+		$this->generateLoadSql()
 			->performSql(true);
+
+		if ($type && method_exists($this, 'loadType' . $type))
+			call_user_func(array($this, 'loadType' . $type));
+
+		return $this;
 	}
 
-	public function loadRandom()
+	public function loadRandom($type = false)
 	{
 		$this->m_sqlData['random'] = true;
 
-		return $this->generateLoadSql()
+		$this->generateLoadSql()
 			->performSql(true);
+
+		if ($type && method_exists($this, 'loadType' . $type))
+			call_user_func(array($this, 'loadType' . $type));
+
+		return $this;
 	}
 
 	/**
 	 * find('`id` = :id AND (`name` LIKE \'%:name%\' OR `login` LIKE \'%:name%\')', array('id' => 5, 'name' => 'Shadez'));
 	 **/
-	public function find($condition, $values)
+	public function find($condition, $values, $type = false)
 	{
 		$this->m_sqlData['where'] = array(
 			'condition' => $condition,
 			'params' => $values
 		);
 
-		return $this->generateLoadSql()
+		$this->generateLoadSql()
 			->performSql(true);
+
+		if ($type && method_exists($this, 'loadType' . $type))
+			call_user_func(array($this, 'loadType' . $type));
+
+		return $this;
 	}
 
 	public function save()
@@ -434,5 +458,10 @@ abstract class Model_Db_Component extends Component
 
 		return $this->generateDeleteSql()
 			->performSql();
+	}
+
+	public function hasData()
+	{
+		return $this->m_dataLoaded;
 	}
 };

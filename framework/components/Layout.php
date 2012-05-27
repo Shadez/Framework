@@ -205,12 +205,20 @@ class Layout_Component extends Component
 		return $this;
 	}
 
-	public function setPageTitle($title)
+	public function setPageTitle($title, $append = true)
 	{
 		if (!$title)
 			return $this;
 
-		$this->m_pageTitle = $this->c('I18n')->getString($title) . $this->c('Config')->getValue('app.layout.title_delimiter') . $this->m_pageTitle;
+		if (!$append)
+			$this->m_pageTitle = $title;
+		else
+		{
+			if (is_array($title))
+				$this->m_pageTitle = implode($this->c('Config')->getValue('app.layout.title_delimiter'), array_merge($title, array($this->m_pageTitle)));
+			else
+				$this->m_pageTitle = $this->c('I18n')->getString($title) . $this->c('Config')->getValue('app.layout.title_delimiter') . $this->m_pageTitle;
+		}
 
 		return $this;
 	}

@@ -32,8 +32,15 @@ class ControllerGroups_Component extends Component
 		foreach ($groups as $name => $group)
 		{
 			if ($group)
-				$this->m_controllerGroups[$name] = $group;
+				$this->createGroup($name, $group);
 		}
+
+		return $this;
+	}
+
+	public function createGroup($name, $group)
+	{
+		$this->m_controllerGroups[$name] = $group;
 
 		return $this;
 	}
@@ -105,5 +112,22 @@ class ControllerGroups_Component extends Component
 		}
 
 		return $this;
+	}
+
+	public function getBlockVar($group, $block, $var)
+	{
+		if (!$var || !$group || !$block)
+			return false;
+
+		if (!isset($this->m_controllerGroups[$group], $this->m_controllerGroups[$group]['blocks']))
+			return false;
+
+		if (!isset($this->m_controllerGroups[$group]['blocks'][$block], $this->m_controllerGroups[$group]['blocks'][$block]['vars']))
+			return false;
+
+		if (!isset($this->m_controllerGroups[$group]['blocks'][$block]['vars'][$var]))
+			return false;
+
+		return $this->m_controllerGroups[$group]['blocks'][$block]['vars'][$var];
 	}
 };
