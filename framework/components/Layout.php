@@ -89,7 +89,7 @@ class Layout_Component extends Component
 				elseif ($cname == $controller_name)
 				{
 					foreach ($cactions as $region => $files)
-						if ($region == $controller_action || $region == '_overall')
+						if ($region == $controller_action || $region == '_overall_')
 							$this->addClientFiles($type, $files);
 				}
 			}
