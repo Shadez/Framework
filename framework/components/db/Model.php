@@ -378,7 +378,7 @@ abstract class Model_Db_Component extends Component
 
 	public function getInsertId()
 	{
-		return $this->m_lastInsertId = 0;
+		return $this->m_lastInsertId;
 	}
 
 	public function restoreFields()
