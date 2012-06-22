@@ -191,4 +191,11 @@ class I18n_Component extends Component
 
 		return isset($this->m_formats[$type][$subtype]) ? date($this->m_formats[$type][$subtype], $timestamp) : date('d.m.Y', $timestamp);
 	}
+
+	public function getFormat($index)
+	{
+		$string = $this->findString(explode('.', $index), $this->m_formats);
+
+		return $string === -1 ? $index : $string;
+	}
 };

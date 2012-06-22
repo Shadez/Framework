@@ -26,6 +26,8 @@ abstract class Model_Db_Component extends Component
 	private $m_data = array();
 	private $m_updatingData = false;
 	private $m_dataLoaded = false;
+	private $m_returnInsertId = false;
+	private $m_lastInsertId = 0;
 
 	protected $m_primaryFields = array();
 	protected $m_primaryFieldsCount = 0;
@@ -264,7 +266,10 @@ abstract class Model_Db_Component extends Component
 			$this->m_rawSql = 'UPDATE `' . $this->getTable() . '` SET ' . $this->getChangedFieldsValues() .
 			' WHERE ' . $this->getPrimaryFieldsValues() . ' LIMIT 1';
 		else
+		{
+			$this->m_returnInsertId = true;
 			$this->m_rawSql = 'INSERT INTO `' . $this->getTable() . '` (' . $this->getChangedFields() . ') VALUES (' . $this->getChangedFieldsValues() . ')';
+		}
 
 		return $this;
 	}
@@ -323,7 +328,12 @@ abstract class Model_Db_Component extends Component
 				$this->setData($result[0]);
 		}
 		else
+		{
 			$this->c('Db')->getDb($this->getType())->executeWithParams($this->m_rawSql, $params);
+
+			if ($this->m_returnInsertId)
+				$this->m_lastInsertId = $this->c('Db')->getDb($this->getType())->getInsertId();
+		}
 
 		return $this;
 	}
@@ -364,6 +374,11 @@ abstract class Model_Db_Component extends Component
 	public function getFieldTypes()
 	{
 		return $this->m_fieldTypes;
+	}
+
+	public function getInsertId()
+	{
+		return $this->m_lastInsertId = 0;
 	}
 
 	public function restoreFields()
