@@ -43,6 +43,7 @@ if (!defined('FW_DIR'))
 
 define('FW_CLASSES_DIR', FW_DIR . 'classes' . DS);
 define('FW_COMPONENTS_DIR', FW_DIR . 'components' . DS);
+define('FW_INTERFACES_DIR', FW_DIR . 'interfaces' . DS);
 
 if (!defined('STATIC_DIR'))
 	define('STATIC_DIR', ROOT . 'static' . DS);
@@ -57,6 +58,7 @@ if (!defined('PHP_EXT'))
 
 define('APP_CLASSES_DIR', APP_DIR . 'classes' . DS);
 define('APP_COMPONENTS_DIR', APP_DIR . 'components' . DS);
+define('APP_INTERFACES_DIR', APP_DIR . 'interfaces' . DS);
 define('APP_CONFIGS_DIR', APP_DIR . 'configs' . DS);
 define('APP_I18N_DIR', APP_DIR . 'i18n' .DS);
 define('APP_LAYOUTS_DIR', APP_DIR . 'layouts' . DS);

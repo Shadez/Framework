@@ -29,7 +29,12 @@ abstract class Autoload
 
 	public static function loadClass($className)
 	{
+		$isInterface = false;
+
 		$pieces = explode('_', $className);
+
+		if ($pieces[0] == $className && strtolower(substr($className, 0, 1)) == 'i')
+			$isInterface = true;
 
 		if (strcmp(strtolower($pieces[sizeof($pieces)-1]), 'component') !== false)
 			unset($pieces[sizeof($pieces)-1]);
@@ -41,17 +46,20 @@ abstract class Autoload
 			$isController = strtolower($pieces[$size-1]) == 'controller';
 
 		$paths = array(
-			APP_COMPONENTS_DIR, FW_COMPONENTS_DIR
+			APP_COMPONENTS_DIR, FW_COMPONENTS_DIR, APP_INTERFACES_DIR, FW_INTERFACES_DIR
 		);
 
+		$usePath = '';
 		$file_path = '';
 
-		for ($i = $size - 1; $i >= 0; --$i)
-		{
-			$file_path .= ($i < $size-1 ? DS : '') . ($i == 0 ? ucfirst(strtolower($pieces[$i])) . '.' . PHP_EXT : strtolower($pieces[$i]));
-		}
+		if ($isInterface)
+			$file_path = ucfirst(strtolower($className)) . '.' . PHP_EXT;
+		else
+			for ($i = $size - 1; $i >= 0; --$i)
+			{
+				$file_path .= ($i < $size-1 ? DS : '') . ($i == 0 ? ucfirst(strtolower($pieces[$i])) . '.' . PHP_EXT : strtolower($pieces[$i]));
+			}
 
-		$usePath = '';
 		$throwExc = false;
 
 		foreach ($paths as $path)
@@ -66,7 +74,7 @@ abstract class Autoload
 		{
 			require_once($usePath);
 
-			if (!class_exists($className))
+			if (!class_exists($className) && !interface_exists($className))
 				$throwExc = true;
 		}
 

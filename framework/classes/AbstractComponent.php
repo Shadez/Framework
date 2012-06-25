@@ -136,4 +136,16 @@ abstract class Component
 	{
 		return $this;
 	}
+
+	public function extend(&$to, $from)
+	{
+		if (!$from || !$to)
+			return $this;
+
+		foreach ($from as $k => $v)
+			if (isset($to[$k]))
+				$to[$k] = $v;
+
+		return $this;
+	}
 };

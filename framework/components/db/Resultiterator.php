@@ -29,6 +29,17 @@ class ResultIterator_Db_Component
 	const RAND_1 = 0.45;
 	const RAND_2 = 0.22;
 
+	public function __get($field)
+	{
+		if ($this->m_last)
+			return null;
+
+		if (isset($this->m_data[$f]))
+			$this->m_field = $f;
+
+		return $this;
+	}
+
 	public function __toString()
 	{
 		if ($this->m_field && isset($this->m_data[$this->m_field]))
