@@ -479,4 +479,9 @@ abstract class Model_Db_Component extends Component
 	{
 		return $this->m_dataLoaded;
 	}
+
+	public function getData()
+	{
+		return $this->m_data;
+	}
 };
