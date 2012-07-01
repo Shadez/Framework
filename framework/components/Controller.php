@@ -102,6 +102,8 @@ abstract class Controller_Component extends Component
 		if ($this->m_pageTitle)
 			$this->c('Layout')->setPageTitle($this->m_pageTitle);
 
+		$this->end();
+
 		$this->finish();
 
 		return $this;
@@ -175,6 +177,11 @@ abstract class Controller_Component extends Component
 	}
 
 	protected function run()
+	{
+		return $this;
+	}
+
+	protected function end()
 	{
 		return $this;
 	}

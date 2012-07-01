@@ -63,7 +63,7 @@ class Core_Component extends Component
 		//$this->c('Router');
 
 		// Perform RunOnce
-		//$this->c('RunOnce', 'Run');
+		$this->c('RunOnce', 'Run');
 
 		$this->m_activeController = null;
 
