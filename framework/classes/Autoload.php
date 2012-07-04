@@ -62,10 +62,18 @@ abstract class Autoload
 
 		$throwExc = false;
 
-		foreach ($paths as $path)
+		if (!$file_path)
+			$throwExc = true;
+
+		if (!$throwExc)
 		{
-			if (file_exists($path . $file_path))
-				$usePath = $path . $file_path;
+			foreach ($paths as $path)
+			{
+				if (!$path) continue;
+
+				if (file_exists($path . $file_path))
+					$usePath = $path . $file_path;
+			}
 		}
 
 		if (!$usePath)

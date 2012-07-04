@@ -31,15 +31,15 @@ $tstart = array_sum(explode(' ', microtime()));
 
 // Define global constants
 define('DS', DIRECTORY_SEPARATOR);
-define('ROOT', dirname(dirname(dirname(__FILE__))) . DS);
+define('ROOT', (dirname(dirname(__FILE__))) . DS);
+
+if (!defined('FW_DIR'))
+	define('FW_DIR', dirname(dirname(__FILE__)) . DS . 'framework' . DS);
 
 if (!defined('LIB_DIR'))
 	define('LIB_DIR', ROOT . 'lib' . DS);
 
 define('SHARED_DIR', LIB_DIR . 'shared' . DS);
-
-if (!defined('FW_DIR'))
-	define('FW_DIR', dirname(dirname(__FILE__)) . DS . 'framework' . DS);
 
 define('FW_CLASSES_DIR', FW_DIR . 'classes' . DS);
 define('FW_COMPONENTS_DIR', FW_DIR . 'components' . DS);
@@ -55,6 +55,13 @@ if (!defined('TPL_EXT'))
 	define('TPL_EXT', 'tpl');
 if (!defined('PHP_EXT'))
 	define('PHP_EXT', 'php');
+
+// PHP-Error by JosephLenton <https://github.com/JosephLenton/PHP-Error>
+if ($debug)
+{
+	require_once(SHARED_DIR . 'php-error' . DS . 'php_error.' . PHP_EXT);
+	\php_error\reportErrors();
+}
 
 define('APP_CLASSES_DIR', APP_DIR . 'classes' . DS);
 define('APP_COMPONENTS_DIR', APP_DIR . 'components' . DS);

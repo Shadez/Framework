@@ -207,17 +207,20 @@ if ($trace)
 		'<td class="content">' . NL .
 		'<div class="trace-file">' . NL .
 		'<div class="plus">+</div><div class="minus">-</div>' . NL .
-		'&nbsp;' . $trace[$i]['file'] . '(' . $trace[$i]['line'] . '): ';
+		'&nbsp;' . (!empty($trace[$i]['file']) ? $trace[$i]['file'] : 'unknown file') . '(' . (!empty($trace[$i]['line']) ? $trace[$i]['line'] : 'unknown line') . '): ';
 		if (isset($trace[$i]['class']))
 			echo '<strong>' . $trace[$i]['class'] . '</strong>' . $trace[$i]['type'];
 		echo '<strong>' . $trace[$i]['function'] . '</strong>()' . NL .
 		'<div class="code"><pre>' . NL;
-		foreach ($trace[$i]['lineContents'] as $line)
+		if (!empty($trace[$i]['lineContents']))
 		{
-			if (($line['line'] + 1) == $trace[$i]['line'])
-				echo '<span class="error"><span class="ln error-ln">' . $line['line'] . '</span>' . $line['content'] . '</span>';
-			else
-				echo '<span class="ln">' . $line['line'] . '</span>' . $line['content'] . NL;
+			foreach ($trace[$i]['lineContents'] as $line)
+			{
+				if (($line['line'] + 1) == $trace[$i]['line'])
+					echo '<span class="error"><span class="ln error-ln">' . $line['line'] . '</span>' . $line['content'] . '</span>';
+				else
+					echo '<span class="ln">' . $line['line'] . '</span>' . $line['content'] . NL;
+			}
 		}
 		echo '</pre></div></td></tr>' . NL;
 	}
