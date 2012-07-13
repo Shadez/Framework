@@ -197,10 +197,41 @@ class Layout_Component extends Component
 		return $this;
 	}
 
+	public function setMetaTags($tags)
+	{
+		if (!$tags)
+			return $this;
+
+		foreach ($tags as $tag)
+		{
+			if (!$tag || !isset($tag['name'], $tag['content']))
+				continue;
+
+			$this->setMetaTag($tag['name'], $tag['content'], isset($tag['typeName']) ? $tag['typeName'] : null);
+		}
+
+		return $this;
+	}
+
 	public function removeMetaTag($name)
 	{
 		if (isset($this->m_pageMetaTags[$name]))
 			unset($this->m_pageMetaTags[$name]);
+
+		return $this;
+	}
+
+	public function removeMetaTags($tags = array())
+	{
+		if (!$tags)
+		{
+			$this->m_pageMetaTags = array();
+
+			return $this;
+		}
+
+		foreach ($tags as $tag)
+			$this->removeMetaTag($tag);
 
 		return $this;
 	}
