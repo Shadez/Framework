@@ -40,7 +40,7 @@ class Events_Component extends Component
 	protected function isCanBeTriggered($event)
 	{
 		if ($this->m_eventsDisabled)
-			return false
+			return false;
 
 		if (!isset($this->m_events[$event]))
 			return false;
