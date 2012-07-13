@@ -30,6 +30,12 @@ class ResultHolder_Db_Component extends Component
 	private $m_iterators = array();
 	private $m_iteratorId = 0;
 
+	/**
+	 * Sets query result
+	 * @param array $data
+	 * @param string $query
+	 * @return ResultHolder_Db_Component
+	 **/
 	public function setResult($data, $query)
 	{
 		$this->m_data = $data;
@@ -49,6 +55,10 @@ class ResultHolder_Db_Component extends Component
 		return $this->setAssigned(true);
 	}
 
+	/**
+	 * Creates and initializes iterators
+	 * @return ResultHolder_Db_Component
+	 **/
 	private function setIterators()
 	{
 		$this->m_iterators = array();
@@ -62,6 +72,11 @@ class ResultHolder_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets assigned state
+	 * @param bool $assigned
+	 * @return ResultHolder_Db_Component
+	 **/
 	private function setAssigned($assigned)
 	{
 		$this->m_assigned = (bool) $assigned;
@@ -69,6 +84,11 @@ class ResultHolder_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * switches to next row ($startWithOffset must set to TRUE with while() loop)
+	 * @param bool $startWithOffset = false
+	 * @return bool
+	 **/
 	public function next($startWithOffset = false)
 	{
 		if ($startWithOffset && $this->m_rowIndex == 0 && !$this->m_offsetUsed)
@@ -87,27 +107,44 @@ class ResultHolder_Db_Component extends Component
 		return false;
 	}
 
+	/**
+	 * Returns current row
+	 * @return array
+	 **/
 	public function getRow()
 	{
 		if (!isset($this->m_dataMap[$this->m_rowIndex]))
-			return null;
+			return array();
 
 		if (!isset($this->m_data[$this->m_dataMap[$this->m_rowIndex]]))
-			return null;
+			return array();
 
 		return $this->m_data[$this->m_dataMap[$this->m_rowIndex]];
 	}
 
+	/**
+	 * Returns first iterator
+	 * @return ResultIterator_Db_Component
+	 **/
 	public function begin()
 	{
 		return $this->m_iterators[0];
 	}
 
+	/**
+	 * Returns last iterator
+	 * @retrurn ResultIterator_Db_Component
+	 **/
 	public function end()
 	{
 		return $this->m_iterators[$this->m_dataSize];
 	}
 
+	/**
+	 * Returns current iterator
+	 * @param bool $toNext = true
+	 * @return ResultIterator_Db_Component
+	 **/
 	public function iter($toNext = true)
 	{
 		if ($toNext)
@@ -116,6 +153,11 @@ class ResultHolder_Db_Component extends Component
 		return $this->m_iterators[$this->m_iteratorId];
 	}
 
+	/**
+	 * Rewinds iterators to beginning or to specified ID
+	 * @param int $id = 0
+	 * @return ResultHolder_Db_Component
+	 **/
 	public function rewind($id = 0)
 	{
 		$this->m_iteratorId = min($id, $this->m_dataSize-1);
@@ -123,6 +165,11 @@ class ResultHolder_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns field value of active row
+	 * @param string $field
+	 * @return mixed
+	 **/
 	public function getRowField($field)
 	{
 		$row = $this->getRow();
@@ -136,6 +183,10 @@ class ResultHolder_Db_Component extends Component
 		return null;
 	}
 
+	/**
+	 * Resets data map
+	 * @return ResultHolder_Db_Component
+	 **/
 	public function reset()
 	{
 		$this->m_rowIndex = 0;
@@ -144,6 +195,10 @@ class ResultHolder_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Frees results
+	 * @return ResultHolder_Db_Component
+	 **/
 	public function free()
 	{
 		$this->m_data = array();
@@ -156,21 +211,37 @@ class ResultHolder_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns SQL query for current data set
+	 * @return string
+	 **/
 	public function getQuery()
 	{
 		return $this->m_sqlQuery;
 	}
 
+	/**
+	 * Returns current data set's rows count
+	 * @return int
+	 **/
 	public function getRowsCount()
 	{
 		return $this->m_dataSize;
 	}
 
+	/**
+	 * Returns data set as array
+	 * @return array
+	 **/
 	public function getData()
 	{
 		return $this->m_data;
 	}
 
+	/**
+	 * Returns all values of specified field
+	 * @return array
+	 **/
 	public function getFieldValues($field)
 	{
 		$data = array();

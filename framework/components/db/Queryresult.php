@@ -34,6 +34,12 @@ class QueryResult_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets main model
+	 * @param string $name
+	 * @throws ModelCrash_Exception_Component
+	 * @return QueryResult_Db_Component
+	 **/
 	public function model($name)
 	{
 		$this->m_model = $this->i($name, 'Model');
@@ -46,12 +52,23 @@ class QueryResult_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets item ID, deprecated, use Models instead
+	 * @param mixed $id
+	 * @deprecated
+	 * @return QueryResult_Db_Component
+	 **/
 	public function setItemId($id)
 	{
 		return $this->setModelIdField()
 			->setId($id);
 	}
 
+	/**
+	 * Sets model's primary field, deprecated, use Models instead
+	 * @deprecated
+	 * @return QueryResult_Db_Component
+	 **/
 	protected function setModelIdField()
 	{
 		foreach ($this->m_model->m_fields as $field => $type)
@@ -64,6 +81,12 @@ class QueryResult_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets ID, deprecated, use Models instead
+	 * @param mixed $id
+	 * @deprecated
+	 * @return QueryResult_Db_Component
+	 **/
 	protected function setId($id)
 	{
 		if (!$this->m_idField)
@@ -81,6 +104,11 @@ class QueryResult_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Converts array to string
+	 * @param array &$values
+	 * @return string
+	 **/
 	private function arrayToString(&$values)
 	{
 		$str = '';
@@ -94,6 +122,11 @@ class QueryResult_Db_Component extends Component
 		return $str;
 	}
 
+	/** 
+	 * Sets fields to be selected
+	 * @param array $fields
+	 * @return QueryResult_Db_Component
+	 **/
 	public function fields($fields)
 	{
 		$this->m_sqlBuilder->setFields($fields);
@@ -101,6 +134,12 @@ class QueryResult_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets indexing key
+	 * @param string $field
+	 * @param bool $multy = false
+	 * @return QueryResult_Db_Component
+	 **/
 	public function indexKey($field, $multy = false)
 	{
 		$this->m_sqlBuilder->indexKey($field, $multy);
@@ -108,6 +147,11 @@ class QueryResult_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Loads random item, deprecated, use Models instead
+	 * @deprecated
+	 * @return QueryResult_Db_Component
+	 **/
 	public function loadRandomItem()
 	{
 		$this->m_sqlBuilder->limit(1)
@@ -141,6 +185,10 @@ class QueryResult_Db_Component extends Component
 		return $holder;
 	}
 
+	/**
+	 * Loads single item
+	 * @return ResultHolder_Db_Component
+	 **/
 	public function loadItem()
 	{
 		$this->m_sqlBuilder->limit(1);
@@ -173,6 +221,12 @@ class QueryResult_Db_Component extends Component
 		return $holder;
 	}
 
+	/**
+	 * Parses query results
+	 * @param array &$item
+	 * @param array &$fields
+	 * @return QueryResult_Db_Component
+	 **/
 	protected function parseResults(&$item, &$fields)
 	{
 		if (!$item || !$fields)
@@ -203,6 +257,10 @@ class QueryResult_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Loads all items
+	 * @return QueryResult_Db_Component
+	 **/
 	public function loadItems()
 	{
 		$index_key = $this->m_sqlBuilder->getIndexKey();

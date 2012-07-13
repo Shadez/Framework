@@ -29,6 +29,11 @@ class ResultIterator_Db_Component
 	const RAND_1 = 0.45;
 	const RAND_2 = 0.22;
 
+	/**
+	 * Sets field to be returned
+	 * @param string $field
+	 * @return ResultIterator_Db_Component
+	 **/
 	public function __get($field)
 	{
 		if ($this->m_last)
@@ -40,6 +45,10 @@ class ResultIterator_Db_Component
 		return $this;
 	}
 
+	/**
+	 * Casts field to appropriate type
+	 * @return mixed
+	 **/
 	public function __toString()
 	{
 		if ($this->m_field && isset($this->m_data[$this->m_field]))
@@ -65,6 +74,12 @@ class ResultIterator_Db_Component
 		return null;
 	}
 
+	/**
+	 * Implements pseudo-methods for field cast (toInt, toFloat, toDouble, toBool, toString)
+	 * @param string $method
+	 * @param array $args
+	 * @return mixed
+	 **/
 	public function __call($method, $args)
 	{
 		$method = strtolower($method);
@@ -107,6 +122,11 @@ class ResultIterator_Db_Component
 		return $this;
 	}
 
+	/**
+	 * Sets query result
+	 * @param array $data
+	 * @return ResultIterator_Db_Component
+	 **/
 	public function setData($data)
 	{
 		if ($this->m_last)
@@ -117,6 +137,10 @@ class ResultIterator_Db_Component
 		return $this;
 	}
 
+	/**
+	 * Sets current iterator as last iterator in vector
+	 * @return ResultIterator_Db_Component
+	 **/
 	public function lastIterator()
 	{
 		$this->m_last = true;
@@ -124,6 +148,11 @@ class ResultIterator_Db_Component
 		return $this;
 	}
 
+	/**
+	 * Sets field to be returned
+	 * @param string $field
+	 * @return ResultIterator_Db_Component
+	 **/
 	public function field($f)
 	{
 		if ($this->m_last)
@@ -135,6 +164,10 @@ class ResultIterator_Db_Component
 		return $this;
 	}
 
+	/**
+	 * Returns raw iterator data
+	 * @return array
+	 **/
 	public function getData()
 	{
 		return $this->m_data;
