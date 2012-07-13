@@ -36,6 +36,11 @@ class Layout_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets bread crumb data
+	 * @param array $bc
+	 * @return Layout_Component
+	 **/
 	public function setBreadcrumb($bc)
 	{
 		if (!$bc)
@@ -56,6 +61,10 @@ class Layout_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Loads client files (CSS/JS) according to active controller or it's client files group
+	 * @return Layout_Component
+	 **/
 	public function loadClientFiles()
 	{
 		if ($this->m_css || $this->m_js)
@@ -100,6 +109,12 @@ class Layout_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Adds some client files to $type type
+	 * @param string $type
+	 * @param array $files
+	 * @return Layout_Component
+	 **/
 	public function addClientFiles($type, $files)
 	{
 		if (!$files)
@@ -114,6 +129,11 @@ class Layout_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns HTML string for CSS output
+	 * @param string $region = 'header'
+	 * @return string
+	 **/
 	public function releaseCss($region = 'header')
 	{
 		if (!isset($this->m_css[$region]))
@@ -142,6 +162,11 @@ class Layout_Component extends Component
 		return $files_string;
 	}
 
+	/**
+	 * Returns HTML string for JS output
+	 * @param string $region = 'header'
+	 * @return string
+	 **/
 	public function releaseJs($region = 'header')
 	{
 		if (!isset($this->m_js[$region]))
@@ -164,6 +189,11 @@ class Layout_Component extends Component
 		return $files_string;
 	}
 
+	/**
+	 * Returns HTML string for meta-tags output (all if $type == '')
+	 * @param string $type = ''
+	 * @return string
+	 **/
 	public function releaseMetaTags($type = '')
 	{
 		if (!$this->m_pageMetaTags)
@@ -185,6 +215,13 @@ class Layout_Component extends Component
 		return $tags_string;
 	}
 
+	/**
+	 * Adds meta tag
+	 * @param string $name
+	 * @param string $content
+	 * @param string $typeName = ''
+	 * @return Layout_Component
+	 **/
 	public function setMetaTag($name, $content, $typeName = '')
 	{
 		$this->m_pageMetaTags[$name] = array();
@@ -197,6 +234,11 @@ class Layout_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets meta tags
+	 * @param array $tags
+	 * @return Layout_Component
+	 **/
 	public function setMetaTags($tags)
 	{
 		if (!$tags)
@@ -213,6 +255,11 @@ class Layout_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Removes meta tag
+	 * @param string $name
+	 * @return Layout_Component
+	 **/
 	public function removeMetaTag($name)
 	{
 		if (isset($this->m_pageMetaTags[$name]))
@@ -221,6 +268,11 @@ class Layout_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Removes meta tags (all if $tags == array())
+	 * @param array $tags = array()
+	 * @return Layout_Component
+	 **/
 	public function removeMetaTags($tags = array())
 	{
 		if (!$tags)
@@ -236,6 +288,12 @@ class Layout_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets page title (if $append == false, it will replace existing title)
+	 * @param string $title
+	 * @param bool $append = true
+	 * @return Layout_Component
+	 **/
 	public function setPageTitle($title, $append = true)
 	{
 		if (!$title)
@@ -254,11 +312,19 @@ class Layout_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns page title
+	 * @return string
+	 **/
 	public function getPageTitle()
 	{
 		return $this->m_pageTitle;
 	}
 
+	/**
+	 * Returns breadcrumb HTML
+	 * @return string
+	 **/
 	public function getBreadcrumb()
 	{
 		return $this->m_breadcrumb;

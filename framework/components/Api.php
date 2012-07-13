@@ -75,11 +75,19 @@ class Api_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns all available API methods defined in API methods holder
+	 * @return array
+	 **/
 	public function getApiMethods()
 	{
 		return $this->m_apiMethods;
 	}
 
+	/**
+	 * Checks API user signature to grant access to some methods
+	 * @return bool
+	 **/
 	public function checkSignature()
 	{
 		if (!$this->m_apiSignature)
@@ -88,16 +96,29 @@ class Api_Component extends Component
 		return isset($this->m_apiSignature['sig']);
 	}
 
+	/**
+	 * Returns API user signature data
+	 * @return array
+	 **/
 	public function getApiSignature()
 	{
 		return $this->m_apiSignature;
 	}
 
+	/**
+	 * Returns specific data of API user signature
+	 * @return mixed
+	 **/
 	public function getApiSignatureData($data)
 	{
 		return isset($this->m_apiSignature[$data]) ? $this->m_apiSignature[$data] : false;
 	}
 
+	/**
+	 * Checks if provided method is allowed be be runned for current API user
+	 * @param string $method
+	 * @return bool
+	 **/
 	public function isAllowedToRun($method)
 	{
 		if ($this->m_apiDisabledMethods)
@@ -115,6 +136,12 @@ class Api_Component extends Component
 		return true;
 	}
 
+	/**
+	 * Returns API method's error response (or default if nothing provided)
+	 * @param int $errno = 0
+	 * @param string $errmsg = ''
+	 * @return array
+	 **/
 	public function getErrResp($errno = 0, $errmsg = '')
 	{
 		$errresp = $this->m_apiErrorResponse;
@@ -130,16 +157,31 @@ class Api_Component extends Component
 		return $errresp;
 	}
 
+	/**
+	 * Checks if provided method is a real method
+	 * @param string $method
+	 * @return bool
+	 **/
 	protected function isApiMethod($method)
 	{
 		return isset($this->m_apiMethods[$method]);
 	}
 
+	/**
+	 * Returns method's type
+	 * @param string $method
+	 * @return mixed
+	 **/
 	protected function getMethodType($method)
 	{
 		return $this->isApiMethod($method) ? $this->m_apiMethods[$method]['type'] : false;
 	}
 
+	/**
+	 * Returns method info by name
+	 * @param string $name
+	 * @return array
+	 **/
 	protected function getMethod($method)
 	{
 		if ($this->isApiMethod($method))
@@ -150,9 +192,14 @@ class Api_Component extends Component
 			return $a;
 		}
 
-		return false;
+		return array();
 	}
 
+	/**
+	 * Tries to execute API method
+	 * @param string $method
+	 * @return array
+	 **/
 	protected function runApi($method)
 	{
 		if (!$this->m_apiInitialized)
@@ -243,11 +290,22 @@ class Api_Component extends Component
 		return $this->m_apiResponse;
 	}
 
+	/**
+	 * Public wrapper for Api_Component::runApi method
+	 * @param string $method
+	 * @returns array
+	 **/
 	public function runApiMethod($method)
 	{
 		return $this->runApi($method);
 	}
 
+	/**
+	 * Handler for Core.getRawUrl API method. Listed as example
+	 * @param string $method
+	 * @param array $data
+	 * @return void
+	 **/
 	protected function apiMethod_coregetrawurl($method, $data)
 	{
 		$this->m_apiResponse = array(
@@ -255,6 +313,12 @@ class Api_Component extends Component
 		);
 	}
 
+	/**
+	 * Handler for Core.getUrlAction API method. Listed as example
+	 * @param string $method
+	 * @param array $data
+	 * @return void
+	 **/
 	protected function apiMethod_coregeturlaction($method, $data)
 	{
 		$this->m_apiResponse = array(
@@ -262,6 +326,12 @@ class Api_Component extends Component
 		);
 	}
 
+	/**
+	 * Handler for Core.getVersion API method. Listed as example
+	 * @param string $method
+	 * @param array $data
+	 * @return void
+	 **/
 	protected function apiMethod_coregetversion($method, $data)
 	{
 		$this->m_apiResponse = array();

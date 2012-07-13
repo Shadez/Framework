@@ -42,6 +42,12 @@ class I18n_Component extends Component
 		return $this->setLocale($locale);
 	}
 
+	/**
+	 * Sets active locale
+	 * @param string $locale_name
+	 * @throws I18nCrash_Exception_Component
+	 * @return I18n_Component
+	 **/
 	public function setLocale($locale_name)
 	{
 		if (!$locale_name)
@@ -54,6 +60,11 @@ class I18n_Component extends Component
 		return $this->loadLocale();
 	}
 
+	/**
+	 * Loads locale data into holders
+	 * @throws I18nCrash_Exception_Component
+	 * @return I18n_Component
+	 **/
 	protected function loadLocale()
 	{
 		if (!$this->m_localeName)
@@ -84,6 +95,11 @@ class I18n_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns locale name according to $type
+	 * @param int $type = LOCALE_SINGLE
+	 * @return string
+	 **/
 	public function getLocale($type = LOCALE_SINGLE)
 	{
 		switch($type)
@@ -100,11 +116,21 @@ class I18n_Component extends Component
 		}
 	}
 
+	/**
+	 * Returns locale ID
+	 * @return int
+	 **/
 	public function getLocaleId()
 	{
 		return $this->m_localeId;
 	}
 
+	/**
+	 * Finds localized string by it's index
+	 * @param array $indexes
+	 * @param array $holder
+	 * @return mixed
+	 **/
 	private function findString($indexes, $holder)
 	{
 		$idx = trim(array_shift($indexes));
@@ -120,6 +146,12 @@ class I18n_Component extends Component
 		return $this->findString($indexes, $holder);
 	}
 
+	/**
+	 * Returns localized string value
+	 * @param string $index
+	 * @param int $gender = -1
+	 * @return string
+	 **/
 	public function getString($index, $gender = -1)
 	{
 		$string = $this->findString(explode('.', $index), $this->m_strings);
@@ -154,6 +186,12 @@ class I18n_Component extends Component
         return $string;
 	}
 
+	/**
+	 * Handles printf-compatible string and runs sprintf function with localized string as format
+	 * @param string $index
+	 * @param ...
+	 * @return string
+	 **/
 	public function format($index)
 	{
 		$args = func_get_args();
@@ -162,6 +200,14 @@ class I18n_Component extends Component
 		return call_user_func_array('sprintf', $args);
 	}
 
+	/**
+	 * Performs extra format to localized string
+	 * This method replaces named placeholders in string by it's $replacements values
+	 * @param string $index
+	 * @param array $replacements
+	 * @param int $gender = -1
+	 * @return string
+	 **/
 	public function extraFormat($index, $replacements, $gender = -1)
 	{
 		$str = $this->getString($index, $gender);
@@ -185,6 +231,10 @@ class I18n_Component extends Component
 		return $str;
 	}
 
+	/**
+	 * Seems to be deprecated method
+	 * @deprecated
+	 **/
 	public function dateTimeFormat($type, $subtype, $timestamp = 0)
 	{
 		$timestamp = $timestamp ? $timestamp : time();
@@ -192,6 +242,11 @@ class I18n_Component extends Component
 		return isset($this->m_formats[$type][$subtype]) ? date($this->m_formats[$type][$subtype], $timestamp) : date('d.m.Y', $timestamp);
 	}
 
+	/**
+	 * Returns localized format
+	 * @param string $index
+	 * @return string
+	 **/
 	public function getFormat($index)
 	{
 		$string = $this->findString(explode('.', $index), $this->m_formats);

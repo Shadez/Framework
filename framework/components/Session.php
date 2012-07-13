@@ -29,6 +29,10 @@ class Session_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Inits session
+	 * @return Session_Component
+	 **/
 	protected function initSession()
 	{
 		$this->m_sessionStorage = $_SESSION;
@@ -36,11 +40,22 @@ class Session_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns session value
+	 * @param string $session
+	 * @return mixed
+	 **/
 	public function getSession($session)
 	{
 		return $this->findSessionValue($session);
 	}
 
+	/**
+	 * Sets session
+	 * @param string $sess
+	 * @param mixed $val
+	 * @return Session_Component
+	 **/
 	public function setSession($sess, $val)
 	{
 		$this->m_sessionStorage[$sess] = $val;
@@ -49,6 +64,12 @@ class Session_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Finds session value
+	 * @param string $session
+	 * @throws CoreCrash_Exception_Component
+	 * @return mixed
+	 **/
 	protected function findSessionValue($session)
 	{
 		if (!isset($this->m_sessionStorage[$session]) && !isset($_SESSION[$session]))

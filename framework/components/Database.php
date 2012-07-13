@@ -29,6 +29,13 @@ class Database_Component extends Component
 	private $m_transaction = array();
 	private $m_lastInsertId = 0;
 
+	/**
+	 * Performs immediate connection to DB or saves configs to perform delayed connection
+	 * @param array $configs
+	 * @param bool $delayed = true
+	 * @throws DatabaseCrash_Exception_Component
+	 * @return Database_Component
+	 **/
 	public function connect($configs, $delayed = true)
 	{
 		if ($configs)
@@ -56,23 +63,33 @@ class Database_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Converts array to string
+	 * @param array &$input
+	 * @return Database_Component
+	 **/
 	private function convertArray(&$input)
 	{
 		if (!$input)
 			return $this;
 
-		$input = array_map(function($v) {
+		foreach ($input as &$v)
 			if (is_string($v))
-				return '\'' . $v . '\'';
-
-			return $v;
-		}, $input);
+				$v = '\'' . $v . '\'';
 
 		$input = implode(', ', $input);
 
 		return $this;
 	}
 
+	/**
+	 * Executes SQL query to database
+	 * @param string $stmtSql
+	 * @param array $params = array()
+	 * @param bool $fetch = false
+	 * @throws DatabaseCrash_Exception_Component
+	 * @return Database_Component
+	 **/
 	private function execute($stmtSql, $params = array(), $fetch = false)
 	{
 		if (!$this->m_pdo)
@@ -122,26 +139,50 @@ class Database_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Checks if connection to DB is established
+	 * @return bool
+	 **/
 	public function isConnected()
 	{
 		return $this->m_connected;
 	}
 
+	/**
+	 * Returns DB statistics: queries count and queries execution time
+	 * @return array
+	 **/
 	public function getStatistics()
 	{
 		return array('queryCount' => $this->m_queriesCount, 'queryGenerationTime' => $this->m_queriesTime);
 	}
 
+	/**
+	 * Executes SQL with bounded parameters
+	 * @param string $stmtSql
+	 * @param array $params = array()
+	 * @return Database_Component
+	 **/
 	public function executeWithParams($stmtSql, $params = array())
 	{
 		return $this->execute($stmtSql, $params);
 	}
 
+	/**
+	 * Executes SQL with bounded parameters and fetches results
+	 * @param string $stmtSql
+	 * @param array $params = array()
+	 * @return Database_Component
+	 **/
 	public function selectWithParams($stmtSql, $params = array())
 	{
 		return $this->execute($stmtSql, $params, true);
 	}
 
+	/**
+	 * Creates new SQL transaction
+	 * @return Database_Component
+	 **/
 	public function createTransaction()
 	{
 		if (!$this->m_pdo)
@@ -157,6 +198,11 @@ class Database_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Adds SQL query to transaction
+	 * @param string $sql
+	 * @return Database_Component
+	 **/
 	public function transact($sql)
 	{
 		if (!$this->m_pdo)
@@ -168,6 +214,10 @@ class Database_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Tries to commit active transaction
+	 * @return Database_Component
+	 **/
 	public function commitTransaction()
 	{
 		if (!$this->m_pdo)
@@ -185,11 +235,24 @@ class Database_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns some specific transaction info
+	 * @param string $info
+	 * @return mixed
+	 **/
 	public function getTranscationInfo($info)
 	{
 		return isset($this->m_transaction[$info]) ? $this->m_transaction[$info] : null;
 	}
 
+	/**
+	 * Sets indexing key for query results
+	 * If $multiply == true, all results will be merged in one sub-array
+	 * with the same key as provided indexing key
+	 * @param string $field
+	 * @param string $multiply = false
+	 * @return Database_Component
+	 **/
 	public function setIndexKey($field, $multiply = false)
 	{
 		if (!$this->m_resultData)
@@ -237,11 +300,19 @@ class Database_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns last SQL query result (that was fetched)
+	 * @return array
+	 **/
 	public function getData()
 	{
 		return $this->m_resultData;
 	}
 
+	/**
+	 * Closes connection with DB
+	 * @return Database_Component
+	 **/
 	public function disconnect()
 	{
 		$this->m_pdo = null;
@@ -249,6 +320,10 @@ class Database_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns last insert ID
+	 * @return int
+	 **/
 	public function getInsertId()
 	{
 		return $this->m_lastInsertId;

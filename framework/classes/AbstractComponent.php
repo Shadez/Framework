@@ -27,6 +27,12 @@ abstract class Component
 	protected $m_uniqueHash = '';
 	protected $m_time = 0;
 
+	/**
+	 * Component constructor
+	 * @param string $name
+	 * @param Core_Component $core
+	 * @throws CoreCrash_Exception_Component
+	 **/
 	public function __construct($name, Core_Component $core)
 	{
 		if (!$name)
@@ -38,6 +44,9 @@ abstract class Component
 		$this->m_uniqueHash = uniqid(dechex(time()), true);
 	}
 
+	/**
+	 * Component destructor
+	 **/
 	public function __destruct()
 	{
 		foreach ($this as $variable => $value)
@@ -51,11 +60,20 @@ abstract class Component
 		unset($variable, $value);
 	}
 
+	/**
+	 * Method called after component creation
+	 * @return Component
+	 **/
 	public function initialize()
 	{
 		return $this;
 	}
 
+	/**
+	 * Turns component's initialization state
+	 * @param bool $value
+	 * @return Component
+	 **/
 	public function setInitialized($value)
 	{
 		$this->m_initialized = $value;
@@ -63,21 +81,42 @@ abstract class Component
 		return $this;
 	}
 
+	/**
+	 * Returns component's initialization state
+	 * @return bool
+	 **/
 	public function isInitialized()
 	{
 		return $this->m_initialized;
 	}
 
+	/**
+	 * Returns Core_Component instance (singleton)
+	 * @return Core_Component
+	 **/
 	public function getCore()
 	{
 		return $this->m_core;
 	}
 
+	/**
+	 * Deprecated method to get Core_Component instance
+	 * Left for compatibility with old projects
+	 * @return Core_Component
+	 **/
 	public function core()
 	{
 		return $this->getCore();
 	}
 
+	/**
+	 * Creates new or returns previously created instance of provided component name
+	 * This method should be used for singletons only!
+	 * @param string $name
+	 * @param string $category = ''
+	 * @throws CoreCrash_Exception_Component
+	 * @return Component
+	 **/
 	public function c($name, $category = '')
 	{
 		if (!$name)
@@ -86,6 +125,14 @@ abstract class Component
 		return $this->getComponent($name, $category);
 	}
 
+	/**
+	 * Creates and returns new instance of provided component name
+	 * This method should not be used to get access to singleton component!
+	 * @param string $name
+	 * @param string $category = ''
+	 * @throws CoreCrash_Exception_Component
+	 * @return Component
+	 **/
 	public function i($name, $category = '')
 	{
 		if (!$name)
@@ -94,6 +141,14 @@ abstract class Component
 		return $this->getComponent($name, $category, true);
 	}
 
+	/**
+	 * Finds or creates instance of component
+	 * @param string $name
+	 * @param string $category = ''
+	 * @param bool $createNew = false
+	 * @throws CoreCrash_Exception_Component
+	 * @return Component
+	 **/
 	private function getComponent($name, $category = '', $createNew = false)
 	{
 		$cmp_name = ucfirst(strtolower($name)) . ($category ? '_' . $category : '') . '_Component';
@@ -127,16 +182,22 @@ abstract class Component
 		return $cmp->initialize()->setInitialized(true);
 	}
 
-	private function addComponent($name, $category = 'default', &$c)
-	{
-		return $this;
-	}
-
+	/**
+	 * Method called before component instance will be deleted
+	 * Usable for correct component termination
+	 * @return Component
+	 **/
 	public function shutdown()
 	{
 		return $this;
 	}
 
+	/**
+	 * Merges contents of two arrays into first one
+	 * @param array &$to
+	 * @param array $from
+	 * @return array
+	 **/
 	public function extend(&$to, $from)
 	{
 		if (!$from || !$to)

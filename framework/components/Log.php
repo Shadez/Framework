@@ -57,9 +57,8 @@ class Log_Component extends Component
 
 	/**
 	 * Adds some lines to debug message
-	 * @access public
-	 * @param  array $args
-	 * @param  string $type
+	 * @param array $args
+	 * @param string $type
 	 * @return void
 	 **/
 	private function addLines($args, $type)
@@ -76,8 +75,8 @@ class Log_Component extends Component
 
 	/**
 	 * Writes error message to log file (if allowed)
-	 * @access public
-	 * @param  string $message,...
+	 * @param string $message
+	 * @param ...
 	 * @return void
 	 **/
 	public function writeError($message)
@@ -91,8 +90,8 @@ class Log_Component extends Component
 
 	/**
 	 * Writes component log message to log file (if allowed)
-	 * @access public
-	 * @param  string $message,...
+	 * @param string $message
+	 * @param ...
 	 * @return void
 	 **/
 	public function writeComponent($message)
@@ -106,8 +105,8 @@ class Log_Component extends Component
 
 	/**
 	 * Writes debug message to log file (if allowed)
-	 * @access public
-	 * @param  string $message,...
+	 * @param string $message
+	 * @param ...
 	 * @return void
 	 **/
 	public function writeDebug($message)
@@ -121,8 +120,8 @@ class Log_Component extends Component
 
 	/**
 	 * Writes sql log message to log file (if allowed)
-	 * @access public
-	 * @param  string $message,...
+	 * @param string $message
+	 * @param ...
 	 * @return void
 	 **/
 	public function writeSql($message)
@@ -136,8 +135,7 @@ class Log_Component extends Component
 
 	/**
 	 * Applies HTML style to log message
-	 * @access public
-	 * @param  string $type
+	 * @param string $type
 	 * @return string
 	 **/	
 	private function applyStyle($type)
@@ -160,8 +158,7 @@ class Log_Component extends Component
 
 	/**
 	 * Writes new log message to log file
-	 * @access private
-	 * @param  string $data
+	 * @param string $data
 	 * @return void
 	 **/
 	private function writeData($data)

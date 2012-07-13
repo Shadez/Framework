@@ -38,6 +38,14 @@ class Html_Component extends Component
 			)
 	 	);
 	 **/
+	/**
+	 * Generates HTML form of Model's fields
+	 * @param string $modelName
+	 * @param array $values = array()
+	 * @param array $attribs = array()
+	 * @param array $wrappers = array()
+	 * @return string
+	 **/
 	public function generateFormFields($modelName, $values = array(), $attribs = array(), $wrappers = array())
 	{
 		$model = $this->i($modelName, 'Model');

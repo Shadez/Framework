@@ -44,6 +44,11 @@ abstract class Model_Db_Component extends Component
 	public $m_aliases = array();
 	public $m_formFields = array();
 
+	/**
+	 * Sets proper field name (for some specific types)
+	 * @param string &$name
+	 * @return bool
+	 **/
 	private function setProperFieldName(&$name)
 	{
 		$newName = '';
@@ -78,6 +83,11 @@ abstract class Model_Db_Component extends Component
 		return true;
 	}
 
+	/**
+	 * Sets value to model field
+	 * @param string $name
+	 * @param mixed $value
+	 **/
 	public function __set($name, $value)
 	{
 		if (!$this->setProperFieldName($name))
@@ -110,6 +120,11 @@ abstract class Model_Db_Component extends Component
 		return true;
 	}
 
+	/**
+	 * Returns model field value
+	 * @param string $name
+	 * @return mixed
+	 **/
 	public function __get($name)
 	{
 		if (!$this->setProperFieldName($name))
@@ -129,6 +144,11 @@ abstract class Model_Db_Component extends Component
 		return false;
 	}
 
+	/**
+	 * Sets model data from DB
+	 * @param array $data
+	 * @return Model_Db_Component
+	 **/
 	public function setData($data)
 	{
 		$this->m_data = $data;
@@ -138,6 +158,12 @@ abstract class Model_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns field type
+	 * @param string $name
+	 * @throws ModelCrash_Exception_Component
+	 * @return string
+	 **/
 	public function getFieldType($name)
 	{
 		if (!isset($this->m_fields[$name]))
@@ -151,6 +177,10 @@ abstract class Model_Db_Component extends Component
 			throw new ModelCrash_Exception_Component('unable to find "' . $name . '" field\'s type');
 	}
 
+	/**
+	 * Sets primary fields (index PRIMARY)
+	 * @return Model_Db_Component
+	 **/
 	private function setPrimaryFields()
 	{
 		foreach ($this->m_fields as $field => $type)
@@ -162,6 +192,12 @@ abstract class Model_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Validates field value by it's type
+	 * @param string $name
+	 * @param mixed $value
+	 * @return mixed
+	 **/
 	protected function validateByType($name, $value)
 	{
 		$type = 'string';
@@ -193,6 +229,10 @@ abstract class Model_Db_Component extends Component
 		return $value;
 	}
 
+	/**
+	 * Returns values of changed fields
+	 * @return string
+	 **/
 	private function getChangedFieldsValues()
 	{
 		if (!$this->m_values)
@@ -209,6 +249,10 @@ abstract class Model_Db_Component extends Component
 		return substr($fields, 0, (strlen($fields) - 2));
 	}
 
+	/**
+	 * Returns changed fields names
+	 * @return string
+	 **/
 	private function getChangedFields()
 	{
 		if (!$this->m_values)
@@ -222,6 +266,10 @@ abstract class Model_Db_Component extends Component
 		return substr($fields, 0, (strlen($fields) - 2));
 	}
 
+	/**
+	 * Returns fields names required for SQL query
+	 * @return string
+	 **/
 	private function getFieldsForSql()
 	{
 		if (!$this->m_fields)
@@ -235,6 +283,10 @@ abstract class Model_Db_Component extends Component
 		return substr($fields, 0, (strlen($fields) - 2));
 	}
 
+	/**
+	 * Returns primary fields values
+	 * @return string
+	 **/
 	private function getPrimaryFieldsValues()
 	{
 		if (!$this->m_data)
@@ -254,6 +306,10 @@ abstract class Model_Db_Component extends Component
 		return $sql;
 	}
 
+	/**
+	 * Generates SQL for saving
+	 * @return Model_Db_Component
+	 **/
 	private function generateSaveSql()
 	{
 		if (!$this->m_values)
@@ -274,6 +330,10 @@ abstract class Model_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Generates SQL for loading
+	 * @return Model_Db_Component
+	 **/
 	private function generateLoadSql()
 	{
 		$this->m_rawSql = 'SELECT ' . $this->getFieldsForSql() . ' FROM `' . $this->getTable() . '` WHERE ';
@@ -301,6 +361,10 @@ abstract class Model_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Generates SQL for deleting
+	 * @return Model_Db_Component
+	 **/
 	private function generateDeleteSql()
 	{
 		if (!$this->m_data && !$this->m_values)
@@ -312,10 +376,15 @@ abstract class Model_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Performs SQL query
+	 * @param bool $load = false
+	 * @return Model_Db_Component
+	 **/
 	private function performSql($load = false)
 	{
 		if (!$this->m_rawSql)
-			return false;
+			return $this;
 
 		$result = true;
 		$params = isset($this->m_sqlData['params']) ? $this->m_sqlData['params'] : array();
@@ -346,41 +415,73 @@ abstract class Model_Db_Component extends Component
 		return $this->setPrimaryFields();
 	}
 
+	/**
+	 * Returns model name
+	 * @return string
+	 **/
 	public function getName()
 	{
 		return $this->m_model;
 	}
 
+	/**
+	 * Returns table name
+	 * @return string
+	 **/
 	public function getTable()
 	{
 		return $this->m_table;
 	}
 
+	/**
+	 * Returns DB type of model
+	 * @return string
+	 **/
 	public function getType()
 	{
 		return $this->m_dbType;
 	}
 
+	/**
+	 * Returns model fields
+	 * @return array
+	 **/
 	public function getFields()
 	{
 		return $this->m_fields;
 	}
 
+	/**
+	 * Returns model fields' aliases
+	 * @return array
+	 **/
 	public function getAliases()
 	{
 		return $this->m_aliases;
 	}
 
+	/**
+	 * Returns model fields' types
+	 * @return array
+	 **/
 	public function getFieldTypes()
 	{
 		return $this->m_fieldTypes;
 	}
 
+	/**
+	 * Returns last insert ID
+	 * @return int
+	 **/
 	public function getInsertId()
 	{
 		return $this->m_lastInsertId;
 	}
 
+	/**
+	 * Restores fields to it's default values
+	 * @return Model_Db_Component
+	 **/
 	public function restoreFields()
 	{
 		$this->m_fields = $this->m_defaultFields;
@@ -388,6 +489,10 @@ abstract class Model_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Restores aliases to it's default values
+	 * @return Model_Db_Component
+	 **/
 	public function restoreAliases()
 	{
 		$this->m_aliases = $this->m_defaultAliases;
@@ -395,6 +500,10 @@ abstract class Model_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Updates fields with new data
+	 * @return Model_Db_Component
+	 **/
 	protected function updateFields()
 	{
 		if (!$this->m_values)
@@ -407,7 +516,11 @@ abstract class Model_Db_Component extends Component
 	}
 
 	/**
-	 * load(array('id' => 5));
+	 * Loads row from DB by primary fields' values
+	 * Example:  ->load(array('id' => 5));
+	 * @param array $primaryfieldsValues
+	 * @param bool $type
+	 * @return Model_Db_Component
 	 **/
 	public function load($primaryfieldsValues, $type = false)
 	{
@@ -424,6 +537,11 @@ abstract class Model_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Loads random row from DB
+	 * @param string $type = ''
+	 * @return Model_Db_Component
+	 **/
 	public function loadRandom($type = false)
 	{
 		$this->m_sqlData['random'] = true;
@@ -438,7 +556,12 @@ abstract class Model_Db_Component extends Component
 	}
 
 	/**
-	 * find('`id` = :id AND (`name` LIKE \'%:name%\' OR `login` LIKE \'%:name%\')', array('id' => 5, 'name' => 'Shadez'));
+	 * Finds row in DB by some condition
+	 * Example: ->find('`id` = :id AND (`name` LIKE \'%:name%\' OR `login` LIKE \'%:name%\')', array('id' => 5, 'name' => 'Shadez'));
+	 * @param string $condition
+	 * @param array $values
+	 * @param string $type = ''
+	 * @return Model_Db_Component
 	 **/
 	public function find($condition, $values, $type = false)
 	{
@@ -456,30 +579,46 @@ abstract class Model_Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Saves changes to DB
+	 * @return Model_Db_Component
+	 **/
 	public function save()
 	{
 		if (!$this->m_values)
-			return true; // No changes were made
+			return $this; // No changes were made
 
 		return $this->generateSaveSql()
 			->updateFields()
 			->performSql();
 	}
 
+	/**
+	 * Deletes row from DB
+	 * @return Model_Db_Component
+	 **/
 	public function delete()
 	{
 		if (!$this->m_data)
-			return true; // No data
+			return $this; // No data
 
 		return $this->generateDeleteSql()
 			->performSql();
 	}
 
+	/**
+	 * Checks if data was loaded
+	 * @return bool
+	 **/
 	public function hasData()
 	{
 		return $this->m_dataLoaded;
 	}
 
+	/**
+	 * Returns model data
+	 * @return array
+	 **/
 	public function getData()
 	{
 		return $this->m_data;

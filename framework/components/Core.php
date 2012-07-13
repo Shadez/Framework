@@ -72,6 +72,12 @@ class Core_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets core variable
+	 * @param string $name
+	 * @param mixed $value
+	 * @return Core_Component
+	 **/
 	public function setVar($name, $value)
 	{
 		$this->m_coreVars[$name] = $value;
@@ -79,11 +85,20 @@ class Core_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns variable value
+	 * @param string $name
+	 * @return mixed
+	 **/
 	public function getVar($name)
 	{
 		return isset($this->m_coreVars[$name]) ? $this->m_coreVars[$name] : null;
 	}
 
+	/**
+	 * Returns all core variables
+	 * @return array
+	 **/
 	public function getVars()
 	{
 		return $this->m_coreVars;
@@ -94,31 +109,57 @@ class Core_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns raw URL (as send by client)
+	 * @return string
+	 **/
 	public function getRawUrl()
 	{
 		return $this->m_rawUrl;
 	}
 
+	/**
+	 * Returns URL action by index
+	 * @param int $idx
+	 * @return string
+	 **/
 	public function getUrlAction($idx)
 	{
 		return isset($this->m_urlActions[$idx]) ? $this->m_urlActions[$idx] : '';
 	}
 
+	/**
+	 * Returns all URL actions as URL string
+	 * @return string
+	 **/
 	public function getActionsUrl()
 	{
 		return implode('/', $this->m_urlActions);
 	}
 
+	/**
+	 * Returns all URL actions as array
+	 * @return array
+	 **/
 	public function getActions()
 	{
 		return $this->m_urlActions;
 	}
 
+	/**
+	 * Returns URL actions count
+	 * @return int
+	 **/
 	public function getActionsCount()
 	{
 		return $this->m_urlActionsCount;
 	}
 
+	/**
+	 * Parses URL string and explodes it into array
+	 * @throws CoreCrash_Exception_Component
+	 * @return Core_Component
+	 **/
 	private function parseUrl()
 	{
 		$url = $this->c('Config')->getValue('core.url_string');
@@ -177,6 +218,11 @@ class Core_Component extends Component
 		return null;
 	}
 
+	/**
+	 * Checks if controller's file exists
+	 * @param string $name
+	 * @return bool
+	 **/
 	public function isControllerExists($name)
 	{
 		$name = strtolower($name);
@@ -207,7 +253,7 @@ class Core_Component extends Component
 	}
 
 	/**
-	 * Performs controller initialization
+	 * Finds controller and performs it's initialization
 	 * @return Core_Component
 	 **/
 	private function initController()
@@ -302,6 +348,11 @@ class Core_Component extends Component
 		}
 	}
 
+	/**
+	 * Sets active controller
+	 * @param Controller_Component $c
+	 * @return Core_Component
+	 **/
 	public function setActiveController($c)
 	{
 		$this->m_activeController = $c;
@@ -309,11 +360,21 @@ class Core_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns active controller
+	 * @return Controller_Component
+	 **/
 	public function getActiveController()
 	{
 		return $this->m_activeController ? $this->m_activeController : $this->c('Default', 'Controller');
 	}
 
+	/**
+	 * Sets header to output
+	 * @param string $header
+	 * @param strign $content = ''
+	 * @return Core_Component
+	 **/
 	public function setHeader($header, $content = '')
 	{
 		if ($content)
@@ -324,6 +385,13 @@ class Core_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Append $url to full-path URL
+	 * e.g. getUrl('account/') will transform into "/path-to-app/en/account/"
+	 * @param string $url = ''
+	 * @param bool $skipUrlLocale = false
+	 * @return string
+	 **/
 	public function getUrl($url = '', $skipUrlLocale = false)
 	{
 		if (!isset($this->m_paths[0]) || !$this->m_paths[0])
@@ -337,6 +405,12 @@ class Core_Component extends Component
 		return $this->m_paths[0] . (substr($url, 0, 1) == '/' ? $url : '/' . $url);
 	}
 
+	/**
+	 * Appends $url to CDN URL
+	 * e.g. getPath('css/style.css') will transform into "http://cdn.example.org/css/style.css"
+	 * @param string $url = ''
+	 * @return string
+	 **/
 	public function getPath($url = '')
 	{
 		if (!isset($this->m_paths[1]) || !$this->m_paths[1])
@@ -345,6 +419,12 @@ class Core_Component extends Component
 		return $this->m_paths[1] . (substr($url, 0, 1) == '/' ? $url : '/' . $url);
 	}
 
+	/**
+	 * Performs redirect to specific $url page
+	 * Note that when header will be sent, current script will be terminated!
+	 * @param string $url
+	 * @return void
+	 **/
 	public function redirectTo($url)
 	{
 		$this->setHeader('Location', $url);
@@ -352,5 +432,10 @@ class Core_Component extends Component
 		exit;
 	}
 
+	/**
+	 * Handler for onCoreControllerSetup event
+	 * @param array $event
+	 * @return void
+	 **/
 	public function onCoreControllerSetup($event) {}
 };

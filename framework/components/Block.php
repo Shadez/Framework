@@ -35,11 +35,20 @@ class Block_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns block state
+	 * @return bool
+	 **/
 	public function getBlockState()
 	{
 		return $this->m_blockState;
 	}
 
+	/**
+	 * Sets block name
+	 * @param string $name
+	 * @return Block_Component
+	 **/
 	public function setName($name)
 	{
 		$this->m_blockName = $name;
@@ -47,11 +56,20 @@ class Block_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns block name
+	 * @return string
+	 **/
 	public function getName()
 	{
 		return $this->m_blockName;
 	}
 
+	/**
+	 * Sets block region
+	 * @param string $name
+	 * @return Block_Component
+	 **/
 	public function setRegion($name)
 	{
 		$this->m_blockRegionName = $name;
@@ -67,16 +85,30 @@ class Block_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Retuns block region
+	 * @return Region_Component
+	 **/
 	public function getRegion()
 	{
 		return $this->c('View')->getRegion($this->getRegionName());
 	}
 
+	/**
+	 * Returns block's region name
+	 * @return string
+	 **/
 	public function getRegionName()
 	{
 		return $this->m_blockRegionName;
 	}
 
+	/**
+	 * Sets block template
+	 * @param string $name
+	 * @param string $path = 'default'
+	 * @return Block_Component
+	 **/
 	public function setTemplate($name, $path = 'default')
 	{
 		$path = str_replace('.', DS, $path);
@@ -87,11 +119,22 @@ class Block_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns block's template name
+	 * @param bool $withPath = false
+	 * @return string
+	 **/
 	public function getTemplate($withPath = false)
 	{
 		return ($withPath ? $this->m_blockTemplatePath . DS : '') . $this->m_blockTemplate . '.' . TPL_EXT;
 	}
 
+	/**
+	 * Sets block variable
+	 * @param string $name
+	 * @param string $value
+	 * @return Block_Component
+	 **/
 	public function setVar($name, $value)
 	{
 		$this->m_blockVars[$name] = $value;
@@ -99,11 +142,22 @@ class Block_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns block's variable value
+	 * @param string $name
+	 * @return mixed
+	 **/
 	public function getVar($name)
 	{
 		return isset($this->m_blockVars[$name]) ? $this->m_blockVars[$name] : null;
 	}
 
+	/**
+	 * Performs block rendering operations
+	 * @param array $vars
+	 * @throws BlockCrash_Exception_Component
+	 * @return Block_Component
+	 **/
 	public function renderBlock($vars)
 	{
 		if ($this->m_blockState)
@@ -138,11 +192,20 @@ class Block_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets block's HTML content
+	 * @return string
+	 **/
 	public function getBlockHTML()
 	{
 		return $this->m_blockHtml;
 	}
 
+	/**
+	 * Returns HTML content for specific region
+	 * @param string $name
+	 * @return string
+	 **/
 	protected function getRegionContents($name)
 	{
 		return $this->c('View')->getRegionContents($name);

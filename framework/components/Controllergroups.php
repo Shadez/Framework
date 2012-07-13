@@ -22,6 +22,10 @@ class ControllerGroups_Component extends Component
 {
 	protected $m_controllerGroups = array();
 
+	/**
+	 * Initializes and creates controller groups from config file
+	 * @return ControllerGroups_Component
+	 **/
 	public function initialize()
 	{
 		$groups = $this->c('Config')->getValue('controller.groups');
@@ -38,6 +42,12 @@ class ControllerGroups_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Creates group
+	 * @param string $name
+	 * @param array $group
+	 * @return ControllerGroups_Component
+	 **/
 	public function createGroup($name, $group)
 	{
 		$this->m_controllerGroups[$name] = $group;
@@ -45,6 +55,12 @@ class ControllerGroups_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Adds blocks to specific group
+	 * @param string $group
+	 * @param array $blocks
+	 * return ControllerGroups_Component
+	 **/
 	public function addBlocksToGroup($group, $blocks)
 	{
 		if (!$group || !$blocks)
@@ -58,11 +74,22 @@ class ControllerGroups_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns all blocks from specific group
+	 * @param string $group
+	 * @return ControllerGroups_Component
+	 **/
 	public function getBlocksFromGroup($group)
 	{
 		return (isset($this->m_controllerGroups[$group]) && $this->m_controllerGroups[$group]['blocks'] ? $this->m_controllerGroups[$group]['blocks'] : array());
 	}
 
+	/**
+	 * Sets layout for specific group
+	 * @param string $group
+	 * @param array $layout
+	 * @return ControllerGroups_Component
+	 **/
 	public function setGroupLayout($group, $layout)
 	{
 		if (!$group || !$layout)
@@ -81,11 +108,25 @@ class ControllerGroups_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns groups layout
+	 * @param string $name
+	 * @return array
+	 **/
 	public function getGroupLayout($group)
 	{
 		return (isset($this->m_controllerGroups[$group], $this->m_controllerGroups[$group]['info'], $this->m_controllerGroups[$group]['info']['layout'])) ? $this->m_controllerGroups[$group]['info']['layout'] : $this->c('Config')->getValue('controller.default_layout');
 	}
 
+	/**
+	 * Sets block var to specific group/block or for all groups/blocks
+	 * @param string $var
+	 * @param mixed $value
+	 * @param string $group = '_all'
+	 * @param string $block = '_all'
+	 * @todo Remove magic strings from input variables
+	 * @return ControllerGroups_Component
+	 **/
 	public function setBlockVar($var, $value, $group = '_all_', $block = '_all_')
 	{
 		if (!$var || !$group || !$block)
@@ -114,6 +155,13 @@ class ControllerGroups_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns block's variable value
+	 * @param string $group
+	 * @param string $block
+	 * @param string $var
+	 * @return mixed
+	 **/
 	public function getBlockVar($group, $block, $var)
 	{
 		if (!$var || !$group || !$block)

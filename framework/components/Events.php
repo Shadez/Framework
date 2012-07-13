@@ -32,10 +32,15 @@ class Events_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Checks if event can be triggered
+	 * @param string $event
+	 * @return bool
+	 **/
 	protected function isCanBeTriggered($event)
 	{
 		if ($this->m_eventsDisabled)
-			return $this;
+			return false
 
 		if (!isset($this->m_events[$event]))
 			return false;
@@ -49,6 +54,12 @@ class Events_Component extends Component
 		return true;
 	}
 
+	/**
+	 * Creates event
+	 * @param string $event
+	 * @param callable $callback
+	 * @return Events_Component
+	 **/
 	public function createEvent($event, $callback)
 	{
 		if (!isset($this->m_events[$event]) && !$this->m_eventsDisabled)
@@ -68,24 +79,38 @@ class Events_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Removes callback for specific event
+	 * @param string $event
+	 * @return Events_Component
+	 **/
 	public function deleteCallback($event)
 	{
 		if (!isset($this->m_events[$event]) || $this->m_eventsDisabled)
 			return $this;
 
 		$this->m_events[$event]['callback'] = null;
+
+		return $this;
 	}
 
+	/**
+	 * Triggers event
+	 * @param string $event
+	 * @param array $eventData
+	 * @param Object $triggeredBy = null
+	 * @return array
+	 **/
 	public function triggerEvent($event, $eventData, $triggeredBy = null)
 	{
 		if ($this->m_eventsDisabled)
-			return false;
+			return array();
 
 		if (!$this->isCanBeTriggered($event))
 		{
 			$this->c('Log')->writeError('%s : event "%s" can not be called!', __METHOD__, $event);
 
-			return false;
+			return array();
 		}
 
 		$eventData['triggeredBy'] = get_class($triggeredBy);
@@ -98,6 +123,11 @@ class Events_Component extends Component
 		return $cbData;
 	}
 
+	/**
+	 * Disables event
+	 * @param string $event
+	 * @return Events_Component
+	 **/
 	public function disableEvent($event)
 	{
 		if (isset($this->m_events[$event]))

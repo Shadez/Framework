@@ -34,6 +34,10 @@ abstract class Controller_Component extends Component
 	protected $m_controllerGroup = '';
 	protected $m_blocks = array();
 
+	/**
+	 * Initializes controller and performs correct action (depends on URL string)
+	 * @return Controller_Component
+	 **/
 	public function initialize()
 	{
 		$this->c('Events')
@@ -109,11 +113,21 @@ abstract class Controller_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns controller name
+	 * @return string
+	 **/
 	public function getName()
 	{
 		return $this->m_controllerName ? $this->m_controllerName : strtolower(str_replace('_controller_component', '', strtolower(get_class($this))));
 	}
 
+	/**
+	 * Sets controller var value
+	 * @param string $name
+	 * @param mixed $value
+	 * @return Controller_Component
+	 **/
 	public function setVar($name, $value)
 	{
 		$this->m_controllerVars[$name] = $value;
@@ -121,31 +135,56 @@ abstract class Controller_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns controller's var value
+	 * @param string $name
+	 * @return mixed
+	 **/
 	public function getVar($name)
 	{
 		return isset($this->m_controllerVars[$name]) ? $this->m_controllerVars[$name] : null;
 	}
 
+	/**
+	 * Returns all controller vars
+	 * @return array
+	 **/
 	public function getVars()
 	{
 		return $this->m_controllerVars;
 	}
 
+	/**
+	 * Returns controller name used for client files
+	 * @return string
+	 **/
 	public function getClientFilesControllerName()
 	{
 		return $this->m_clientFilesControllerName ? $this->m_clientFilesControllerName : $this->getName();
 	}
 
+	/**
+	 * Returns active controller action
+	 * @return string
+	 **/
 	public function getControllerAction()
 	{
 		return $this->m_controllerAction;
 	}
 
+	/**
+	 * Returns controller group name
+	 * @return string
+	 **/
 	public function getControllerGroup()
 	{
 		return $this->m_controllerGroup;
 	}
 
+	/**
+	 * Sets page's state to error
+	 * @return Controller_Component
+	 **/
 	public function setErrorPage()
 	{
 		$this->m_errorPage = true;
@@ -155,6 +194,10 @@ abstract class Controller_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets page's state to AJAX
+	 * @return Controller_Component
+	 **/
 	public function setAjaxPage()
 	{
 		$this->m_ajaxPage = true;
@@ -164,11 +207,20 @@ abstract class Controller_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns page's AJAX state
+	 * @return bool
+	 **/
 	public function isAjaxPage()
 	{
 		return $this->m_ajaxPage;
 	}
 
+	/**
+	 * Sets specific content type for page ("Content-type" header)
+	 * @param string $mime
+	 * @return Controller_Component
+	 **/
 	public function setContentType($mime)
 	{
 		$this->getCore()->setHeader('Content-type', $mime);
@@ -176,21 +228,37 @@ abstract class Controller_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Method called after controller initialization
+	 * @return Controller_Component
+	 **/
 	protected function run()
 	{
 		return $this;
 	}
 
+	/**
+	 * Method called after controller work but before View initialization
+	 * @return Controller_Component
+	 **/
 	protected function end()
 	{
 		return $this;
 	}
 
+	/**
+	 * Default controller action
+	 * @return Controller_Component
+	 **/
 	protected function actionIndex()
 	{
 		return $this;
 	}
 
+	/**
+	 * Last method executed by controller, initializes View
+	 * @return COntroller_Component
+	 **/
 	protected function finish()
 	{
 		$this->c('View')->buildBlocks($this->m_blocks)->buildPage();
@@ -202,5 +270,10 @@ abstract class Controller_Component extends Component
 	 * Events
 	 */
 
+	/**
+	 * Handler for onControllerStartup event
+	 * @param array $event
+	 * @return void
+	 **/
 	public function onControllerStartup($event) {}
 };

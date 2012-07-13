@@ -30,11 +30,24 @@ class Cookie_Component
 		return $this;
 	}
 
+	/**
+	 * Returns cookie value
+	 * @param string $name
+	 * @return string
+	 **/
 	public function read($name)
 	{
 		return isset($_COOKIE[$name]) ? $_COOKIE[$name] : null;
 	}
 
+	/**
+	 * Sets cookie
+	 * @param string $name
+	 * @param string $value
+	 * @param string $time_limit = 'NEXT YEAR'
+	 * @param string $path = '/'
+	 * @return Cookie_Component
+	 **/
 	public function write($name, $value = '', $time_limit = 'NEXT YEAR', $path = '/')
 	{
 		setcookie($name, $value, strtotime($time_limit), $path);

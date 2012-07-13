@@ -22,6 +22,14 @@ class Db_Component extends Component
 {
 	private $m_availableDatabases = array();
 
+	/**
+	 * __call overwrite required for fast access to any DB type
+	 * e.g. instead of writing c('Db')->getDb('site') you can just write c('Db')->site()
+	 * and get access to Database_Component for "site" DB type
+	 * @param string $method
+	 * @param array $args
+	 * @return mixed
+	 **/
 	public function __call($method, $args)
 	{
 		if (method_exists($this, $method))
@@ -32,6 +40,11 @@ class Db_Component extends Component
 		return $this->getDb($db_type);
 	}
 
+	/**
+	 * Parses DB configs and creates instances for each database type.
+	 * All connections created here are delayed (connection will be established only at first DB access)
+	 * @return Db_Component
+	 **/
 	public function initialize()
 	{
 		$databases = $this->c('Config')->getValue('app.databases');
@@ -87,6 +100,13 @@ class Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns DB for specific type
+	 * @param string $type
+	 * @param bool $skipConnection = false
+	 * @throws DBCrash_Exception_Component
+	 * @return Database_Component
+	 **/
 	public function getDb($type, $skipConnection = false)
 	{
 		if (!isset($this->m_availableDatabases[$type]))
@@ -127,11 +147,22 @@ class Db_Component extends Component
 		return $dbo;
 	}
 
+	/**
+	 * Checks if database for specific type available (instance exists, connection availability skipped)
+	 * @param string $type
+	 * @return bool
+	 **/
 	public function isDatabaseAvailable($type)
 	{
 		return isset($this->m_availableDatabases[$type]);
 	}
 
+	/**
+	 * Switches to specific database ID for $type (if databases count for $type type > 1)
+	 * @param string $type
+	 * @param int $id
+	 * @return Db_Component
+	 **/
 	public function switchTo($type, $id)
 	{
 		if (!isset($this->m_availableDatabases[$type]))
@@ -142,10 +173,15 @@ class Db_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns statistics from all DBs for specific type
+	 * @param string $type
+	 * @return array
+	 **/
 	public function getStatistics($type)
 	{
 		if (!isset($this->m_availableDatabases[$type]))
-			return false;
+			return array();
 
 		if ($this->m_availableDatabases[$type]['single'])
 		{
@@ -170,6 +206,6 @@ class Db_Component extends Component
 			}
 		}
 
-		return false;
+		return array();
 	}
 };

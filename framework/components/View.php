@@ -31,6 +31,10 @@ class View_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Renders all regions
+	 * @return View_Component
+	 **/
 	private function renderRegions()
 	{
 		foreach ($this->m_regions as $region)
@@ -39,6 +43,10 @@ class View_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets all variables to template (from core & controller)
+	 * @return View_Component
+	 **/
 	private function setAllVars()
 	{
 		$this->m_tplVars['core'] = $this->getCore()->getVars();
@@ -47,6 +55,12 @@ class View_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Builds all provided blocks and blocks of current controller's group
+	 * @param array $blocks = array()
+	 * @throws ViewCrash_Exception_Component
+	 * @return View_Component
+	 **/
 	public function buildBlocks($blocks = array())
 	{
 		$controller = $this->getCore()->getActiveController();
@@ -92,6 +106,13 @@ class View_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Includes template file
+	 * @param string $tpl_name
+	 * @param string $tpl_path = 'default'
+	 * @throws ViewCrash_Exception_Component
+	 * @return View_Component
+	 **/
 	public function displayTemplate($tpl_name, $tpl_path = 'default')
 	{
 		$tpl_path = str_replace('.', DS, $tpl_path);
@@ -106,6 +127,11 @@ class View_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Adds region
+	 * @param Region_Component $region
+	 * @return View_Component
+	 **/
 	public function addRegion(Region_Component $region)
 	{
 		$this->m_regions[$region->getName()] = $region;
@@ -113,11 +139,22 @@ class View_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Checks if region exists
+	 * @param string $name
+	 * @return bool
+	 **/
 	public function regionExists($name)
 	{
 		return isset($this->m_regions[$name]);
 	}
 
+	/**
+	 * Returns Region_Component instance by region name
+	 * @param mixed $region
+	 * @throws ViewCrash_Exception_Component
+	 * @return Region_Component
+	 **/
 	public function getRegion($region)
 	{
 		if (is_object($region) && isset($this->m_regions[$region->getName()]))
@@ -130,11 +167,23 @@ class View_Component extends Component
 		return null;
 	}
 
+	/**
+	 * Returns region contents
+	 * @param string $name
+	 * @return string
+	 **/
 	public function getRegionContents($name)
 	{
 		return isset($this->m_htmlContents[$name]) ? $this->m_htmlContents[$name] : '';
 	}
 
+	/**
+	 * Builds page
+	 * @param string $layoutFile = ''
+	 * @param string $layoutPath = ''
+	 * @throws ViewCrash_Exception_Component
+	 * @return View_Component
+	 **/
 	public function buildPage($layoutFile = false, $layoutPath = false)
 	{
 		if (!$layoutFile || !$layoutPath)

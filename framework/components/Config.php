@@ -30,7 +30,8 @@ class Config_Component extends Component
 	}
 
 	/**
-	 * Loads configuration file into $m_holder
+	 * Loads configuration file
+	 * @throws Config_Exception_Component
 	 * @return Config_Component
 	 **/
 	public function loadConifgs()
@@ -54,8 +55,7 @@ class Config_Component extends Component
 
 	/**
 	 * Transforms string path to array accessors
-	 * @access private
-	 * @param  $path
+	 * @param  &$path
 	 * @return mixed
 	 **/
 	private function getConfigPath(&$path)
@@ -73,7 +73,13 @@ class Config_Component extends Component
 		return $holder_path;
 	}
 
-	private function findValue($indexes, $holder, $address = false)
+	/**
+	 * Finds config value
+	 * @param array $indexes
+	 * @param array $holder
+	 * @return mixed
+	 **/
+	private function findValue($indexes, $holder)
 	{
 		$idx = trim(array_shift($indexes));
 
@@ -91,12 +97,13 @@ class Config_Component extends Component
 	/**
 	 * Returns configuration value
 	 * @param  $path
+	 * @throws Config_Exception_Component
 	 * @return mixed
 	 **/
 	public function getValue($path)
 	{
 		if (!$path)
-			return false;
+			throw Config_Exception_Component('no config path provided');
 
 		return $this->findValue(explode('.', $path), $this->m_holder);
 	}
@@ -131,6 +138,10 @@ class Config_Component extends Component
 		return $this->m_holder;
 	}
 
+	/**
+	 * Rewrites config file with current values
+	 * @return Config_Component
+	 **/
 	public function updateConfigFile()
 	{
 		$str = '<?php
@@ -156,5 +167,7 @@ class Config_Component extends Component
 ';
 		$str .= '$SiteConfigs = ' . var_export($this->m_holder, true) . ';';
 		file_put_contents(APP_CONFIGS_DIR . 'Site.php', $str);
+
+		return $this;
 	}
 };

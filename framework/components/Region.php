@@ -32,6 +32,11 @@ class Region_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Sets region name
+	 * @param string $name
+	 * @return Region_Component
+	 **/
 	public function setName($name)
 	{
 		$this->m_regionName = $name;
@@ -39,16 +44,30 @@ class Region_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns region name
+	 * @return string
+	 **/
 	public function getName()
 	{
 		return $this->m_regionName;
 	}
 
+	/**
+	 * Checks if block exists in current region
+	 * @param string $name
+	 * @return bool
+	 **/
 	public function blockExists($name)
 	{
 		return isset($this->m_regionBlocks[$name]);
 	}
 
+	/**
+	 * Adds block to region
+	 * @param Block_Component $block
+	 * @return Region_Component
+	 **/
 	public function addBlock(Block_Component $block)
 	{
 		if ($this->blockExists($block->getName()))
@@ -59,6 +78,11 @@ class Region_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns Block_Component by it's name
+	 * @param mixed $block
+	 * @return Block_Component
+	 **/
 	public function getBlock($block)
 	{
 		if (is_object($block) && isset($this->m_regionBlocks[$block->getName()]))
@@ -69,6 +93,11 @@ class Region_Component extends Component
 		return null;
 	}
 
+	/**
+	 * Removes block from region
+	 * @param mixed $block
+	 * @return Region_Component
+	 **/
 	public function removeBlock($block)
 	{
 		if (is_object($block) && isset($this->m_regionBlocks[$block->getName()]))
@@ -79,11 +108,20 @@ class Region_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns all region's blocks
+	 * @return array
+	 **/
 	public function getBlocks()
 	{
 		return $this->m_regionBlocks;
 	}
 
+	/**
+	 * Renders region
+	 * @param array $vars
+	 * @return Region_Component
+	 **/
 	public function renderRegion($vars)
 	{
 		if ($this->m_regionState)
@@ -99,6 +137,10 @@ class Region_Component extends Component
 		return $this;
 	}
 
+	/**
+	 * Returns region's HTML content
+	 * @return string
+	 **/
 	public function getRegionHTML()
 	{
 		return $this->m_regionHtml;
