@@ -202,6 +202,9 @@ if ($trace)
 {
 	for ($i = 0; $i < $size; ++$i)
 	{
+		if (!$trace[$i] || empty($trace[$i]['file']))
+			continue;
+
 		echo '<tr class="trace core collapsed">' . NL .
 		'<td class="number">#' . $i . '</td>' . NL .
 		'<td class="content">' . NL .

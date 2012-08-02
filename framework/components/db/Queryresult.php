@@ -18,7 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class QueryResult_Db_Component extends Component
+namespace Db;
+class QueryResult extends \Component
 {
 	protected $m_sqlData = array();
 	protected $m_idField = '';
@@ -28,7 +29,7 @@ class QueryResult_Db_Component extends Component
 	public function initialize()
 	{
 		$this->m_sqlData = array();
-		$this->m_sqlBuilder = $this->i('QueryBuilder', 'Db');
+		$this->m_sqlBuilder = $this->i('\Db\QueryBuilder');
 		$this->m_model = null;
 
 		return $this;
@@ -37,15 +38,15 @@ class QueryResult_Db_Component extends Component
 	/**
 	 * Sets main model
 	 * @param string $name
-	 * @throws ModelCrash_Exception_Component
+	 * @throws \Exceptions\ModelCrash
 	 * @return QueryResult_Db_Component
 	 **/
 	public function model($name)
 	{
-		$this->m_model = $this->i($name, 'Model');
+		$this->m_model = $this->i('\Models\\' . $name);
 
 		if (!$this->m_model)
-			throw new ModelCrash_Exception_Component('model ' . $name . ' was not found');
+			throw new \Exceptions\ModelCrash('Model ' . $name . ' was not found');
 
 		$this->m_sqlBuilder->setModel($name);
 
@@ -166,7 +167,7 @@ class QueryResult_Db_Component extends Component
 
 		if (!$fields)
 		{
-			$holder = $this->i('ResultHolder', 'Db')
+			$holder = $this->i('\Db\ResultHolder')
 				->setResult($item, $this->m_sqlBuilder->getSql());
 
 			unset($item);
@@ -177,7 +178,7 @@ class QueryResult_Db_Component extends Component
 		// Parse fields
 		$this->parseResults($item[0], $fields);
 
-		$holder = $this->i('ResultHolder', 'Db')
+		$holder = $this->i('\Db\ResultHolder')
 			->setResult($item, $this->m_sqlBuilder->getSql());
 
 		unset($item);
@@ -202,7 +203,7 @@ class QueryResult_Db_Component extends Component
 
 		if (!$fields)
 		{
-			$holder = $this->i('ResultHolder', 'Db')
+			$holder = $this->i('\Db\ResultHolder')
 				->setResult($item, $this->m_sqlBuilder->getSql());
 
 			unset($item);
@@ -213,7 +214,7 @@ class QueryResult_Db_Component extends Component
 		// Parse fields
 		$this->parseResults($item[0], $fields);
 
-		$holder = $this->i('ResultHolder', 'Db')
+		$holder = $this->i('\Db\ResultHolder')
 			->setResult($item, $this->m_sqlBuilder->getSql());
 
 		unset($item);
@@ -277,7 +278,7 @@ class QueryResult_Db_Component extends Component
 
 		if (!$fields)
 		{
-			$holder = $this->i('ResultHolder', 'Db')
+			$holder = $this->i('\Db\ResultHolder')
 				->setResult($items, $this->m_sqlBuilder->getSql());
 
 			unset($items);
@@ -289,7 +290,7 @@ class QueryResult_Db_Component extends Component
 		foreach ($items as &$item)
 			$this->parseResults($item, $fields);
 
-		$holder = $this->i('ResultHolder', 'Db')
+		$holder = $this->i('\Db\ResultHolder')
 			->setResult($items, $this->m_sqlBuilder->getSql());
 
 		unset($items);

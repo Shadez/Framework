@@ -18,7 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class RunOnce_Run_Component extends Component
+namespace Run;
+class RunOnce extends \Component
 {
 	public function initialize()
 	{

@@ -18,28 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Home_Controller_Component extends Controller_Component
-{
-	protected $m_webActionIndex = 1;
-	protected $m_pageTitle = 'home.title';
-
-	public function actionIndex()
-	{
-		
-	}
-
-	protected function finish()
-	{
-		$this->c('View')->buildBlocks('home')->buildPage('layout', 'demo.layout');
-
-		return $this;
-	}
-
-	public function block_home()
-	{
-		return $this->i('Block')
-			->setName('home')
-			->setTemplate('home', 'demo.contents')
-			->setRegion('pagecontent');
-	}
-};
+namespace Exceptions;
+class BlockCrash extends \Exception
+{};

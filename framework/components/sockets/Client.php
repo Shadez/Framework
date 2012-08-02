@@ -18,14 +18,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Client_Socket_Component extends Component implements ISocket
+namespace Sockets;
+class Client extends \Component implements \Sockets\ISocket
 {
 	private $m_socket = null;
 
 	public function createSocket($host, $port, $timeout = 0)
 	{
 		if (!$host || !$port)
-			throw new ClientSocket_Exception_Component('wrong host or port value provided');
+			throw new \Exceptions\ClientSocket('wrong host or port value provided');
 
 		$errno = 0;
 		$errmsg = '';
@@ -36,7 +37,7 @@ class Client_Socket_Component extends Component implements ISocket
 		{
 			$this->c('Log')->writeError('%s : unable to create connection to %s:%d (errno: %d, errmsg: "%s")!', __METHOD__, $host, $port, $errno, $errmsg);
 
-			throw new ClientSocket_Exception_Component('unable to create ClientSocket connection, more info available in logs!');
+			throw new \Exceptions\ClientSocket('unable to create ClientSocket connection, more info available in logs!');
 		}
 
 		return $this;
@@ -45,7 +46,7 @@ class Client_Socket_Component extends Component implements ISocket
 	public function sendText($text, $socket = null)
 	{
 		if (!$this->m_socket)
-			throw new ClientSocket_Exception_Component('unable to sendText(): no open socket available');
+			throw new \Exceptions\ClientSocket('unable to sendText(): no open socket available');
 
 		fputs($this->m_socket, $text);
 
@@ -55,7 +56,7 @@ class Client_Socket_Component extends Component implements ISocket
 	public function readText($length)
 	{
 		if (!$this->m_socket)
-			throw new ClientSocket_Exception_Component('unable to readText(): no open socket available');
+			throw new \Exceptions\ClientSocket('unable to readText(): no open socket available');
 
 		return fread($this->m_socket, $length);
 	}

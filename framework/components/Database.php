@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Database_Component extends Component
+class Database extends Component
 {
 	private $m_pdo = null;
 	private $m_configs = array();
@@ -33,7 +33,7 @@ class Database_Component extends Component
 	 * Performs immediate connection to DB or saves configs to perform delayed connection
 	 * @param array $configs
 	 * @param bool $delayed = true
-	 * @throws DatabaseCrash_Exception_Component
+	 * @throws \Exceptions\DatabaseCrash
 	 * @return Database_Component
 	 **/
 	public function connect($configs, $delayed = true)
@@ -45,7 +45,7 @@ class Database_Component extends Component
 			return $this;
 
 		if (!$this->m_configs)
-			throw new DatabaseCrash_Exception_Component('connection info was not found');
+			throw new \Exceptions\DatabaseCrash('connection info was not found');
 
 		try
 		{
@@ -53,7 +53,7 @@ class Database_Component extends Component
 		}
 		catch (Exception $e)
 		{
-			throw new DatabaseCrash_Exception_Component($e->getMessage());
+			throw new \Exceptions\DatabaseCrash($e->getMessage());
 		}
 
 		$this->m_connected = true;
@@ -87,7 +87,7 @@ class Database_Component extends Component
 	 * @param string $stmtSql
 	 * @param array $params = array()
 	 * @param bool $fetch = false
-	 * @throws DatabaseCrash_Exception_Component
+	 * @throws \Exceptions\DatabaseCrash
 	 * @return Database_Component
 	 **/
 	private function execute($stmtSql, $params = array(), $fetch = false)
@@ -126,7 +126,7 @@ class Database_Component extends Component
 		}
 		catch (Exception $e)
 		{
-			throw new DatabaseCrash_Exception_Component($e->getMessage());
+			throw new \Exceptions\DatabaseCrash($e->getMessage());
 		}
 
 		$query_time = round(microtime(true) - $query_start, 4);

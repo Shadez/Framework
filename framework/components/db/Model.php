@@ -18,7 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-abstract class Model_Db_Component extends Component
+namespace Db;
+abstract class Model extends \Component
 {
 	private $m_defaultFields = array();
 	private $m_defaultAliases = array();
@@ -161,20 +162,20 @@ abstract class Model_Db_Component extends Component
 	/**
 	 * Returns field type
 	 * @param string $name
-	 * @throws ModelCrash_Exception_Component
+	 * @throws \Exceptions\ModelCrash
 	 * @return string
 	 **/
 	public function getFieldType($name)
 	{
 		if (!isset($this->m_fields[$name]))
-			throw new ModelCrash_Exception_Component('field "' . $name . '" was not found');
+			throw new \Exceptions\ModelCrash('field "' . $name . '" was not found');
 
 		if (is_array($this->m_fields[$name]) && isset($this->m_fields[$name]['type']))
 			return $this->m_fields[$name]['type'];
 		elseif ($this->m_fields[$name])
 			return $this->m_fields[$name];
 		else
-			throw new ModelCrash_Exception_Component('unable to find "' . $name . '" field\'s type');
+			throw new \Exceptions\ModelCrash('unable to find "' . $name . '" field\'s type');
 	}
 
 	/**

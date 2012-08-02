@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Events_Component extends Component
+class Events extends Component
 {
 	private $m_eventsDisabled = false;
 	protected $m_events = array();

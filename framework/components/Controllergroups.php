@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class ControllerGroups_Component extends Component
+class ControllerGroups extends Component
 {
 	protected $m_controllerGroups = array();
 

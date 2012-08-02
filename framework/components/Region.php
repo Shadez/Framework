@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Region_Component extends Component
+class Region extends Component
 {
 	private $m_regionName = '';
 	private $m_regionBlocks = array();
@@ -65,10 +65,10 @@ class Region_Component extends Component
 
 	/**
 	 * Adds block to region
-	 * @param Block_Component $block
+	 * @param Block $block
 	 * @return Region_Component
 	 **/
-	public function addBlock(Block_Component $block)
+	public function addBlock(Block $block)
 	{
 		if ($this->blockExists($block->getName()))
 			return $this;

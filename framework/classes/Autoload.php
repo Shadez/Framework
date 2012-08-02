@@ -27,77 +27,90 @@ abstract class Autoload
 		spl_autoload_register('Autoload::loadClass');
 	}
 
-	public static function loadClass($className)
+	public static function loadClass($className, $checkOnly = false)
 	{
-		$isInterface = false;
+		// Since we're using namespaces, let's find out what NS we've got now
+		$ns = explode('\\', $className);
 
-		$pieces = explode('_', $className);
+		$name = $ns[ sizeof($ns) - 1];
+		unset($ns[ sizeof($ns) - 1]);
+		$ns = array_values($ns); // Rebuild indexes
 
-		if ($pieces[0] == $className && strtolower(substr($className, 0, 1)) == 'i')
-			$isInterface = true;
+		$ns_path = implode(DS, array_map(function($v) {
+			return strtolower($v);
+		}, $ns));
 
-		if (strcmp(strtolower($pieces[sizeof($pieces)-1]), 'component') !== false)
-			unset($pieces[sizeof($pieces)-1]);
-
-		$size = sizeof($pieces);
-		$isController = false;
-
-		if ($size >= 2)
-			$isController = strtolower($pieces[$size-1]) == 'controller';
-
-		$paths = array(
-			APP_COMPONENTS_DIR, FW_COMPONENTS_DIR, APP_INTERFACES_DIR, FW_INTERFACES_DIR
+		$default_pathes = array(
+			array(
+				'dir' => APP_COMPONENTS_DIR,
+				'info' => 'App Component',
+				'type' => 'component'
+			),
+			array(
+				'dir' => FW_COMPONENTS_DIR,
+				'info' => 'Framework Component',
+				'type' => 'component'
+			),
+			array(
+				'dir' => APP_INTERFACES_DIR,
+				'info' => 'App Interface',
+				'type' => 'interface'
+			),
+			array(
+				'dir' => FW_INTERFACES_DIR,
+				'info' => 'Framework Interface',
+				'type' => 'interface'
+			),
 		);
 
-		$usePath = '';
+		$file = ucfirst(strtolower($name)) . '.php';
 		$file_path = '';
+		$throw_exception = false;
+		$file_path_info = array();
 
-		if ($isInterface)
-			$file_path = ucfirst(strtolower($className)) . '.' . PHP_EXT;
-		else
-			for ($i = $size - 1; $i >= 0; --$i)
+		if (!$ns)
+		{
+			// No namespace, root component
+			foreach ($default_pathes as $fp)
 			{
-				$file_path .= ($i < $size-1 ? DS : '') . ($i == 0 ? ucfirst(strtolower($pieces[$i])) . '.' . PHP_EXT : strtolower($pieces[$i]));
+				if (file_exists($fp['dir'] . $file))
+				{
+					$file_path = $fp['dir'] . $file;
+					$file_path_info = $fp;
+				}
 			}
 
-		$throwExc = false;
-
-		if (!$file_path)
-			$throwExc = true;
-
-		if (!$throwExc)
-		{
-			foreach ($paths as $path)
-			{
-				if (!$path) continue;
-
-				if (file_exists($path . $file_path))
-					$usePath = $path . $file_path;
-			}
+			if (!$file_path || !$file_path_info)
+				$throw_exception = true;
 		}
-
-		if (!$usePath)
-			$throwExc = true;
 		else
 		{
-			require_once($usePath);
+			foreach ($default_pathes as $fp)
+			{
+				if (file_exists($fp['dir'] . $ns_path . DS . $file))
+				{
+					$file_path = $fp['dir'] . $ns_path . DS . $file;
+					$file_path_info = $fp;
+				}
+			}
 
-			if (!class_exists($className) && !interface_exists($className))
-				$throwExc = true;
+			if (!$file_path || !$file_path_info)
+				$throw_exception = true;
 		}
 
-		if ($isController && !class_exists($className))
-		{
-			$className = preg_replace('/[^ \/_A-Za-z-]/', '', $className);
-			$className = str_replace(' ', '', $className);
+		if ($checkOnly)
+			return !$throw_exception;
 
-			if (strcmp(strtolower($className), 'default_controller_component'))
-				eval('class ' . $className . ' extends Default_Controller_Component {};');
-		}
-		elseif ($throwExc)
-			throw new Exception('class ' . $className . ' was not found');
+		if ($throw_exception)
+			throw new Exception('Class ' . $className . ' was not found!');
 
-		self::$m_classes[$className] = true;
+		require_once($file_path);
+
+		$file_path_info['path'] = $file_path;
+		$file_path_info['class'] = $className;
+		unset($file_path_info['dir']);
+
+		self::$m_classes[$className] = $file_path_info;
 	}
 
 	public static function getLoadedClasses()

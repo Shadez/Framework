@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class I18n_Component extends Component
+class I18n extends Component
 {
 	protected $m_strings = array();
 	protected $m_formats = array();
@@ -45,13 +45,13 @@ class I18n_Component extends Component
 	/**
 	 * Sets active locale
 	 * @param string $locale_name
-	 * @throws I18nCrash_Exception_Component
+	 * @throws \Exceptions\I18nCrash
 	 * @return I18n_Component
 	 **/
 	public function setLocale($locale_name)
 	{
 		if (!$locale_name)
-			throw new I18nCrash_Exception_Component('no locale name provided');
+			throw new \Exceptions\I18nCrash('no locale name provided');
 	
 		$this->m_localeName = $locale_name;
 
@@ -62,19 +62,19 @@ class I18n_Component extends Component
 
 	/**
 	 * Loads locale data into holders
-	 * @throws I18nCrash_Exception_Component
+	 * @throws \Exceptions\I18nCrash
 	 * @return I18n_Component
 	 **/
 	protected function loadLocale()
 	{
 		if (!$this->m_localeName)
-			throw new I18nCrash_Exception_Component('locale name was not found');
+			throw new \Exceptions\I18nCrash('locale name was not found');
 
 		$stringsFile = APP_I18N_DIR . $this->m_localeName . DS . 'strings_' . $this->m_localeName . '.' . PHP_EXT;
 		$formatsFile = APP_I18N_DIR . $this->m_localeName . DS . 'formats_' . $this->m_localeName . '.' . PHP_EXT;
 
 		if (!file_exists($stringsFile) || !file_exists($formatsFile))
-			throw new I18nCrash_Exception_Component('locale ' . $this->m_localeName . ' was not found');
+			throw new \Exceptions\I18nCrash('locale ' . $this->m_localeName . ' was not found');
 
 		$App_Strings = array();
 		$App_Formats = array();
@@ -83,7 +83,7 @@ class I18n_Component extends Component
 		require($formatsFile);
 
 		if (!$App_Strings || !$App_Formats || !isset($App_Strings['locale']) || !$App_Strings['locale'])
-			throw new I18nCrash_Exception_Component('corrupted locale ' . $this->m_localeName . ' was found');
+			throw new \Exceptions\I18nCrash('corrupted locale ' . $this->m_localeName . ' was found');
 
 		$this->m_strings = $App_Strings;
 		$this->m_formats = $App_Formats;

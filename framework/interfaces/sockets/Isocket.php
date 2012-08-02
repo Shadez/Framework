@@ -18,5 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class CoreCrash_Exception_Component extends Exception
-{};
+namespace Sockets;
+interface ISocket
+{
+	public function createSocket($host, $port, $timeout = 0);
+	public function sendText($text, $socket = null);
+	public function readText($length);
+	public function closeConnection();
+};

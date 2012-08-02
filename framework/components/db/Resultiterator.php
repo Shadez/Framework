@@ -18,7 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class ResultIterator_Db_Component
+namespace Db;
+class ResultIterator
 {
 	private $m_last = false;
 	private $m_guid = 0;

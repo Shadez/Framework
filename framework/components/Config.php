@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Config_Component extends Component
+class Config extends Component
 {
 	private $m_holder = array();
 
@@ -31,7 +31,7 @@ class Config_Component extends Component
 
 	/**
 	 * Loads configuration file
-	 * @throws Config_Exception_Component
+	 * @throws Exceptions\Config
 	 * @return Config_Component
 	 **/
 	public function loadConifgs()
@@ -48,7 +48,7 @@ class Config_Component extends Component
 			$this->m_holder = $SiteConfigs;
 		}
 		else
-			throw new Config_Exception_Component('Unable to find configuration file!');
+			throw new Exceptions\Config('Unable to find configuration file!');
 
 		return $this;
 	}
@@ -97,13 +97,13 @@ class Config_Component extends Component
 	/**
 	 * Returns configuration value
 	 * @param  $path
-	 * @throws Config_Exception_Component
+	 * @throws Exceptions\Config
 	 * @return mixed
 	 **/
 	public function getValue($path)
 	{
 		if (!$path)
-			throw Config_Exception_Component('no config path provided');
+			throw Exceptions\Config('no config path provided');
 
 		return $this->findValue(explode('.', $path), $this->m_holder);
 	}

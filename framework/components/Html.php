@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Html_Component extends Component
+class Html extends Component
 {
 	protected $m_html = '';
 
@@ -48,7 +48,7 @@ class Html_Component extends Component
 	 **/
 	public function generateFormFields($modelName, $values = array(), $attribs = array(), $wrappers = array())
 	{
-		$model = $this->i($modelName, 'Model');
+		$model = $this->i('\Models\\' . $modelName);
 
 		if (!$model || !$model->m_formFields)
 			return '';

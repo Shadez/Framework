@@ -18,7 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class QueryBuilder_Db_Component extends Component
+namespace Db;
+class QueryBuilder extends \Component
 {
 	protected $m_model = null;
 	protected $m_fields = array();
@@ -72,12 +73,13 @@ class QueryBuilder_Db_Component extends Component
 	 * Sets active model
 	 * @param  string $model_name
 	 * @return  QueryBuilder_Db_Component
+	 * @throws \Exceptions\ModelCrash
 	 **/
 	public function setModel($model_name)
 	{
-		$this->m_model = $this->i($model_name, 'Model');
+		$this->m_model = $this->i('\Models\\' . $model_name);
 		if (!$this->m_model)
-			throw new ModelCrash_Exception_Component('Model ' . $model_name . ' was not found');
+			throw new \Exceptions\ModelCrash('Model ' . $model_name . ' was not found');
 
 		$this->m_fields[$this->getModel()->getTable()] = array_keys($this->getModel()->getFields()); // Will be re-assigned, if necessary
 		$this->m_fieldsCount += sizeof($this->m_fields[$this->getModel()->getTable()]);
@@ -346,16 +348,17 @@ class QueryBuilder_Db_Component extends Component
 	 * Adds additional model to join
 	 * @param  string $model_name
 	 * @return  QueryBuilder_Db_Component
+	 * @throws \Exceptions\ModelCrash
 	 **/
 	public function addModel($model_name)
 	{
 		if (isset($this->m_childModels[$model_name]))
 			return $this;
 
-		$this->m_childModels[$model_name] = $this->i($model_name, 'Model');
+		$this->m_childModels[$model_name] = $this->i('\Models\\' . $model_name);
 
 		if (!$this->m_childModels[$model_name])
-			throw new ModelCrash_Exception_Component('Model ' . $model_name . ' was not found!');
+			throw new \Exceptions\ModelCrash('Model ' . $model_name . ' was not found!');
 
 		$this->m_fields[$this->m_childModels[$model_name]->m_table] = array_keys($this->m_childModels[$model_name]->getFields());
 		$this->m_fieldsCount += sizeof($this->m_fields[$this->m_childModels[$model_name]->m_table]);

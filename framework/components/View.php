@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class View_Component extends Component
+class View extends Component
 {
 	private $m_regions = array();
 	private $m_tplVars = array();
@@ -58,7 +58,7 @@ class View_Component extends Component
 	/**
 	 * Builds all provided blocks and blocks of current controller's group
 	 * @param array $blocks = array()
-	 * @throws ViewCrash_Exception_Component
+	 * @throws \Exception\ViewCrash
 	 * @return View_Component
 	 **/
 	public function buildBlocks($blocks = array())
@@ -66,7 +66,7 @@ class View_Component extends Component
 		$controller = $this->getCore()->getActiveController();
 
 		if (!$controller)
-			throw new ViewCrash_Exception_Component('unable to create controller blocks: controller does not exists');
+			throw new \Exception\ViewCrash('unable to create controller blocks: controller does not exists');
 
 		if ($blocks)
 		{
@@ -110,7 +110,7 @@ class View_Component extends Component
 	 * Includes template file
 	 * @param string $tpl_name
 	 * @param string $tpl_path = 'default'
-	 * @throws ViewCrash_Exception_Component
+	 * @throws \Exception\ViewCrash
 	 * @return View_Component
 	 **/
 	public function displayTemplate($tpl_name, $tpl_path = 'default')
@@ -120,7 +120,7 @@ class View_Component extends Component
 		$tpl = TEMPLATES_DIR . $tpl_path . DS . $tpl_name . '.' . TPL_EXT;
 
 		if (!file_exists($tpl))
-			throw new ViewCrash_Exception_Component('unable to find template file (' . $tpl_name . ')');
+			throw new \Exception\ViewCrash('unable to find template file (' . $tpl_name . ')');
 
 		require_once($tpl);
 
@@ -129,10 +129,10 @@ class View_Component extends Component
 
 	/**
 	 * Adds region
-	 * @param Region_Component $region
+	 * @param Region $region
 	 * @return View_Component
 	 **/
-	public function addRegion(Region_Component $region)
+	public function addRegion(Region $region)
 	{
 		$this->m_regions[$region->getName()] = $region;
 
@@ -152,7 +152,7 @@ class View_Component extends Component
 	/**
 	 * Returns Region_Component instance by region name
 	 * @param mixed $region
-	 * @throws ViewCrash_Exception_Component
+	 * @throws \Exception\ViewCrash
 	 * @return Region_Component
 	 **/
 	public function getRegion($region)
@@ -162,7 +162,7 @@ class View_Component extends Component
 		elseif (is_string($region) && isset($this->m_regions[$region]))
 			return $this->m_regions[$region];
 		else
-			throw new ViewCrash_Exception_Component('region ' . (is_object($region) ? $region->getName() : $region) . ' was not found');
+			throw new \Exception\ViewCrash('region ' . (is_object($region) ? $region->getName() : $region) . ' was not found');
 
 		return null;
 	}
@@ -181,7 +181,7 @@ class View_Component extends Component
 	 * Builds page
 	 * @param string $layoutFile = ''
 	 * @param string $layoutPath = ''
-	 * @throws ViewCrash_Exception_Component
+	 * @throws \Exception\ViewCrash
 	 * @return View_Component
 	 **/
 	public function buildPage($layoutFile = false, $layoutPath = false)
@@ -192,7 +192,7 @@ class View_Component extends Component
 			$defaultLayout = $this->c('Config')->getValue('controller.default_layout');
 
 			if (!$controller)
-				throw new ViewCrash_Exception_Component('unable to build page: active controller does not exists');
+				throw new \Exception\ViewCrash('unable to build page: active controller does not exists');
 
 			// Check controller group
 			$group = $controller->getControllerGroup();
@@ -216,7 +216,7 @@ class View_Component extends Component
 		}
 
 		if (!$layoutFile || !$layoutPath)
-			throw new ViewCrash_Exception_Component('layout file was not defined');
+			throw new \Exception\ViewCrash('layout file was not defined');
 
 		$path = str_replace('.', DS, $layoutPath);
 
@@ -226,7 +226,7 @@ class View_Component extends Component
 		$tpl = TEMPLATES_DIR . $path . DS . $layoutFile . '.' . TPL_EXT;
 
 		if (!file_exists($tpl))
-			throw new ViewCrash_Exception_Component('unable to find layout file (' . $layoutPath . '.' . $layoutFile . ')');
+			throw new \Exception\ViewCrash('unable to find layout file (' . $layoutPath . '.' . $layoutFile . ')');
 
 		$this->renderRegions();
 

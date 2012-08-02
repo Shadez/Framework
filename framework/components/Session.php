@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Session_Component extends Component
+class Session extends Component
 {
 	protected $m_sessionStorage = array();
 
@@ -67,7 +67,7 @@ class Session_Component extends Component
 	/**
 	 * Finds session value
 	 * @param string $session
-	 * @throws CoreCrash_Exception_Component
+	 * @throws \Exceptions\CoreCrash
 	 * @return mixed
 	 **/
 	protected function findSessionValue($session)
@@ -79,6 +79,6 @@ class Session_Component extends Component
 		elseif (isset($this->m_sessionStorage[$session]))
 			return $this->m_sessionStorage[$session];
 
-		throw new CoreCrash_Exception_Component('you\'ve just divided by zero');
+		throw new \Exceptions\CoreCrash('you\'ve just divided by zero');
 	}
 };

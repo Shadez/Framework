@@ -87,7 +87,7 @@ define('IE_BROWSER', isset($_SERVER['HTTP_USER_AGENT']) ? preg_match('/MSIE/six'
 
 try
 {
-	$core = Core_Component::create()->run();
+	$core = \Core::create()->run();
 }
 catch (Exception $e)
 {
@@ -105,6 +105,17 @@ catch (Exception $e)
 
 if ($debug && !$core->getActiveController()->isAjaxPage())
 {
-	printf('<div id="debug">Page loaded in %.2f ms<br />Memory usage: %.2f MB<br />Memory usage peak: %.2f MB', (array_sum(explode(' ', microtime())) - $tstart), ((memory_get_usage(true)/1048576 * 100000)/100000), ((memory_get_peak_usage(true)/1048576 * 100000)/100000));
-	printf('<br />Loaded classes:<ul><li>%s</ul></div>', implode('<li>', array_keys(Autoload::getLoadedClasses())));
+	require_once(FW_DIR . 'Debug.' . PHP_EXT);
+
+	$debug = new SFDebug($core);
+	$tend = array_sum(explode(' ', microtime()));
+
+	$debug->setData(array(
+		'start_time' => $tstart,
+		'end_time' => $tend,
+		'run_time' => sprintf('%.3f', ($tend - $tstart)),
+		'memory_usage' => sprintf('%.2f', ((memory_get_usage(true)/1048576 * 100000)/100000)),
+		'memory_usage_peak' => sprintf('%.2f', ((memory_get_peak_usage(true)/1048576 * 100000)/100000)),
+		'classes' => Autoload::getLoadedClasses()
+	));
 }

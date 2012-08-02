@@ -18,5 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class ViewCrash_Exception_Component extends Exception
+namespace Exceptions;
+class Runtime extends \Exception
 {};

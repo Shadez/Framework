@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Layout_Component extends Component
+class Layout extends Component
 {
 	private $m_css = array();
 	private $m_js = array();

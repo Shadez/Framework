@@ -18,7 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class ResultHolder_Db_Component extends Component
+namespace Db;
+class ResultHolder extends \Component
 {
 	private $m_data = array();
 	private $m_dataMap = array();
@@ -64,10 +65,10 @@ class ResultHolder_Db_Component extends Component
 		$this->m_iterators = array();
 
 		foreach ($this->m_dataMap as $idx => $key)
-			$this->m_iterators[$idx] = $this->i('ResultIterator', 'Db')
+			$this->m_iterators[$idx] = $this->i('\Db\ResultIterator')
 				->setData($this->m_data[$key]);
 
-		$this->m_iterators[$this->m_dataSize] = $this->i('ResultIterator', 'Db')->lastIterator();
+		$this->m_iterators[$this->m_dataSize] = $this->i('\Db\ResultIterator')->lastIterator();
 
 		return $this;
 	}

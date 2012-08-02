@@ -18,42 +18,28 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Cookie
+namespace Controllers;
+class Api extends \Controller
 {
-	public function initialize()
+	protected function run()
 	{
-		return $this;
+		$this->ajaxPage();
+
+		// Init site API
+		$this->c('SiteApi');
+
+		$resp = array('errno' => -1, 'errmsg' => 'No method provided');
+
+		if (!isset($_GET['apiSig']))
+		{
+			$resp = array(
+				'errno' => -2,
+				'ermsg' => 'No API Signature provided'
+			);
+		}
+		elseif (isset($_GET['method']))
+			$resp = $this->c('Api')->runApiMethod(addslashes($_GET['method']));
+
+		$this->getCore()->setVar('content', $resp);
 	}
-
-	public function setInitialized($val)
-	{
-		return $this;
-	}
-
-	/**
-	 * Returns cookie value
-	 * @param string $name
-	 * @return string
-	 **/
-	public function read($name)
-	{
-		return isset($_COOKIE[$name]) ? $_COOKIE[$name] : null;
-	}
-
-	/**
-	 * Sets cookie
-	 * @param string $name
-	 * @param string $value
-	 * @param string $time_limit = 'NEXT YEAR'
-	 * @param string $path = '/'
-	 * @return Cookie_Component
-	 **/
-	public function write($name, $value = '', $time_limit = 'NEXT YEAR', $path = '/')
-	{
-		setcookie($name, $value, strtotime($time_limit), $path);
-
-		$_COOKIE[$name] = $value;
-
-		return $this;
-	}
-};
+}

@@ -18,5 +18,24 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class DBCrash_Exception_Component extends Exception
-{};
+namespace Controllers;
+class DefaultController extends \Controller
+{
+	protected $m_isDefaultController = true;
+	protected $m_errorPage = true;
+
+	protected function finish()
+	{
+		$this->c('View')->buildBlocks('default')->buildPage();
+
+		return $this;
+	}
+
+	public function block_default()
+	{
+		return $this->i('Block')
+			->setName('default')
+			->setTemplate('default', 'default.contents')
+			->setRegion('pagecontent');
+	}
+};

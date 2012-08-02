@@ -18,27 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Api_Controller_Component extends Controller_Component
-{
-	protected function run()
-	{
-		$this->ajaxPage();
-
-		// Init site API
-		$this->c('SiteApi');
-
-		$resp = array('errno' => -1, 'errmsg' => 'No method provided');
-
-		if (!isset($_GET['apiSig']))
-		{
-			$resp = array(
-				'errno' => -2,
-				'ermsg' => 'No API Signature provided'
-			);
-		}
-		elseif (isset($_GET['method']))
-			$resp = $this->c('Api')->runApiMethod(addslashes($_GET['method']));
-
-		$this->getCore()->setVar('content', $resp);
-	}
-}
+namespace Exceptions;
+class Config extends \Exception
+{};

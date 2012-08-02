@@ -18,5 +18,43 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class DatabaseCrash_Exception_Component extends Exception
-{};
+class SFDebug
+{
+	private $m_generationTime = 0.0;
+	private $m_memoryUsage = 0.0;
+	private $m_memoryUsagePeak = 0.0;
+	private $m_sqlQueriesCount = 0;
+	private $m_sqlQueriesTiming = 0.0;
+	private $m_componentsCount = 0;
+	private $m_componentsList = array();
+	private $m_debugHTML = '';
+	private $m_data = array();
+
+	private $core = null;
+
+	public function __construct(Core $core)
+	{
+		if (!$core)
+			throw new Exception('core was not found');
+
+		$this->core = $core;
+	}
+
+	public function setData($data)
+	{
+		$this->m_data = $data;
+		dump($data);
+
+		$this->debug();
+	}
+
+	public function getResult()
+	{
+		return $this->m_debugHTML;
+	}
+
+	private function debug()
+	{
+		
+	}
+}

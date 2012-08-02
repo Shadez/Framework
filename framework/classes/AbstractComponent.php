@@ -31,12 +31,12 @@ abstract class Component
 	 * Component constructor
 	 * @param string $name
 	 * @param Core_Component $core
-	 * @throws CoreCrash_Exception_Component
+	 * @throws \Exceptions\CoreCrash
 	 **/
-	public function __construct($name, Core_Component $core)
+	public function __construct($name, Core $core)
 	{
 		if (!$name)
-			throw new CoreCrash_Exception_Component('component name was not provided');
+			throw new \Exceptions\CoreCrash('component name was not provided');
 
 		$this->m_core = $core;
 		$this->m_component = $name;
@@ -113,73 +113,61 @@ abstract class Component
 	 * Creates new or returns previously created instance of provided component name
 	 * This method should be used for singletons only!
 	 * @param string $name
-	 * @param string $category = ''
-	 * @throws CoreCrash_Exception_Component
+	 * @throws \Exceptions\CoreCrash
 	 * @return Component
 	 **/
-	public function c($name, $category = '')
+	public function c($name)
 	{
 		if (!$name)
-			throw new CoreCrash_Exception_Component('You must provide component name!');
+			throw new \Exceptions\CoreCrash('You must provide component name!');
 
-		return $this->getComponent($name, $category);
+		return $this->getComponent($name);
 	}
 
 	/**
 	 * Creates and returns new instance of provided component name
 	 * This method should not be used to get access to singleton component!
 	 * @param string $name
-	 * @param string $category = ''
-	 * @throws CoreCrash_Exception_Component
+	 * @throws \Exceptions\CoreCrash
 	 * @return Component
 	 **/
-	public function i($name, $category = '')
+	public function i($name)
 	{
 		if (!$name)
-			throw new CoreCrash_Exception_Component('You must provide component name!');
+			throw new \Exceptions\CoreCrash('You must provide component name!');
 
-		return $this->getComponent($name, $category, true);
+		return $this->getComponent($name, true);
 	}
 
 	/**
 	 * Finds or creates instance of component
-	 * @param string $name
-	 * @param string $category = ''
+	 * @param string $className
 	 * @param bool $createNew = false
-	 * @throws CoreCrash_Exception_Component
+	 * @throws \Exceptions\CoreCrash
 	 * @return Component
 	 **/
-	private function getComponent($name, $category = '', $createNew = false)
+	private function getComponent($className, $createNew = false)
 	{
-		$cmp_name = ucfirst(strtolower($name)) . ($category ? '_' . $category : '') . '_Component';
+		$object = null;
 
-		if ($createNew)
+		if (!$createNew && isset(self::$m_components[$className]))
 		{
-			// Check singletons
-			$singletons = array(
-				'Core', 'Db', 'Events'
-			);
-
-			if (in_array(ucfirst(strtolower($name)), $singletons))
-				throw new CoreCrash_Exception_Component('there is can be only one instance of ' . $name . ' component');
-		
-			$cmp = new $cmp_name($name, $this->m_core);
-
-			return $cmp->initialize()->setInitialized(true);
+			$object = self::$m_components[$className]; // Use previously saved instance
 		}
-
-		if (!isset(self::$m_components[$category]))
-			self::$m_components[$category] = array();
 		else
 		{
-			if (isset(self::$m_components[$category][$name]))
-				return self::$m_components[$category][$name];
+			$object = new $className($className, $this->getCore());
+
+			if (!$createNew)
+			{
+				// Save only singleton-like components
+				self::$m_components[$className] = $object;
+			}
+
+			$object->initialize()->setInitialized(true);
 		}
 
-		$cmp = new $cmp_name($name, $this->m_core);
-		self::$m_components[$category][$name] = $cmp;
-
-		return $cmp->initialize()->setInitialized(true);
+		return $object;
 	}
 
 	/**

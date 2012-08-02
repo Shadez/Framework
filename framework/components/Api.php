@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Api_Component extends Component
+class Api extends Component
 {
 	protected $m_apiInitialized = false;
 	protected $m_apiMethods = array();

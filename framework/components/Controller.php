@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-abstract class Controller_Component extends Component
+abstract class Controller extends Component
 {
 	protected $m_ajaxPage = false;
 	protected $m_buildFailed = false;

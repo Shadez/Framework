@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Core_Component extends Component
+class Core extends Component
 {
 	const URL_PATTERN = '/[^ \/_0-9A-Za-zА-Яа-я-]/';
 
@@ -33,7 +33,7 @@ class Core_Component extends Component
 	public function __construct()
 	{
 		$this->m_core = $this;
-		$this->m_component = 'Core';
+		$this->m_component = '\Core';
 		$this->m_time = microtime(true);
 		$this->m_uniqueHash = uniqid(dechex(time()), true);
 		$this->setVar('core', $this);
@@ -41,12 +41,12 @@ class Core_Component extends Component
 		if (!isset(self::$m_components['default']))
 			self::$m_components['default'] = array();
 
-		self::$m_components['default']['Core'] = $this;
+		self::$m_components['default']['\Core'] = $this;
 	}
 
 	public static function create()
 	{
-		$core = new Core_Component();
+		$core = new Core();
 
 		$core->c('Events')
 			->createEvent('onCoreStartup', array($core, 'onCoreStartup'))
@@ -59,11 +59,8 @@ class Core_Component extends Component
 	{
 		$this->parseUrl();
 
-		// Call router BEFORE controllers!
-		//$this->c('Router');
-
 		// Perform RunOnce
-		$this->c('RunOnce', 'Run');
+		$this->c('\Run\RunOnce');
 
 		$this->m_activeController = null;
 
@@ -157,7 +154,7 @@ class Core_Component extends Component
 
 	/**
 	 * Parses URL string and explodes it into array
-	 * @throws CoreCrash_Exception_Component
+	 * @throws \Exception\CoreCrash
 	 * @return Core_Component
 	 **/
 	private function parseUrl()
@@ -165,7 +162,7 @@ class Core_Component extends Component
 		$url = $this->c('Config')->getValue('core.url_string');
 
 		if (!$url)
-			throw new CoreCrash_Exception_Component('unable to find URL string!');
+			throw new \Exception\CoreCrash('unable to find URL string!');
 
 		$this->m_urlActionsCount = 0;
 
@@ -220,31 +217,24 @@ class Core_Component extends Component
 
 	/**
 	 * Checks if controller's file exists
-	 * @param string $name
+	 * @param array $name
 	 * @return bool
 	 **/
 	public function isControllerExists($name)
 	{
-		$name = strtolower($name);
+		if (!$name)
+			return false;
 
-		$d = explode('_', $name);
+		foreach ($name as &$p)
+			$p = strtolower($p);
 
-		$size = sizeof($d);
+		$name[sizeof($name) - 1] = ucfirst(strtolower($name[sizeof($name) - 1]));
 
-		$t = '';
-
-		for ($i = $size-1; $i >= 0; --$i)
-		{
-			if ($i == 0)
-				$t .= DS . mb_convert_case($d[$i], MB_CASE_TITLE, 'UTF-8');
-			else
-				$t .= DS . mb_convert_case($d[$i], MB_CASE_LOWER, 'UTF-8');
-		}
-
-		$path = 'components' . DS . 'controller' . $t . '.' . PHP_EXT;
+		$path = 'components' . DS . 'controllers' . DS . implode(DS, $name) . '.' . PHP_EXT;
 
 		foreach (array(APP_DIR, FW_DIR) as $type)
 		{
+			//dump($type.$path);
 			if (file_exists($type . $path))
 				return true;
 		}
@@ -273,79 +263,37 @@ class Core_Component extends Component
 		{
 			$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => 'Home', 'default' => false), $this);
 
-			return $this->c('Home', 'Controller');
+			return $this->c('Controllers\Home');
 		}
 
-		$tmp_name = '';
+		$tmp_name = array();
 		$actions_count = $this->getActionsCount();
 
-		for ($i = $actions_count - 1; $i >= 0; -- $i)
-			$tmp_name .= $this->getUrlAction($i) . '_';
+		for ($i = 0; $i < $actions_count; ++$i)
+			$tmp_name[] = ucfirst(strtolower($this->getUrlAction($i)));
 
-		$tmp_name = ucfirst(substr($tmp_name, 0, strlen($tmp_name)-1));
+		$controller_name = '';
 
-		if (!$this->isControllerExists($tmp_name))
+		while ($tmp_name)
 		{
-			$tmp_name = 'Home_' . $tmp_name;
-
-			if (!$this->isControllerExists($tmp_name, true))
-			{
-				$found = false;
-				$new_name = $tmp_name;
-				$name_pieces = explode('_', substr($new_name, 5));
-				$psize = sizeof($name_pieces);
-				$cname = '';
-
-				for ($i = 0; $i < $psize; ++$i)
-				{
-					if (!$found)
-					{
-						$cname = implode('_', $name_pieces);
-
-						if ($this->isControllerExists($cname, true))
-						{
-							$found = true;
-							$new_name = $cname;
-						}
-
-						array_unshift($name_pieces, 'Home');
-						$cname = implode('_', $name_pieces);
-
-						if ($this->isControllerExists($cname, true))
-						{
-							$found = true;
-							$new_name = $cname;
-						}
-
-						array_shift($name_pieces);
-						array_shift($name_pieces);
-					}
-				}
-
-				if ($found)
-				{
-					$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => $new_name, 'default' => false), $this);
-
-					return $this->c($new_name, 'Controller');
-				}
-
-				$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => 'Default', 'default' => true), $this);
-
-				return $this->c('Default', 'Controller');
-			}
+			if (!$this->isControllerExists($tmp_name))
+				array_pop($tmp_name);
 			else
 			{
-				$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => $tmp_name, 'default' => false), $this);
-
-				return $this->c($tmp_name, 'Controller');
+				$controller_name = implode('\\', $tmp_name);
+				$tmp_name = null;
 			}
 		}
-		else
-		{
-			$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => $tmp_name, 'default' => false), $this);
 
-			return $this->c($tmp_name, 'Controller');
-		}
+		if (!$controller_name)
+			$controller_name = 'DefaultController';
+
+		$this->c('Events')->triggerEvent('onCoreControllerSetup', array(
+			'controller_name' => $controller_name,
+			'default' => $controller_name == 'DefaultController'
+		), $this);
+
+		return $this->c('\Controllers\\' . $controller_name);
 	}
 
 	/**
@@ -366,7 +314,7 @@ class Core_Component extends Component
 	 **/
 	public function getActiveController()
 	{
-		return $this->m_activeController ? $this->m_activeController : $this->c('Default', 'Controller');
+		return $this->m_activeController ? $this->m_activeController : $this->c('\Controllers\DefaultController');
 	}
 
 	/**

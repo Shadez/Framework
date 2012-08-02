@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Db_Component extends Component
+class Db extends Component
 {
 	private $m_availableDatabases = array();
 
@@ -104,13 +104,13 @@ class Db_Component extends Component
 	 * Returns DB for specific type
 	 * @param string $type
 	 * @param bool $skipConnection = false
-	 * @throws DBCrash_Exception_Component
+	 * @throws \Exceptions\DBCrash
 	 * @return Database_Component
 	 **/
 	public function getDb($type, $skipConnection = false)
 	{
 		if (!isset($this->m_availableDatabases[$type]))
-			throw new DBCrash_Exception_Component('unknown database type: ' . $type);
+			throw new \Exceptions\DBCrash('unknown database type: ' . $type);
 
 		$dbo = null;
 
@@ -166,7 +166,7 @@ class Db_Component extends Component
 	public function switchTo($type, $id)
 	{
 		if (!isset($this->m_availableDatabases[$type]))
-			throw new DBCrash_Exception_Component('unknown database type: ' . $type);
+			throw new \Exceptions\DBCrash('unknown database type: ' . $type);
 
 		$this->m_availableDatabases[$type]['activeId'] = $id;
 			

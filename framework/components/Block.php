@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  **/
 
-class Block_Component extends Component
+class Block extends Component
 {
 	private $m_blockName = '';
 	private $m_blockRegionName = '';
@@ -155,7 +155,7 @@ class Block_Component extends Component
 	/**
 	 * Performs block rendering operations
 	 * @param array $vars
-	 * @throws BlockCrash_Exception_Component
+	 * @throws \Exceptions\BlockCrash
 	 * @return Block_Component
 	 **/
 	public function renderBlock($vars)
@@ -166,7 +166,7 @@ class Block_Component extends Component
 		$template = TEMPLATES_DIR . $this->m_blockTemplatePath . DS . $this->m_blockTemplate . '.' . TPL_EXT;
 
 		if (!file_exists($template))
-			throw new BlockCrash_Exception_Component('unable to build block "' . $this->getName() . '": template was not found');
+			throw new \Exceptions\BlockCrash('unable to build block "' . $this->getName() . '": template was not found');
 
 		// Vars priority: block/controller/core
 
