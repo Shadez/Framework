@@ -154,7 +154,7 @@ class Core extends Component
 
 	/**
 	 * Parses URL string and explodes it into array
-	 * @throws \Exception\CoreCrash
+	 * @throws \Exceptions\CoreCrash
 	 * @return Core_Component
 	 **/
 	private function parseUrl()
@@ -162,7 +162,7 @@ class Core extends Component
 		$url = $this->c('Config')->getValue('core.url_string');
 
 		if (!$url)
-			throw new \Exception\CoreCrash('unable to find URL string!');
+			throw new \Exceptions\CoreCrash('unable to find URL string!');
 
 		$this->m_urlActionsCount = 0;
 
