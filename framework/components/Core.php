@@ -263,7 +263,7 @@ class Core extends Component
 		{
 			$this->c('Events')->triggerEvent('onCoreControllerSetup', array('controller_name' => 'Home', 'default' => false), $this);
 
-			return $this->c('Controllers\Home');
+			return $this->c('\Controllers\Home');
 		}
 
 		$tmp_name = array();
