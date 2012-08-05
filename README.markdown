@@ -1,7 +1,8 @@
 Model-View-Controller Pattern-based PHP Framework
 =================================================
-Required PHP Version: 5.3.X and higher (namespaces, closures are highly used in this software)
-mod_rewrite for Apache HTTP Server is required
+Required PHP Version: 5.3.X and higher (namespaces, closures are highly used in this software);
+
+mod_rewrite for Apache HTTP Server is required.
 
 License
 -------

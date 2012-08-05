@@ -29,6 +29,11 @@ if (!isset($debug))
 
 $tstart = array_sum(explode(' ', microtime()));
 
+if (version_compare(PHP_VERSION, '5.3.0', '<'))
+{
+	die('You PHP version is not compatible with this software (at least 5.3.0 required)!');
+}
+
 // Define global constants
 define('DS', DIRECTORY_SEPARATOR);
 define('ROOT', (dirname(dirname(__FILE__))) . DS);
