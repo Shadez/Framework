@@ -22,6 +22,7 @@ class Core extends Component
 {
 	const URL_PATTERN = '/[^ \/_0-9A-Za-zА-Яа-я-]/';
 
+	private static $m_coreSingleton = null;
 	private $m_urlActions = array();
 	private $m_urlActionsCount = 0;
 	private $m_rawUrl = '';
@@ -33,6 +34,7 @@ class Core extends Component
 	public function __construct()
 	{
 		$this->m_core = $this;
+		Core::$m_coreSingleton = $this;
 		$this->m_component = '\Core';
 		$this->m_time = microtime(true);
 		$this->m_uniqueHash = uniqid(dechex(time()), true);
@@ -42,6 +44,11 @@ class Core extends Component
 			self::$m_components['default'] = array();
 
 		self::$m_components['default']['\Core'] = $this;
+	}
+
+	public static function getInstance()
+	{
+		return self::$m_coreSingleton;
 	}
 
 	public static function create()

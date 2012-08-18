@@ -96,6 +96,9 @@ abstract class Component
 	 **/
 	public function getCore()
 	{
+		if (!$this->m_core)
+			$this->m_core = Core::getInstance();
+
 		return $this->m_core;
 	}
 
