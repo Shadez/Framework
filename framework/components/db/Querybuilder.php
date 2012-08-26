@@ -252,6 +252,54 @@ class QueryBuilder extends \Component
 
 		return $this;
 	}
+	
+	/**
+	 * Applies special MySQL condition.
+	 *
+	 * Since we can't apply array parameter to PDO, we're unable to use one single named parameter
+	 * at some specific MySQL statements (for example, "IN" or "LIKE").
+	 * This method creates named parameter for each array value and allows to create query statements like
+	 * <b>"SELECT * FROM users WHERE id IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)"</b> with simple
+	 * <code>\Db\QueryResult->applyCondition('id', 'IN', array(1, ..., 10));</code>
+	 *
+	 * @param  string $field
+	 * @param  string $condition
+	 * @param  array $params = array()
+	 * @param  string $next = 'AND'
+	 * @return QueryBuilder_Db_Component
+	 **/
+	public function applyCondition($field, $condition, $params, $next = 'AND')
+	{
+		$sql_condition = '';
+
+		$query_params = array();
+		$param_name = '';
+		foreach ($params as $p)
+		{
+			$param_name = ':param_' . $field . '_' . md5($p);
+			$sql_condition .= ($sql_condition ? ', ' : '') . $param_name;
+			$query_params[$param_name] = $p;
+		}
+
+		$field_info = explode('.', $field);
+
+		if ($field_info && isset($field_info[1]))
+		{
+			$table = trim($field_info[0]);
+			$field = trim($field_info[1]);
+		}
+		else
+			$table = trim($this->getModel()->m_table);
+
+		return $this->appendSql('where', array(
+			'table' => $table,
+			'field' => $field,
+			'condition' => ' ' . $condition . ' ( ' . $sql_condition . ' ) ',
+			'next' => $next,
+			'binary' => false,
+			'params' => $query_params
+		));
+	}
 
 	/**
 	 * Applies MySQL condition

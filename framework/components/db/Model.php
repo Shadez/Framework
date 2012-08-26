@@ -710,10 +710,10 @@ abstract class Model extends \Component
 		{
 			// Do not overwrite existing data
 
-			if (isset($this->m_data[$key]))
+			if (isset($this->m_customData[$key]))
 				continue;
 
-			$this->m_data[$key] = $value;
+			$this->m_customData[$key] = $value;
 		}
 
 		return $this;

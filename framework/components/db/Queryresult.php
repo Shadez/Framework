@@ -326,6 +326,13 @@ class QueryResult extends \Component
 		return $this;
 	}
 
+	public function applyCondition($field, $condition, $params, $next = 'AND')
+	{
+		$this->m_sqlBuilder->applyCondition($field, $condition, $params, $next);
+
+		return $this;
+	}
+
 	public function fieldCondition($field, $condition, $params = array(), $next = 'AND', $binary = false, $insideCond = 'AND')
 	{
 		$this->m_sqlBuilder->fieldCondition($field, $condition, $params, $next, $binary, $insideCond);
