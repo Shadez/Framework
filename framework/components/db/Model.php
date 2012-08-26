@@ -624,4 +624,22 @@ abstract class Model extends \Component
 	{
 		return $this->m_data;
 	}
+
+	public function additionalData($data)
+	{
+		if (!$data)
+			return $this;
+
+		foreach ($data as $key => $value)
+		{
+			// Do not overwrite existing data
+
+			if (isset($this->m_data[$key]))
+				continue;
+
+			$this->m_data[$key] = $value;
+		}
+
+		return $this;
+	}
 };
