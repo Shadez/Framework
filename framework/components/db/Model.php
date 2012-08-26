@@ -23,13 +23,13 @@ abstract class Model extends \Component
 {
 	private $m_defaultFields = array();
 	private $m_defaultAliases = array();
-	private $m_values = array();
-	private $m_data = array();
-	private $m_updatingData = false;
-	private $m_dataLoaded = false;
-	private $m_returnInsertId = false;
-	private $m_lastInsertId = 0;
 
+	protected $m_values = array();
+	protected $m_data = array();
+	protected $m_updatingData = false;
+	protected $m_dataLoaded = false;
+	protected $m_returnInsertId = false;
+	protected $m_lastInsertId = 0;
 	protected $m_primaryFields = array();
 	protected $m_primaryFieldsCount = 0;
 	protected $m_rawSql = '';
