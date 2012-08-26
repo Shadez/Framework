@@ -68,7 +68,10 @@ abstract class Model extends \Component
 			->createEvent('onModelSave', array($this, 'onModelSave'))
 			->createEvent('onModelDelete', array($this, 'onModelDelete'));
 
-		return $this;
+		$this->m_defaultFields = $this->m_fields;
+		$this->m_defaultAliases = $this->m_aliases;
+
+		return $this->setPrimaryFields();
 	}
 
 	/**
@@ -451,14 +454,6 @@ abstract class Model extends \Component
 		}
 
 		return $this;
-	}
-
-	public function initialize()
-	{
-		$this->m_defaultFields = $this->m_fields;
-		$this->m_defaultAliases = $this->m_aliases;
-
-		return $this->setPrimaryFields();
 	}
 
 	/**
