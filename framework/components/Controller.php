@@ -66,24 +66,9 @@ abstract class Controller extends Component
 		else
 		{
 			$c_name = $this->getName();
-			if (strpos(strtolower($c_name), 'home_') !== false && strtolower($c_name) != 'home_controller_component')
-			{
-				$c_name = strtolower(str_replace('home_', '', $c_name));
-				$useNext = false;
-				foreach ($this->getCore()->getActions() as $act)
-				{
-					if ($useNext)
-					{
-						$action = strtolower($act);
-						break;
-					}
+			$size = sizeof(explode('\\', $c_name));
 
-					if (strtolower($act) == $c_name)
-						$useNext = true;
-				}
-			}
-			elseif (strtolower($c_name) == 'home_controller_component')
-				$action = $this->getCore()->getUrlAction(1);
+			$action = $this->getCore()->getUrlAction($size);
 		}
 
 		if ($this->m_isDefaultController)
@@ -119,7 +104,10 @@ abstract class Controller extends Component
 	 **/
 	public function getName()
 	{
-		return $this->m_controllerName ? $this->m_controllerName : strtolower(str_replace('_controller_component', '', strtolower(get_class($this))));
+		if (!$this->m_controllerName)
+			$this->m_controllerName = strtolower(str_replace('controllers\\', '', strtolower(get_class($this))));
+
+		return $this->m_controllerName;
 	}
 
 	/**
