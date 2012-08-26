@@ -137,7 +137,7 @@ class Db extends Component
 				$dbo = $this->m_availableDatabases[$type]['configs'][$activeId]['object'];
 			else
 			{
-				$dbo = $this->i('Database')->connect($this->m_availableDatabases[$type][$activeId]['configs'], $skipConnection);
+				$dbo = $this->i('Database')->connect($this->m_availableDatabases[$type]['configs'][$activeId], $skipConnection);
 
 				$this->m_availableDatabases[$type]['configs'][$activeId]['connected'] = true;
 				$this->m_availableDatabases[$type]['configs'][$activeId]['object'] = $dbo;
