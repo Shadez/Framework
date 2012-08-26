@@ -132,7 +132,7 @@ class QueryBuilder extends \Component
 	 * @param  array $sql
 	 * @return  QueryBuilder_Db_Component
 	 **/
-	function appendSql($type, $sql)
+	private function appendSql($type, $sql)
 	{
 		if (!isset($this->m_sql[$type]))
 			$this->m_sql[$type] = array();
