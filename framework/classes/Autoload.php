@@ -73,7 +73,7 @@ abstract class Autoload
 			// No namespace, root component
 			foreach ($default_pathes as $fp)
 			{
-				if (file_exists($fp['dir'] . $file))
+				if (file_exists($fp['dir'] . $file) && !$file_path)
 				{
 					$file_path = $fp['dir'] . $file;
 					$file_path_info = $fp;
@@ -87,7 +87,7 @@ abstract class Autoload
 		{
 			foreach ($default_pathes as $fp)
 			{
-				if (file_exists($fp['dir'] . $ns_path . DS . $file))
+				if (file_exists($fp['dir'] . $ns_path . DS . $file) && !$file_path)
 				{
 					$file_path = $fp['dir'] . $ns_path . DS . $file;
 					$file_path_info = $fp;
