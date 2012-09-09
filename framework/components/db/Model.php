@@ -126,6 +126,33 @@ abstract class Model extends \Component
 		if (!$name || !isset($this->m_fields[$name]))
 			return false;
 
+		$this->validateOnSet($name, $value, 'values');
+
+		return true;
+	}
+
+	private function validateCoreType($field, &$value, $getter = false)
+	{
+		$type = $this->getFieldType($field);
+		$settings = $this->getFieldSettings($field);
+
+		switch ($type)
+		{
+			case 'Id':
+				break;
+			case 'UnixTimestamp':
+				$this->c('Db\Fields\\' . $type)->validate($value, $settings, $getter, $this);
+				break;
+		}
+
+		return $this;
+	}
+
+	private function validateOnSet($name, &$value, $type = 'values')
+	{
+		if (!$name)
+			return $this;
+
 		// Validate by data type
 		$value = $this->validateByType($name, $value);
 
@@ -145,9 +172,14 @@ abstract class Model extends \Component
 				$value = call_user_func(array($this, 'validate' . $validationGroup . 'group'), $name, $value);
 		}
 
-		$this->m_values[$name] = $value;
+		$this->validateCoreType($name, $value, false);
 
-		return true;
+		if ($type == 'values')
+			$this->m_values[$name] = $value;
+		else
+			$this->m_data[$name] = $value;
+
+		return $this;
 	}
 
 	/**
@@ -166,12 +198,27 @@ abstract class Model extends \Component
 			return $this->m_customData[$name];
 		}
 
-		if (isset($this->m_values[$name]))
-			return $this->m_values[$name];
-		elseif (isset($this->m_data[$name]))
-			return $this->m_data[$name];
+		$value = null;
 
-		return false;
+		if (isset($this->m_values[$name]))
+			$value = $this->m_values[$name];
+		elseif (isset($this->m_data[$name]))
+			$value = $this->m_data[$name];
+
+		// Validate (if it's a Field)
+		$this->validateCoreType($name, $value, true);
+
+		return $value;
+	}
+
+	private function setFieldValue($field, $value, $type)
+	{
+		if (!isset($this->m_fields[$field]))
+			return $this;
+
+		$this->validateOnSet($field, $value, $type);
+
+		return $this;
 	}
 
 	/**
@@ -185,7 +232,11 @@ abstract class Model extends \Component
 
 		$old_data = $this->m_data;
 
-		$this->m_data = $data;
+		foreach ($data as $k => $v)
+		{
+			$this->setFieldValue($k, $v, 'data'); // For validation purposes
+		}
+//		$this->m_data = $data;
 
 		$this->c('Events')->triggerEvent('onModelDataUpdate', array(
 			'model' => $this,
@@ -218,6 +269,23 @@ abstract class Model extends \Component
 			return $this->m_fields[$name];
 		else
 			throw new \Exceptions\ModelCrash('unable to find "' . $name . '" field\'s type');
+	}
+
+	/**
+	 * Returns field settings
+	 * @param string $name
+	 * @throws \Exceptions\ModelCrash
+	 * @return array
+	 **/
+	public function getFieldSettings($name)
+	{
+		if (!isset($this->m_fields[$name]))
+			throw new \Exceptions\ModelCrash('field "' . $name . '" was not found');
+
+		if (!is_array($this->m_fields[$name]))
+			return false;
+
+		return $this->m_fields[$name];
 	}
 
 	/**

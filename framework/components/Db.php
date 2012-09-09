@@ -131,7 +131,7 @@ class Db extends Component
 			$activeId = $this->m_availableDatabases[$type]['activeId'];
 
 			if (!isset($this->m_availableDatabases[$type]['configs'][$activeId]))
-				return null;
+				throw new \Exceptions\DBCrash('database ' . $type . ' has wrong activeId value');
 
 			if ($this->m_availableDatabases[$type]['configs'][$activeId]['connected'])
 				$dbo = $this->m_availableDatabases[$type]['configs'][$activeId]['object'];

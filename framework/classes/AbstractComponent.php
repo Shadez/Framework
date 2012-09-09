@@ -45,22 +45,6 @@ abstract class Component
 	}
 
 	/**
-	 * Component destructor
-	 **/
-	public function __destruct()
-	{
-		foreach ($this as $variable => $value)
-		{
-			if (isset($this->{$variable}))
-				unset($this->{$variable});
-			elseif (isset(self::${$variable}))
-				unset(self::${$variable});
-		}
-
-		unset($variable, $value);
-	}
-
-	/**
 	 * Method called after component creation
 	 * @return Component
 	 **/
