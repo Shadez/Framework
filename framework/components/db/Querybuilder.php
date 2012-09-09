@@ -156,7 +156,7 @@ class QueryBuilder extends \Component
 	 * @param  string $t
 	 * @return  Model_Db_Component
 	 **/
-	protected function getModelByTable($t)
+	public function getModelByTable($t)
 	{
 		if ($this->m_model->m_table == $t)
 			return $this->m_model;
@@ -178,7 +178,7 @@ class QueryBuilder extends \Component
 	 * @param  string $n
 	 * @return  Model_Db_Component
 	 **/
-	protected function getModelByName($n)
+	public function getModelByName($n)
 	{
 		if ($this->m_model->m_model == $n)
 			return $this->m_model;
@@ -251,6 +251,54 @@ class QueryBuilder extends \Component
 		}
 
 		return $this;
+	}
+	
+	/**
+	 * Applies special MySQL condition.
+	 *
+	 * Since we can't apply array parameter to PDO, we're unable to use one single named parameter
+	 * at some specific MySQL statements (for example, "IN" or "LIKE").
+	 * This method creates named parameter for each array value and allows to create query statements like
+	 * <b>"SELECT * FROM users WHERE id IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)"</b> with simple
+	 * <code>\Db\QueryResult->applyCondition('id', 'IN', array(1, ..., 10));</code>
+	 *
+	 * @param  string $field
+	 * @param  string $condition
+	 * @param  array $params = array()
+	 * @param  string $next = 'AND'
+	 * @return QueryBuilder_Db_Component
+	 **/
+	public function applyCondition($field, $condition, $params, $next = 'AND')
+	{
+		$sql_condition = '';
+
+		$query_params = array();
+		$param_name = '';
+		foreach ($params as $p)
+		{
+			$param_name = ':param_' . $field . '_' . md5($p);
+			$sql_condition .= ($sql_condition ? ', ' : '') . $param_name;
+			$query_params[$param_name] = $p;
+		}
+
+		$field_info = explode('.', $field);
+
+		if ($field_info && isset($field_info[1]))
+		{
+			$table = trim($field_info[0]);
+			$field = trim($field_info[1]);
+		}
+		else
+			$table = trim($this->getModel()->m_table);
+
+		return $this->appendSql('where', array(
+			'table' => $table,
+			'field' => $field,
+			'condition' => ' ' . $condition . ' ( ' . $sql_condition . ' ) ',
+			'next' => $next,
+			'binary' => false,
+			'params' => $query_params
+		));
 	}
 
 	/**
@@ -474,7 +522,7 @@ class QueryBuilder extends \Component
 	 * @param string $field
 	 * @return string
 	 **/
-	private function getFunctionForField($table, $field)
+	public function getFunctionForField($table, $field)
 	{
 		if (!isset($this->m_sql['function']))
 			return false;
@@ -492,7 +540,7 @@ class QueryBuilder extends \Component
 	 * @param string $field
 	 * @return string
 	 **/
-	private function getAliasForFieldFunction($table, $field)
+	public function getAliasForFieldFunction($table, $field)
 	{
 		if (!isset($this->m_sql['function']))
 			return false;
@@ -524,299 +572,17 @@ class QueryBuilder extends \Component
 			}
 		}
 
-		$this->m_rawSql = 'SELECT' . NL;
-		$field_num = 0;
-
-		$this->m_localeFields = array();
-
-		foreach ($this->m_fields as $tName => $table)
-		{
-			if (!$tName || !$table)
-				continue;
-
-			$model = $this->getModelByTable($tName);
-			if (!$model)
-				continue;
-
-			$alias = $table_aliases[$tName];
-			if (!$alias)
-				$alias = 't' . rand(50, 100);
-
-			$size_fields = sizeof($table);
-			for ($i = 0; $i < $size_fields; ++$i)
-			{
-				if (!isset($table[$i]) || !$table[$i])
-					continue;
-
-				$skipAs = false;
-
-				if (isset($this->m_sql['function']))
-				{
-					$function = $this->getFunctionForField($this->getModel()->m_table, $table[$i]);
-					if ($function)
-					{
-						$alias_f_func = $this->getAliasForFieldFunction($this->getModel()->m_table, $table[$i]);
-						if ($alias_f_func)
-							$skipAs = true;
-
-						$this->m_rawSql .= strtoupper($function) . '(' . '`' . $alias . '`.`' . $table[$i] . '`' . ')' . $alias_f_func;
-					}
-					else
-						$this->m_rawSql .= '`' . $alias . '`.`' . $table[$i] . '`';
-				}
-				else
-					$this->m_rawSql .= '`' . $alias . '`.`' . $table[$i] . '`';
-
-				if (!$skipAs)
-				{
-					$tempAlias = null;
-					// Check if this field is DbLocale field
-					// If it is, set it to temporary name (for cases when localization is missing in DB)
-					if (isset($model->m_fields[$table[$i]]) && $model->m_fields[$table[$i]] == 'DbLocale')
-					{
-						if (!isset($this->m_localeFields[$model->m_table]))
-							$this->m_localeFields[$model->m_table] = array();
-
-						$this->m_localeFields[$model->m_table][$table[$i] . '_temporary'] = array(
-							'field' => $table[$i],
-							'temp'  => $table[$i] . '_temporary',
-							'alias' => (isset($model->m_aliases[$table[$i]]) ? $model->m_aliases[$table[$i]] : $table[$i])
-						);
-						$tempAlias = $table[$i] . '_temporary';
-					}
-
-					$this->m_rawSql .= ' AS `';
-
-					if ($tempAlias != null)
-						$this->m_rawSql .= $tempAlias;
-					elseif (isset($model->m_aliases[$table[$i]]))
-						$this->m_rawSql .= $model->m_aliases[$table[$i]];
-					else
-						$this->m_rawSql .= $table[$i];
-
-					$this->m_rawSql .= '`';
-				}
-
-				$field_num++;
-
-				if ($field_num < $this->m_fieldsCount)
-					$this->m_rawSql .= ',';
-
-				$this->m_rawSql .= NL;
-			}
-		}
-
-		$this->m_rawSql .= 'FROM `' . $this->getModel()->m_table . '` AS `' . $table_aliases[$this->getModel()->m_table] . '`' . NL;
-
-		if (isset($this->m_sql['join']))
-		{
-			$join_sql = array();
-
-			$join_size = sizeof($this->m_sql['join']);
-
-			for ($i = 0; $i < $join_size; ++$i)
-			{
-				$j = &$this->m_sql['join'][$i];
-
-				if (!isset($j['model']) || !isset($this->m_childModels[$j['model']]))
-					continue;
-
-				if (!isset($join_sql[$j['model']]))
-					$join_sql[$j['model']] = '';
-
-				$alias = $table_aliases[$this->m_childModels[$j['model']]->m_table];
-
-				$mJoin_table = $this->getModel()->m_table;
-				$mJoin_alias = $table_aliases[$this->getModel()->m_table];
-
-				if (isset($j['join_model']))
-				{
-					$model = $this->getModelByName($j['join_model']);
-					if ($model)
-					{
-						$mJoin_table = $model->m_table;
-						$mJoin_alias = $table_aliases[$model->m_table];
-					}
-				}
-
-				if ($join_sql[$j['model']] == '')
-				{
-					$join_sql[$j['model']] .= strtoupper($j['type']) . ' JOIN `' . $this->m_childModels[$j['model']]->m_table . '`';
-					$join_sql[$j['model']] .= ' AS `' . $alias . '` ON `' . $alias . '`.`' . $j['child'] . '` = ';
-
-					if (!$j['child_value'])
-						$join_sql[$j['model']] .= '`' . $mJoin_alias . '`.`' . $j['parent'] . '`';
-					else
-						$join_sql[$j['model']] .= '\'' . $j['child_value'] . '\'';
-				}
-				else
-				{
-					$join_sql[$j['model']] .= ' AND `' . $alias . '`.`' . $j['child'] . '` = ';
-
-					if (!$j['child_value'])
-						$join_sql[$j['model']] .= '`' . $mJoin_alias . '`.`' . $j['parent'] . '`';
-					else
-						$join_sql[$j['model']] .= '\'' . $j['child_value'] . '\'';
-				}
-
-				$join_sql[$j['model']] .= NL;
-			}
-
-			if ($join_sql)
-				foreach ($join_sql as $join_rawSql)
-					$this->m_rawSql .= $join_rawSql;
-		}
-
-		if (isset($this->m_sql['where']))
-		{
-			$this->m_rawSql .= 'WHERE' . NL;
-
-			$changed = false;
-
-			$count = sizeof($this->m_sql['where']);
-			$current = 0;
-
-			foreach ($this->m_sql['where'] as $cond)
-			{
-				if ((!isset($cond['table']) || !isset($cond['field']) || !isset($cond['condition'])) && !isset($cond['multi']))
-					continue;
-
-				if (isset($cond['multi']))
-				{
-					if (!isset($cond['conditions']) || !$cond['conditions'])
-						continue;
-
-					$this->m_rawSql .= ' (';
-					$cSize = sizeof($cond['conditions']);
-					$cCurrent = 0;
-					foreach ($cond['conditions'] as $c)
-					{
-						if (!$c)
-							continue;
-
-						if (is_array($c[2]))
-						{
-							$tmp = $this->arrayConditionToString($c[2], $alias, $c[1]);
-
-							if ($tmp)
-								$this->m_rawSql .= $tmp;
-						}
-						else
-							$this->m_rawSql .= '`' . $alias . '`.`' . $c[1] . '`' . $c[2];
-
-						++$cCurrent;
-
-						if ($cCurrent < $cSize)
-							$this->m_rawSql .= ' ' . $cond['insideCond'] . ' ';
-					}
-					$this->m_rawSql .= ' )';
-					
-				}
-				else
-				{
-					$alias = $table_aliases[$cond['table']];
-					if (is_array($cond['condition']))
-					{
-						$tmp = $this->arrayConditionToString($cond['condition'], $alias, $cond['field']);
-
-						if ($tmp)
-							$this->m_rawSql .= $tmp;
-					}
-					else
-					{
-						if (isset($cond['like']) && $cond['like'])
-							$this->m_rawSql .= '`' . $alias . '`.' . $cond['field'] . ' ' . $cond['condition'];
-						else
-							$this->m_rawSql .= ($cond['binary'] ? ' BINARY ' : '') . '`' . $alias . '`.`' . $cond['field'] . '`' . $cond['condition'];
-					}
-				}
-
-				++$current;
-				if ($current < $count)
-				{
-					if (!isset($cond['next']))
-						$this->m_rawSql .= ' AND';
-					else
-						$this->m_rawSql .= ' ' . $cond['next'];
-				}
-
-				if (isset($cond['params']))
-					$this->m_params = array_merge($this->m_params, $cond['params']);
-				
-				$changed = true;
-
-				$this->m_rawSql .= NL;
-			}
-			if (!$changed)
-				$this->m_rawSql .= ' 1' . NL;
-		}
-
-		if (isset($this->m_sql['group']))
-		{
-			$g = $this->m_sql['group'][0];
-			if ($g)
-				$this->m_rawSql .= 'GROUP BY `' . $table_aliases[$this->getModelByName($g['model'])->m_table] . '`.`' . $g['field'] . '`' . NL;
-		}
-
-		if (isset($this->m_sql['random'], $this->m_sql['random'][0]))
-		{
-			if (isset($this->m_sql['random'][0]['useRandom']) && $this->m_sql['random'][0]['useRandom'])
-				$this->m_rawSql .= 'ORDER BY RAND()' . NL;
-		}
-		else if (isset($this->m_sql['order']))
-		{
-			$this->m_rawSql .= 'ORDER BY ' . NL;
-
-			$multiorder = false;
-			foreach ($this->m_sql['order'] as &$entry)
-			{
-				if (!isset($entry[0]) || !is_array($entry[0]))
-					continue;
-
-				$fields_info = $entry[0];
-				$type = $entry[1];
-				foreach ($fields_info as $model => &$fields)
-				{
-					$m = $this->getModelByName($model);
-					if (!$m)
-						continue;
-
-					$current = 0;
-					$size = sizeof($fields);
-
-					foreach ($fields as $probKey => &$field)
-					{
-						if (is_array($field) && (!is_numeric($probKey) && is_string($probKey)))
-						{
-							// Using multi order
-							$multiorder = true;
-							$this->m_rawSql .= '`' . $table_aliases[$m->m_table] . '`.`' . $probKey . '` ' . strtoupper($field[0]);
-						}
-						else
-							$this->m_rawSql .= '`' . $table_aliases[$m->m_table] . '`.`' . $field . '` ';
-
-						if ($current < $size-1)
-							$this->m_rawSql .= ', ';
-		
-						++$current;
-					}
-				}
-			}
-			if (!$multiorder)
-				$this->m_rawSql .= ' ' . strtoupper($type);
-		}
-
-		if (isset($this->m_sql['limit']))
-		{
-			if (isset($this->m_sql['limit'][0][1]))
-			{
-				$this->m_rawSql .= ' LIMIT ' . $this->m_sql['limit'][0][1];
-				if (isset($this->m_sql['limit'][0][0]))
-					$this->m_rawSql .= ', ' . $this->m_sql['limit'][0][0];
-
-				$this->m_rawSql .= NL;
-			}
-		}
+		// Generate SQL from internal parser
+		$this->m_rawSql = $this->c('Db\Parsers\MySQL')->parseQueryBuilderSqlData(
+			$table_aliases,
+			$this->m_fields,
+			$this->m_fieldsCount,
+			$this->m_childModels,
+			$this->m_sql,
+			$this->m_params,
+			$this,
+			$this->m_localeFields
+		);
 
 		return $this;
 	}
@@ -828,7 +594,7 @@ class QueryBuilder extends \Component
 	 * @param string $field
 	 * @return string
 	 **/
-	private function arrayConditionToString($cond, $alias, $field)
+	public function arrayConditionToString($cond, $alias, $field)
 	{
 		$tmp = '';
 		$size_cond = sizeof($cond);

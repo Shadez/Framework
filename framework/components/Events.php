@@ -113,7 +113,7 @@ class Events extends Component
 			return array();
 		}
 
-		$eventData['triggeredBy'] = get_class($triggeredBy);
+		$eventData['triggeredBy'] = $triggeredBy;
 
 		$this->m_events[$event]['triggered'] = microtime();
 		$this->m_events[$event]['eventData'] = $eventData;

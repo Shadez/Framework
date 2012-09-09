@@ -23,13 +23,13 @@ abstract class Model extends \Component
 {
 	private $m_defaultFields = array();
 	private $m_defaultAliases = array();
-	private $m_values = array();
-	private $m_data = array();
-	private $m_updatingData = false;
-	private $m_dataLoaded = false;
-	private $m_returnInsertId = false;
-	private $m_lastInsertId = 0;
 
+	protected $m_values = array();
+	protected $m_data = array();
+	protected $m_updatingData = false;
+	protected $m_dataLoaded = false;
+	protected $m_returnInsertId = false;
+	protected $m_lastInsertId = 0;
 	protected $m_primaryFields = array();
 	protected $m_primaryFieldsCount = 0;
 	protected $m_rawSql = '';
@@ -44,6 +44,35 @@ abstract class Model extends \Component
 	public $m_fieldTypes = array();
 	public $m_aliases = array();
 	public $m_formFields = array();
+
+	public function onModelDataSelection($event) {}
+	public function onModelDataUpdate($event) {}
+	public function onBeforeModelDataSave($event) {}
+	public function onAfterModelDataSave($event) {}
+	public function onModelFind($event) {}
+	public function onModelLoad($event) {}
+	public function onModelLoadRandom($event) {}
+	public function onModelSave($event) {}
+	public function onModelDelete($event) {}
+
+	public function initialize()
+	{
+		$this->c('Events')
+			->createEvent('onModelDataSelection', array($this, 'onModelDataSelection'))
+			->createEvent('onModelDataUpdate', array($this, 'onModelDataUpdate'))
+			->createEvent('onBeforeModelDataSave', array($this, 'onBeforeModelDataSave'))
+			->createEvent('onAfterModelDataSave', array($this, 'onAfterModelDataSave'))
+			->createEvent('onModelFind', array($this, 'onModelFind'))
+			->createEvent('onModelLoad', array($this, 'onModelLoad'))
+			->createEvent('onModelLoadRandom', array($this, 'onModelLoadRandom'))
+			->createEvent('onModelSave', array($this, 'onModelSave'))
+			->createEvent('onModelDelete', array($this, 'onModelDelete'));
+
+		$this->m_defaultFields = $this->m_fields;
+		$this->m_defaultAliases = $this->m_aliases;
+
+		return $this->setPrimaryFields();
+	}
 
 	/**
 	 * Sets proper field name (for some specific types)
@@ -152,9 +181,22 @@ abstract class Model extends \Component
 	 **/
 	public function setData($data)
 	{
+		$this->c('Events')->triggerEvent('onBeforeModelDataSave', array('model' => $this, 'modelData' => $data), $this);
+
+		$old_data = $this->m_data;
+
 		$this->m_data = $data;
+
+		$this->c('Events')->triggerEvent('onModelDataUpdate', array(
+			'model' => $this,
+			'oldData' => $old_data,
+			'newData' => $data
+		), $this);
+
 		$this->m_dataLoaded = true;
 		$this->m_updatingData = true;
+
+		$this->c('Events')->triggerEvent('onAfterModelDataSave', array('model' => $this, 'modelData' => $data), $this);
 
 		return $this;
 	}
@@ -394,6 +436,12 @@ abstract class Model extends \Component
 		{
 			$result = $this->c('Db')->getDb($this->getType())->selectWithParams($this->m_rawSql, $params)->getData();
 
+			$this->c('Events')->triggerEvent('onModelDataSelection', array(
+				'model' => $this,
+				'sql' => $this->m_rawSql,
+				'sqlParams' => $params
+			), $this);
+
 			if (isset($result[0]) && $result[0])
 				$this->setData($result[0]);
 		}
@@ -406,14 +454,6 @@ abstract class Model extends \Component
 		}
 
 		return $this;
-	}
-
-	public function initialize()
-	{
-		$this->m_defaultFields = $this->m_fields;
-		$this->m_defaultAliases = $this->m_aliases;
-
-		return $this->setPrimaryFields();
 	}
 
 	/**
@@ -535,6 +575,12 @@ abstract class Model extends \Component
 		if ($type && method_exists($this, 'loadType' . $type))
 			call_user_func(array($this, 'loadType' . $type));
 
+		$this->c('Events')->triggerEvent('onModelFind', array(
+			'model' => $this,
+			'primaryFieldsValues' => $primaryfieldsValues,
+			'loadType' => $type
+		), $this);
+
 		return $this;
 	}
 
@@ -552,6 +598,11 @@ abstract class Model extends \Component
 
 		if ($type && method_exists($this, 'loadType' . $type))
 			call_user_func(array($this, 'loadType' . $type));
+
+		$this->c('Events')->triggerEvent('onModelLoadRandom', array(
+			'model' => $this,
+			'loadType' => $type
+		), $this);
 
 		return $this;
 	}
@@ -577,6 +628,13 @@ abstract class Model extends \Component
 		if ($type && method_exists($this, 'loadType' . $type))
 			call_user_func(array($this, 'loadType' . $type));
 
+		$this->c('Events')->triggerEvent('onModelFind', array(
+			'model' => $this,
+			'condition' => $condition,
+			'values' => $values,
+			'loadType' => $type
+		), $this);
+
 		return $this;
 	}
 
@@ -589,9 +647,18 @@ abstract class Model extends \Component
 		if (!$this->m_values)
 			return $this; // No changes were made
 
-		return $this->generateSaveSql()
+		$values = $this->m_values;
+
+		$this->generateSaveSql()
 			->updateFields()
 			->performSql();
+
+		$this->c('Events')->triggerEvent('onModelSave', array(
+			'model' => $this,
+			'values' => $values
+		), $this);
+
+		return $this;
 	}
 
 	/**
@@ -603,8 +670,17 @@ abstract class Model extends \Component
 		if (!$this->m_data)
 			return $this; // No data
 
-		return $this->generateDeleteSql()
+		$data = $this->m_data;
+
+		$this->generateDeleteSql()
 			->performSql();
+
+		$this->c('Events')->triggerEvent('onModelDelete', array(
+			'model' => $this,
+			'data' => $data
+		), $this);
+
+		return $this;
 	}
 
 	/**
@@ -623,5 +699,23 @@ abstract class Model extends \Component
 	public function getData()
 	{
 		return $this->m_data;
+	}
+
+	public function additionalData($data)
+	{
+		if (!$data)
+			return $this;
+
+		foreach ($data as $key => $value)
+		{
+			// Do not overwrite existing data
+
+			if (isset($this->m_customData[$key]))
+				continue;
+
+			$this->m_customData[$key] = $value;
+		}
+
+		return $this;
 	}
 };
